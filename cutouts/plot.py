@@ -63,11 +63,6 @@ def add_velocity_vector(ax, wcs, ra, dec, vra, vdec, gap=8, length=8, x_offset=0
 
 def center_image(image, wcs, ra, dec, height=115, width=115):
 
-    # Calculate where RA and Dec should fall in the centered
-    # image
-    x_center = np.round(width / 2, 0).astype(int)
-    y_center = np.round(height / 2, 0).astype(int)
-
     # Calculate where RA and Dec fall in the actual image
     image_y_center, image_x_center = wcs.world_to_array_index_values(ra, dec)
     # The following is not a typo: note x,y change
@@ -81,11 +76,11 @@ def center_image(image, wcs, ra, dec, height=115, width=115):
     if image_y_center - pimage_y_center > 0:
         ybit = 1
 
-    y_offset = y_center - image_y_center
-    x_offset = x_center - image_x_center
     image_copy = image.copy()
+    y_len, x_len = image_copy.shape
+    y_offset = np.round(y_len / 2, 0).astype(int) - image_y_center
+    x_offset = np.round(x_len / 2, 0).astype(int) - image_x_center
 
-    # Center ra, dec t
     if y_offset > 0:
         top_padding = np.zeros((y_offset, image_copy.shape[1]))
         image_copy = np.vstack([top_padding, image_copy])
@@ -93,11 +88,11 @@ def center_image(image, wcs, ra, dec, height=115, width=115):
         bottom_padding = np.zeros((-y_offset, image_copy.shape[1]))
         image_copy = np.vstack([image_copy, bottom_padding])
 
-    if x_offset > 0:
-        left_padding = np.zeros((image_copy.shape[0], x_offset))
+    if x_offset < 0:
+        left_padding = np.zeros((image_copy.shape[0], -x_offset))
         image_copy = np.hstack([left_padding, image_copy])
-    elif x_offset < 0:
-        right_padding = np.zeros((image_copy.shape[0], -x_offset))
+    elif x_offset > 0:
+        right_padding = np.zeros((image_copy.shape[0], x_offset))
         image_copy = np.hstack([image_copy, right_padding])
 
     y_len, x_len = image_copy.shape
@@ -108,7 +103,8 @@ def center_image(image, wcs, ra, dec, height=115, width=115):
         num_rows = height - y_len
         for i in range(num_rows):
             padding = np.zeros((1, image_copy.shape[1]))
-            if i % 2 == 0 + ybit:
+            if i % 2 == (0 + ybit):
+                y_offset += 1
                 image_copy = np.vstack([padding, image_copy])
             else:
                 image_copy = np.vstack([image_copy, padding])
@@ -117,8 +113,9 @@ def center_image(image, wcs, ra, dec, height=115, width=115):
     if y_len > height:
         num_rows = y_len - height
         for i in range(num_rows):
-            if i % 2 == 0 + ybit:
+            if i % 2 == (0 + ybit):
                 image_copy = image_copy[1:, :]
+                y_offset -= 1
             else:
                 image_copy = image_copy[:-1, ]
 
@@ -128,8 +125,9 @@ def center_image(image, wcs, ra, dec, height=115, width=115):
         num_cols = width - x_len
         for i in range(num_cols):
             padding = np.zeros((image_copy.shape[0], 1))
-            if i % 2 == 0 + xbit:
+            if i % 2 == (0 + xbit):
                 image_copy = np.hstack([padding, image_copy])
+                x_offset += 1
             else:
                 image_copy = np.hstack([image_copy, padding])
 
@@ -138,9 +136,10 @@ def center_image(image, wcs, ra, dec, height=115, width=115):
     if x_len > width:
         num_cols = x_len - width
         for i in range(num_cols):
-            if i % 2 == 0 + xbit:
-                image_copy = image_copy[:, :-1]
-            else:
+            if i % 2 == (0 + xbit):
                 image_copy = image_copy[:, 1:]
+                x_offset -= 1
+            else:
+                image_copy = image_copy[:, :-1]
 
     return image_copy, x_offset, y_offset
