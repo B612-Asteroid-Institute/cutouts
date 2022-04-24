@@ -152,7 +152,30 @@ def center_image(image, wcs, ra, dec, height=115, width=115):
 
     return image_copy, x_offset, y_offset
 
-def plot_cutout(ax, path, ra, dec, vra, vdec, crosshair=True, velocity_vector=True, height=115, width=115, cmap=CMAP_BONE):
+def plot_cutout(
+        ax,
+        path,
+        ra,
+        dec,
+        vra,
+        vdec,
+        crosshair=True,
+        crosshair_kwargs={
+            "color": "r",
+            "alpha": 0.9,
+            "zorder": 9
+        },
+        velocity_vector=True,
+        velocity_vector_kwargs={
+            "color": "#34ebcd",
+            "width": 0.2,
+            "head_width": 2,
+            "zorder": 10
+        },
+        height=115,
+        width=115,
+        cmap=CMAP_BONE
+    ):
 
     # Read file and get image
     hdu = fits.open(path)[0]
@@ -178,8 +201,7 @@ def plot_cutout(ax, path, ra, dec, vra, vdec, crosshair=True, velocity_vector=Tr
             dec,
             x_offset=x_offset,
             y_offset=y_offset,
-            color="r",
-            alpha=0.9
+            **crosshair_kwargs
         )
     if velocity_vector:
         add_velocity_vector(
@@ -191,10 +213,7 @@ def plot_cutout(ax, path, ra, dec, vra, vdec, crosshair=True, velocity_vector=Tr
             vdec,
             x_offset=x_offset,
             y_offset=y_offset,
-            color="#34ebcd",
-            width=0.2,
-            head_width=2,
-            zorder=10
+            **velocity_vector_kwargs
         )
 
     return ax
