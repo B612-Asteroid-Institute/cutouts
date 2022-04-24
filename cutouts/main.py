@@ -17,14 +17,14 @@ logger = logging.getLogger("cutouts")
 CATALOG_URL = "https://datalab.noirlab.edu/sia/nsc_dr2"
 
 def get_cutouts(
+        times,
         ra,
         dec,
-        times,
         sia_catalog=CATALOG_URL,
         exposure_id=None,
         delta_time=1e-8,
-        height=30,
-        width=30,
+        height=20,
+        width=20,
         out_dir=None
     ):
     # Connect to Simple Image Access catalog

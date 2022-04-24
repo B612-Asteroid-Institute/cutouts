@@ -36,8 +36,8 @@ def find_cutout(
         mjd_utc,
         sia_service,
         delta_time=1e-8,
-        height=30,
-        width=30,
+        height=20,
+        width=20,
         exposure_id=None
     ):
     center = (ra, dec)

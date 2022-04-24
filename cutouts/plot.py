@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib
+import matplotlib.pyplot as plt
 from astropy.io import fits
 from astropy.wcs import WCS
 from astropy.visualization import ImageNormalize
@@ -189,7 +190,10 @@ def plot_cutout(
         image_centered,
         origin="lower",
         cmap=cmap,
-        norm=ImageNormalize(image, interval=ZScaleInterval())
+        norm=ImageNormalize(
+            image,
+            interval=ZScaleInterval()
+        )
     )
     ax.axis("off")
 
@@ -217,3 +221,93 @@ def plot_cutout(
         )
 
     return ax
+
+def plot_cutouts(
+        paths,
+        times,
+        ra,
+        dec,
+        vra,
+        vdec,
+        filter=None,
+        mag=None,
+        mag_sigma=None,
+        dpi=200,
+        max_cols=4,
+        row_height=2,
+        col_width=2,
+        cutout_height=75,
+        cutout_width=75,
+        crosshair=True,
+        crosshair_kwargs={
+            "color": "r",
+            "alpha": 0.9,
+            "zorder": 9
+        },
+        velocity_vector=True,
+        velocity_vector_kwargs={
+            "color": "#34ebcd",
+            "width": 0.2,
+            "head_width": 2,
+            "zorder": 10
+        },
+        subplots_adjust_kwargs={
+            "hspace": 0.15,
+            "wspace": 0.15,
+            "left": 0.05,
+            "right": 0.95,
+            "top": 0.95,
+            "bottom": 0.02
+        },
+    ):
+
+    num_obs = len(paths)
+    num_rows = np.ceil(num_obs / max_cols).astype(int)
+
+    include_filter = False
+    include_mag = False
+    include_mag_sigma = False
+    if isinstance(filter, np.ndarray):
+        include_filter = True
+    if isinstance(mag, np.ndarray):
+        include_mag = True
+    if isinstance(mag_sigma, np.ndarray):
+        include_mag_sigma = True
+
+    fig = plt.figure(figsize=(col_width*max_cols, row_height*num_rows), dpi=dpi)
+    fig.subplots_adjust(**subplots_adjust_kwargs)
+
+    axs = []
+    for i, (path_i, ra_i, dec_i, vra_i, vdec_i) in enumerate(zip(paths, ra, dec, vra, vdec)):
+
+        ax = fig.add_subplot(num_rows, max_cols, i+1)
+        ax = plot_cutout(
+            ax,
+            path_i,
+            ra_i,
+            dec_i,
+            vra_i,
+            vdec_i,
+            height=cutout_height,
+            width=cutout_width,
+            crosshair=crosshair,
+            crosshair_kwargs=crosshair_kwargs,
+            velocity_vector=velocity_vector,
+            velocity_vector_kwargs=velocity_vector_kwargs
+        )
+        axs.append(ax)
+
+        y = 1.0
+        title = ""
+        title += f"{times[i].iso}"
+        if include_filter:
+            title += f"\n{filter[i]}"
+        if include_mag:
+            title += f": {mag[i]:.2f}"
+            y -= 0.03
+        if include_mag_sigma:
+            title += f"$\pm{mag_sigma[i]:.2f}$"
+
+        ax.set_title(title, fontsize=6, y=y)
+
+    return fig, axs
