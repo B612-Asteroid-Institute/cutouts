@@ -1,9 +1,17 @@
 import numpy as np
+import matplotlib
+from astropy.io import fits
+from astropy.wcs import WCS
+from astropy.visualization import ImageNormalize
+from astropy.visualization import ZScaleInterval
+
+CMAP_BONE = matplotlib.cm.bone.copy()
+CMAP_BONE.set_bad("black", 100.)
 
 def add_crosshair(ax, wcs, ra, dec, gap=8, length=8, x_offset=0, y_offset=0, **kwargs):
 
     # Get pixel location of RA and Dec
-    ycenter, xcenter = wcs.world_to_pixel_values(ra, dec)
+    xcenter, ycenter = wcs.world_to_pixel_values(ra, dec)
     xcenter = xcenter + x_offset
     ycenter = ycenter + y_offset
 
@@ -36,12 +44,12 @@ def add_crosshair(ax, wcs, ra, dec, gap=8, length=8, x_offset=0, y_offset=0, **k
 def add_velocity_vector(ax, wcs, ra, dec, vra, vdec, gap=8, length=8, x_offset=0, y_offset=0, **kwargs):
 
     # Get pixel location of RA and Dec
-    ycenter, xcenter = wcs.world_to_pixel_values(ra, dec)
+    xcenter, ycenter = wcs.world_to_pixel_values(ra, dec)
     xcenter = xcenter + x_offset
     ycenter = ycenter + y_offset
 
     dt = 1/24/2
-    yoffset, xoffset = wcs.world_to_pixel_values(ra + vra * dt, dec + vdec * dt)
+    xoffset, yoffset = wcs.world_to_pixel_values(ra + vra * dt, dec + vdec * dt)
     xoffset = xoffset + x_offset
     yoffset = yoffset + y_offset
     vx = (xoffset - xcenter) / dt
@@ -143,3 +151,50 @@ def center_image(image, wcs, ra, dec, height=115, width=115):
                 image_copy = image_copy[:, :-1]
 
     return image_copy, x_offset, y_offset
+
+def plot_cutout(ax, path, ra, dec, vra, vdec, crosshair=True, velocity_vector=True, height=115, width=115, cmap=CMAP_BONE):
+
+    # Read file and get image
+    hdu = fits.open(path)[0]
+    image = hdu.data
+    hdr = hdu.header
+    wcs = WCS(hdr)
+
+    image_centered, x_offset, y_offset = center_image(image, wcs, ra, dec, height=height, width=width)
+
+    ax.imshow(
+        image_centered,
+        origin="lower",
+        cmap=cmap,
+        norm=ImageNormalize(image, interval=ZScaleInterval())
+    )
+    ax.axis("off")
+
+    if crosshair:
+        add_crosshair(
+            ax,
+            wcs,
+            ra,
+            dec,
+            x_offset=x_offset,
+            y_offset=y_offset,
+            color="r",
+            alpha=0.9
+        )
+    if velocity_vector:
+        add_velocity_vector(
+            ax,
+            wcs,
+            ra,
+            dec,
+            vra,
+            vdec,
+            x_offset=x_offset,
+            y_offset=y_offset,
+            color="#34ebcd",
+            width=0.2,
+            head_width=2,
+            zorder=10
+        )
+
+    return ax
