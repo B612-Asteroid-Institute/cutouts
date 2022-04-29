@@ -7,62 +7,63 @@ from astropy.visualization import ImageNormalize
 from astropy.visualization import ZScaleInterval
 
 CMAP_BONE = matplotlib.cm.bone.copy()
-CMAP_BONE.set_bad("black", 100.)
+CMAP_BONE.set_bad("black")
 
 def add_crosshair(ax, wcs, ra, dec, gap=8, length=8, x_offset=0, y_offset=0, **kwargs):
 
     # Get pixel location of RA and Dec
-    xcenter, ycenter = wcs.world_to_pixel_values(ra, dec)
-    xcenter = xcenter + x_offset
-    ycenter = ycenter + y_offset
+    x_center, y_center = wcs.world_to_array_index_values(ra, dec)
+    #y_center, x_center = wcs.world_to_pixel_values(ra, dec)
+    x_center = x_center + x_offset
+    y_center = y_center + y_offset
 
     ax.vlines(
-        xcenter,
-        ycenter + gap,
-        ycenter + gap + length,
+        x_center,
+        y_center + gap,
+        y_center + gap + length,
         **kwargs
     )
     ax.vlines(
-        xcenter,
-        ycenter - gap,
-        ycenter - gap - length,
+        x_center,
+        y_center - gap,
+        y_center - gap - length,
         **kwargs
     )
     ax.hlines(
-        ycenter,
-        xcenter + gap,
-        xcenter + gap + length,
+        y_center,
+        x_center + gap,
+        x_center + gap + length,
         **kwargs
     )
     ax.hlines(
-        ycenter,
-        xcenter - gap,
-        xcenter - gap - length,
+        y_center,
+        x_center - gap,
+        x_center - gap - length,
         **kwargs
     )
     return
 
 def add_velocity_vector(ax, wcs, ra, dec, vra, vdec, gap=8, length=8, x_offset=0, y_offset=0, **kwargs):
 
-    # Get pixel location of RA and Dec
-    xcenter, ycenter = wcs.world_to_pixel_values(ra, dec)
-    xcenter = xcenter + x_offset
-    ycenter = ycenter + y_offset
+    x_center, y_center = wcs.world_to_array_index_values(ra, dec)
+    #y_center, x_center = wcs.world_to_pixel_values(ra, dec)
+    x_center = x_center + x_offset
+    y_center = y_center + y_offset
 
     dt = 1/24/2
-    xoffset, yoffset = wcs.world_to_pixel_values(ra + vra * dt, dec + vdec * dt)
+    xoffset, yoffset = wcs.world_to_array_index_values(ra + vra * dt, dec + vdec * dt)
+    #yoffset, xoffset = wcs.world_to_pixel_values(ra + vra * dt, dec + vdec * dt)
     xoffset = xoffset + x_offset
     yoffset = yoffset + y_offset
-    vx = (xoffset - xcenter) / dt
-    vy = (yoffset - ycenter) / dt
+    vx = (xoffset - x_center) / dt
+    vy = (yoffset - y_center) / dt
 
     vx_hat = vx / np.sqrt(vx**2 + vy**2)
     vy_hat = vy / np.sqrt(vx**2 + vy**2)
 
-
     ax.arrow(
-        xcenter + gap*vx_hat,
-        ycenter + gap*vy_hat,
+        x_center + gap*vx_hat,
+        y_center + gap*vy_hat,
         length*vx_hat,
         length*vy_hat,
         length_includes_head=True,
@@ -73,83 +74,106 @@ def add_velocity_vector(ax, wcs, ra, dec, vra, vdec, gap=8, length=8, x_offset=0
 def center_image(image, wcs, ra, dec, height=115, width=115):
 
     # Calculate where RA and Dec fall in the actual image
-    image_y_center, image_x_center = wcs.world_to_array_index_values(ra, dec)
-    # The following is not a typo: note x,y change
-    pimage_x_center, pimage_y_center = wcs.world_to_pixel_values(ra, dec)
+    image_x_center, image_y_center = wcs.world_to_array_index_values(ra, dec)
 
+    # The following is not a typo: note x,y change
+    pimage_y_center, pimage_x_center = wcs.world_to_pixel_values(ra, dec)
+
+    image_copy = image.copy()
+    num_rows, num_cols = image_copy.shape
+
+    cols_from_left = num_cols - 2*image_x_center
+    rows_from_top = num_rows - 2*image_y_center
+    x_offset, y_offset = 0, 0
+
+    if cols_from_left > 0:
+        pad_cols = np.abs(np.ceil(cols_from_left)).astype(int)
+        left_padding = np.zeros((image_copy.shape[0], pad_cols))
+        image_copy = np.hstack([left_padding, image_copy])
+        x_offset += pad_cols
+        
+    elif cols_from_left < 0:
+        pad_cols = np.abs(np.ceil(-cols_from_left)).astype(int)
+        right_padding = np.zeros((image_copy.shape[0], pad_cols))
+        image_copy = np.hstack([image_copy, right_padding])
+
+    if rows_from_top > 0:
+        pad_rows = np.abs(np.ceil(rows_from_top)).astype(int)
+        top_padding = np.zeros((pad_rows, image_copy.shape[1]))
+        image_copy = np.vstack([top_padding, image_copy])
+        y_offset += pad_rows
+       
+    elif rows_from_top < 0:
+        pad_rows = np.abs(np.ceil(-rows_from_top)).astype(int)
+        bottom_padding = np.zeros((pad_rows, image_copy.shape[1]))
+        image_copy = np.vstack([image_copy, bottom_padding])
+
+    # Update shape parameters
+    num_rows, num_cols = image_copy.shape
+
+    # Disable xbit, ybit for the time being
     xbit = 0
     if image_x_center - pimage_x_center > 0:
-        xbit = 1
+        xbit = 0
 
     ybit = 0
     if image_y_center - pimage_y_center > 0:
-        ybit = 1
-
-    image_copy = image.copy()
-    y_len, x_len = image_copy.shape
-    y_offset = np.round(y_len / 2, 0).astype(int) - image_y_center
-    x_offset = np.round(x_len / 2, 0).astype(int) - image_x_center
-
-    if y_offset > 0:
-        top_padding = np.zeros((y_offset, image_copy.shape[1]))
-        image_copy = np.vstack([top_padding, image_copy])
-    elif y_offset < 0:
-        bottom_padding = np.zeros((-y_offset, image_copy.shape[1]))
-        image_copy = np.vstack([image_copy, bottom_padding])
-
-    if x_offset < 0:
-        left_padding = np.zeros((image_copy.shape[0], -x_offset))
-        image_copy = np.hstack([left_padding, image_copy])
-    elif x_offset > 0:
-        right_padding = np.zeros((image_copy.shape[0], x_offset))
-        image_copy = np.hstack([image_copy, right_padding])
-
-    y_len, x_len = image_copy.shape
-
-    # If the image is not the desired height, pad more rows
-    # until it is
-    if y_len < height:
-        num_rows = height - y_len
-        for i in range(num_rows):
-            padding = np.zeros((1, image_copy.shape[1]))
-            if i % 2 == (0 + ybit):
-                y_offset += 1
-                image_copy = np.vstack([padding, image_copy])
-            else:
-                image_copy = np.vstack([image_copy, padding])
-    # If the image is larger than the desired height, remove
-    # rows until it is
-    if y_len > height:
-        num_rows = y_len - height
-        for i in range(num_rows):
-            if i % 2 == (0 + ybit):
-                image_copy = image_copy[1:, :]
-                y_offset -= 1
-            else:
-                image_copy = image_copy[:-1, ]
+        ybit = 0
 
     # If the image is not the desired width, pad more columns
     # until it is
-    if x_len < width:
-        num_cols = width - x_len
+    if num_cols < width:
+        num_cols = width - num_cols
         for i in range(num_cols):
             padding = np.zeros((image_copy.shape[0], 1))
-            if i % 2 == (0 + xbit):
+            if i % 2 == 0 + xbit:
                 image_copy = np.hstack([padding, image_copy])
                 x_offset += 1
             else:
                 image_copy = np.hstack([image_copy, padding])
 
+    # Update shape parameters
+    num_rows, num_cols = image_copy.shape
+
     # If the image is larger than the desired width, remove
     # columns until it is
-    if x_len > width:
-        num_cols = x_len - width
+    if num_cols > width:
+        num_cols = num_cols - width
         for i in range(num_cols):
-            if i % 2 == (0 + xbit):
+            if i % 2 == 0 + xbit:
                 image_copy = image_copy[:, 1:]
                 x_offset -= 1
             else:
                 image_copy = image_copy[:, :-1]
+
+    # Update shape parameters
+    num_rows, num_cols = image_copy.shape
+   
+    # If the image is not the desired height, pad more rows
+    # until it is
+    if num_rows < height:
+        num_rows = height - num_rows
+        for i in range(num_rows):
+            padding = np.zeros((1, image_copy.shape[1]))
+            if i % 2 == 0 + ybit:
+                image_copy = np.vstack([padding, image_copy])
+                y_offset += 1
+            else:
+                image_copy = np.vstack([image_copy, padding])
+
+    # Update shape parameters
+    num_rows, num_cols = image_copy.shape
+                
+    # If the image is larger than the desired height, remove
+    # rows until it is
+    if num_rows > height:
+        num_rows = num_rows - height
+        for i in range(num_rows):
+            if i % 2 == 0 + ybit:
+                image_copy = image_copy[1:, :]
+                y_offset -= 1
+            else:
+                image_copy = image_copy[:-1, ]
 
     return image_copy, x_offset, y_offset
 
@@ -239,9 +263,14 @@ def plot_cutouts(
         cutout_height=75,
         cutout_width=75,
         crosshair=True,
-        crosshair_kwargs={
+        crosshair_detection_kwargs={
+            "color": "#03fc0f",
+            "alpha": 1.0,
+            "zorder": 9
+        },
+        crosshair_non_detection_kwargs={
             "color": "r",
-            "alpha": 0.9,
+            "alpha": 1.0,
             "zorder": 9
         },
         velocity_vector=True,
@@ -259,6 +288,7 @@ def plot_cutouts(
             "top": 0.95,
             "bottom": 0.02
         },
+        cmap=CMAP_BONE,
     ):
 
     num_obs = len(paths)
@@ -280,34 +310,67 @@ def plot_cutouts(
     axs = []
     for i, (path_i, ra_i, dec_i, vra_i, vdec_i) in enumerate(zip(paths, ra, dec, vra, vdec)):
 
-        ax = fig.add_subplot(num_rows, max_cols, i+1)
-        ax = plot_cutout(
-            ax,
-            path_i,
-            ra_i,
-            dec_i,
-            vra_i,
-            vdec_i,
-            height=cutout_height,
-            width=cutout_width,
-            crosshair=crosshair,
-            crosshair_kwargs=crosshair_kwargs,
-            velocity_vector=velocity_vector,
-            velocity_vector_kwargs=velocity_vector_kwargs
-        )
-        axs.append(ax)
-
         y = 1.0
         title = ""
         title += f"{times[i].iso}"
         if include_filter:
             title += f"\n{filter[i]}"
+
         if include_mag:
-            title += f": {mag[i]:.2f}"
+
+            if np.isnan(mag[i]):
+                crosshair_kwargs_i = crosshair_non_detection_kwargs
+                title += f": --.--"
+            else:
+                crosshair_kwargs_i = crosshair_detection_kwargs
+                title += f": {mag[i]:.2f}"
             y -= 0.03
+
+        else:
+            crosshair_kwargs_i = crosshair_detection_kwargs
+
         if include_mag_sigma:
-            title += f"$\pm{mag_sigma[i]:.2f}$"
+            if np.isnan(mag_sigma[i]):
+                title += f":$\pm$--.--"
+            else:
+                title += f"$\pm{mag_sigma[i]:.2f}$"
+
+        ax = fig.add_subplot(num_rows, max_cols, i+1)
+
+        if path_i is None:
+            image = np.zeros((cutout_height, cutout_width), dtype=float)
+            ax.imshow(
+                image,
+                origin="lower",
+                cmap=cmap
+            )
+            ax.axis("off")
+            ax.text(
+                cutout_height/2,
+                cutout_width/2,
+                "No image found",
+                horizontalalignment="center",
+                color="w"
+            )
+
+        else:
+            ax = plot_cutout(
+                ax,
+                path_i,
+                ra_i,
+                dec_i,
+                vra_i,
+                vdec_i,
+                height=cutout_height,
+                width=cutout_width,
+                crosshair=crosshair,
+                crosshair_kwargs=crosshair_kwargs_i,
+                velocity_vector=velocity_vector,
+                velocity_vector_kwargs=velocity_vector_kwargs
+            )
 
         ax.set_title(title, fontsize=6, y=y)
+
+        axs.append(ax)
 
     return fig, axs
