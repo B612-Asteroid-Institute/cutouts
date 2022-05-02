@@ -43,8 +43,9 @@ def get_cutouts(
 
     urls = []
     for i, (ra_i, dec_i, mjd_i, exposure_id_i) in enumerate(zip(ra, dec, mjd, exposure_id)):
-        urls.append(
-            find_cutout(
+
+        try:
+            cutout_url = find_cutout(
                 ra_i,
                 dec_i,
                 mjd_i,
@@ -54,7 +55,12 @@ def get_cutouts(
                 width=width,
                 exposure_id=exposure_id_i
             )
-        )
+
+        except FileNotFoundError as e:
+            logger.warning(f"No cutout found for {mjd_i} MJD [UTC] at (RA, Dec) = ({ra_i}, {dec_i})")
+            cutout_url = None
+
+        urls.append(cutout_url)
 
     paths = []
     for i, (ra_i, dec_i, mjd_i, exposure_id_i, url_i) in enumerate(zip(ra, dec, mjd, exposure_id, urls)):
@@ -69,13 +75,15 @@ def get_cutouts(
         else:
             out_file_i = None
 
-
-        paths.append(
-            download_cutout(
+        if url_i is None:
+            path_i = None
+        else:
+            path_i = download_cutout(
                 url_i,
                 out_file=out_file_i
             )
-        )
+
+        paths.append(path_i)
 
     return paths
 
