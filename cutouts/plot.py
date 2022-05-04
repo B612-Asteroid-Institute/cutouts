@@ -1,4 +1,5 @@
 import numpy as np
+import numpy.typing as npt
 import matplotlib
 import matplotlib.pyplot as plt
 from astropy.io import fits
@@ -9,8 +10,43 @@ from astropy.visualization import ZScaleInterval
 CMAP_BONE = matplotlib.cm.bone.copy()
 CMAP_BONE.set_bad("black")
 
-def add_crosshair(ax, wcs, ra, dec, gap=8, length=8, x_offset=0, y_offset=0, **kwargs):
+def add_crosshair(
+        ax: matplotlib.axes.Axes,
+        wcs: WCS,
+        ra: float,
+        dec: float,
+        gap: int = 8,
+        length: int = 8,
+        x_offset: int = 0,
+        y_offset: int = 0,
+        **kwargs
+    ):
+    """
+    Add a crosshair centered on RA and Dec to the given axes.
 
+    Parameter
+    ---------
+    ax : `~matplotlib.axes.Axes`
+        Matplotlib axes (usually a subplot) on which to add the crosshair.
+    wcs : `~astropy.wcs.wcs.WCS`
+        World Coordinate System (WCS) that maps pixels in an image to RA, Dec.
+    ra : float
+        Predicted RA in degrees.
+    dec : float
+        Predicted Dec in degrees.
+    gap : int
+        Distance from center in pixels to start drawing crosshair reticle bar.
+    length : int
+        Length in pixels of an individual bar reticle.
+    x_offset : int, optional
+        Offset in x-axis pixels from the sky-plane origin of the image (offsets might be non-zero
+        due to image centering, padding, and/or trimming).
+    y_offset : int, optional
+        Offset in y-axis pixels from the sky-plane origin of the image (offsets might be non-zero
+        due to image centering, padding, and/or trimming).
+    **kwargs
+        Keyword arguments to pass to ax.hlines and ax.vlines.
+    """
     # Get pixel location of RA and Dec
     x_center, y_center = wcs.world_to_array_index_values(ra, dec)
     #y_center, x_center = wcs.world_to_pixel_values(ra, dec)
@@ -43,20 +79,62 @@ def add_crosshair(ax, wcs, ra, dec, gap=8, length=8, x_offset=0, y_offset=0, **k
     )
     return
 
-def add_velocity_vector(ax, wcs, ra, dec, vra, vdec, gap=8, length=8, x_offset=0, y_offset=0, **kwargs):
+def add_velocity_vector(
+        ax: matplotlib.axes.Axes,
+        wcs: WCS,
+        ra: float,
+        dec: float,
+        vra: float,
+        vdec: float,
+        gap: int = 8,
+        length: int = 8,
+        x_offset: int = 0,
+        y_offset: int = 0,
+        **kwargs
+    ):
+    """
+    Add a velocity vector showing the predicted velocity of an object
+    to an image.
 
-    x_center, y_center = wcs.world_to_array_index_values(ra, dec)
-    #y_center, x_center = wcs.world_to_pixel_values(ra, dec)
+    Parameters
+    ----------
+    ax : `~matplotlib.axes.Axes`
+        Matplotlib axes (usually a subplot) on which to add the velocity vector.
+    wcs : `~astropy.wcs.wcs.WCS`
+        World Coordinate System (WCS) that maps pixels in an image to RA, Dec.
+    ra : float
+        Predicted RA in degrees.
+    dec : float
+        Predicted Dec in degrees.
+    vra : float
+        Predicted RA-velocity in degrees per day.
+    vdec : float
+        Predicted Dec in degrees in degrees per day.
+    gap : int
+        Distance from center in pixels to start drawing velocity vector.
+    length : int
+        Length in pixels of velocity vector.
+    x_offset : int, optional
+        Offset in x-axis pixels from the sky-plane origin of the image (offsets might be non-zero
+        due to image centering and padding, and/or trimming).
+    y_offset : int, optional
+        Offset in y-axis pixels from the sky-plane origin of the image (offsets might be non-zero
+        due to image centering, padding, and/or trimming)
+    **kwargs
+        Keyword arguments to pass to ax.arrow.
+    """
+    #x_center, y_center = wcs.world_to_array_index_values(ra, dec)
+    y_center, x_center = wcs.world_to_pixel_values(ra, dec)
     x_center = x_center + x_offset
     y_center = y_center + y_offset
 
     dt = 1/24/2
-    xoffset, yoffset = wcs.world_to_array_index_values(ra + vra * dt, dec + vdec * dt)
-    #yoffset, xoffset = wcs.world_to_pixel_values(ra + vra * dt, dec + vdec * dt)
-    xoffset = xoffset + x_offset
-    yoffset = yoffset + y_offset
-    vx = (xoffset - x_center) / dt
-    vy = (yoffset - y_center) / dt
+    #x_propagated, y_propagated = wcs.world_to_array_index_values(ra + vra * dt, dec + vdec * dt)
+    y_propagated, x_propagated = wcs.world_to_pixel_values(ra + vra * dt, dec + vdec * dt)
+    x_propagated = x_propagated + x_offset
+    y_propagated = y_propagated + y_offset
+    vx = (x_propagated - x_center) / dt
+    vy = (y_propagated - y_center) / dt
 
     vx_hat = vx / np.sqrt(vx**2 + vy**2)
     vy_hat = vy / np.sqrt(vx**2 + vy**2)
@@ -71,8 +149,48 @@ def add_velocity_vector(ax, wcs, ra, dec, vra, vdec, gap=8, length=8, x_offset=0
     )
     return
 
-def center_image(image, wcs, ra, dec, height=115, width=115):
+def center_image(
+        image: npt.NDArray[np.float64],
+        wcs: WCS,
+        ra: float,
+        dec: float,
+        height: int = 115,
+        width: int = 115
+    ) -> npt.NDArray[np.float64]:
+    """
+    Given an image and its WCS, ensure that (RA, Dec) is actually as near
+    to the center of the image as possible. Also, ensure that the image
+    is sized as (height, width). If the image is not centered, this function
+    will center (RA, Dec) as much as possible, and if the image is not the desired
+    shape then this function will pad columns/rows or trim columns/rows until it is the
+    desired shape.
 
+    Parameters
+    ----------
+    image : `~numpy.ndarray` (N, M)
+        2D array with image data.
+    wcs : `~astropy.wcs.wcs.WCS`
+        World Coordinate System (WCS) that maps pixels in an image to RA, Dec.
+    ra : float
+        RA in degrees of the desired center of the image.
+    dec : float
+        Dec in degrees of the desired center of the image.
+    height : int, optional
+        The desired height of the image.
+    width : int, optional
+        The desired width of the image.
+
+    Returns
+    -------
+    image_centered : `~numpy.ndarray` (height, width)
+        Image with desired height and width with RA, Dec as near to the center as possible.
+    x_offset : int
+        Offset in x-axis pixels from the sky-plane origin of the image (offsets might be non-zero
+        due to image centering and padding, and/or trimming).
+    y_offset : int
+        Offset in y-axis pixels from the sky-plane origin of the image (offsets might be non-zero
+        due to image centering, padding, and/or trimming)
+    """
     # Calculate where RA and Dec fall in the actual image
     image_x_center, image_y_center = wcs.world_to_array_index_values(ra, dec)
 
@@ -91,7 +209,7 @@ def center_image(image, wcs, ra, dec, height=115, width=115):
         left_padding = np.zeros((image_copy.shape[0], pad_cols))
         image_copy = np.hstack([left_padding, image_copy])
         x_offset += pad_cols
-        
+
     elif cols_from_left < 0:
         pad_cols = np.abs(np.ceil(-cols_from_left)).astype(int)
         right_padding = np.zeros((image_copy.shape[0], pad_cols))
@@ -102,7 +220,7 @@ def center_image(image, wcs, ra, dec, height=115, width=115):
         top_padding = np.zeros((pad_rows, image_copy.shape[1]))
         image_copy = np.vstack([top_padding, image_copy])
         y_offset += pad_rows
-       
+
     elif rows_from_top < 0:
         pad_rows = np.abs(np.ceil(-rows_from_top)).astype(int)
         bottom_padding = np.zeros((pad_rows, image_copy.shape[1]))
@@ -148,7 +266,7 @@ def center_image(image, wcs, ra, dec, height=115, width=115):
 
     # Update shape parameters
     num_rows, num_cols = image_copy.shape
-   
+
     # If the image is not the desired height, pad more rows
     # until it is
     if num_rows < height:
@@ -163,7 +281,7 @@ def center_image(image, wcs, ra, dec, height=115, width=115):
 
     # Update shape parameters
     num_rows, num_cols = image_copy.shape
-                
+
     # If the image is larger than the desired height, remove
     # rows until it is
     if num_rows > height:
