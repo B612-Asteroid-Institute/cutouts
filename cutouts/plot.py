@@ -2,6 +2,13 @@ import numpy as np
 import numpy.typing as npt
 import matplotlib
 import matplotlib.pyplot as plt
+from typing import (
+    List,
+    Optional,
+    Union,
+    Tuple
+)
+from astropy.time import Time
 from astropy.io import fits
 from astropy.wcs import WCS
 from astropy.visualization import ImageNormalize
@@ -296,29 +303,29 @@ def center_image(
     return image_copy, x_offset, y_offset
 
 def plot_cutout(
-        ax,
-        path,
-        ra,
-        dec,
-        vra,
-        vdec,
-        crosshair=True,
-        crosshair_kwargs={
+        ax: matplotlib.axes.Axes,
+        path: str,
+        ra: float,
+        dec: float,
+        vra: float,
+        vdec: float,
+        crosshair: bool = True,
+        crosshair_kwargs: dict = {
             "color": "r",
             "alpha": 0.9,
             "zorder": 9
         },
-        velocity_vector=True,
-        velocity_vector_kwargs={
+        velocity_vector: bool = True,
+        velocity_vector_kwargs: dict = {
             "color": "#34ebcd",
             "width": 0.2,
             "head_width": 2,
             "zorder": 10
         },
-        height=115,
-        width=115,
-        cmap=CMAP_BONE
-    ):
+        height: int = 115,
+        width: int = 115,
+        cmap: matplotlib.cm = CMAP_BONE
+    ) -> matplotlib.axes.Axes:
 
     # Read file and get image
     hdu = fits.open(path)[0]
@@ -365,40 +372,42 @@ def plot_cutout(
     return ax
 
 def plot_cutouts(
-        paths,
-        times,
-        ra,
-        dec,
-        vra,
-        vdec,
-        filter=None,
-        mag=None,
-        mag_sigma=None,
-        dpi=200,
-        max_cols=4,
-        row_height=2,
-        col_width=2,
-        cutout_height=75,
-        cutout_width=75,
-        crosshair=True,
-        crosshair_detection_kwargs={
+        paths: List[Union[str, None]],
+        times: Time,
+        ra: npt.NDArray[np.float64],
+        dec: npt.NDArray[np.float64],
+        vra: npt.NDArray[np.float64],
+        vdec: npt.NDArray[np.float64],
+        filters: Optional[npt.NDArray[str]] = None,
+        mag: Optional[npt.NDArray[np.float64]] = None,
+        mag_sigma: Optional[npt.NDArray[np.float64]] = None,
+        exposure_time: Optional[npt.NDArray[np.float64]] = None,
+        dpi: int = 200,
+        max_cols: int = 4,
+        row_height: float = 2.,
+        col_width: float = 2.,
+        cutout_height: int = 75,
+        cutout_width: int = 75,
+        include_missing: bool = True,
+        crosshair: bool = True,
+        crosshair_detection_kwargs: dict = {
             "color": "#03fc0f",
             "alpha": 1.0,
             "zorder": 9
         },
-        crosshair_non_detection_kwargs={
+        crosshair_non_detection_kwargs: dict = {
             "color": "r",
             "alpha": 1.0,
             "zorder": 9
         },
-        velocity_vector=True,
-        velocity_vector_kwargs={
+        velocity_vector: bool = True,
+        velocity_vector_kwargs: dict = {
             "color": "#34ebcd",
             "width": 0.2,
             "head_width": 2,
             "zorder": 10
         },
-        subplots_adjust_kwargs={
+        subplots_adjust_kwargs: dict = {
             "hspace": 0.15,
             "wspace": 0.15,
             "left": 0.05,
@@ -412,15 +421,18 @@ def plot_cutouts(
     num_obs = len(paths)
     num_rows = np.ceil(num_obs / max_cols).astype(int)
 
-    include_filter = False
+    include_filters = False
     include_mag = False
     include_mag_sigma = False
-    if isinstance(filter, np.ndarray):
-        include_filter = True
+    include_exposure_time = False
+    if isinstance(filters, np.ndarray):
+        include_filters = True
     if isinstance(mag, np.ndarray):
         include_mag = True
     if isinstance(mag_sigma, np.ndarray):
         include_mag_sigma = True
+    if isinstance(exposure_time, np.ndarray):
+        include_exposure_time = True
 
     fig = plt.figure(figsize=(col_width*max_cols, row_height*num_rows), dpi=dpi)
     fig.subplots_adjust(**subplots_adjust_kwargs)
@@ -428,14 +440,14 @@ def plot_cutouts(
     axs = []
     for i, (path_i, ra_i, dec_i, vra_i, vdec_i) in enumerate(zip(paths, ra, dec, vra, vdec)):
 
+        ax = None
         y = 1.0
         title = ""
         title += f"{times[i].iso}"
-        if include_filter:
-            title += f"\n{filter[i]}"
+        if include_filters:
+            title += f"\n{filters[i]}"
 
         if include_mag:
-
             if np.isnan(mag[i]):
                 crosshair_kwargs_i = crosshair_non_detection_kwargs
                 title += f": --.--"
@@ -453,9 +465,15 @@ def plot_cutouts(
             else:
                 title += f"$\pm{mag_sigma[i]:.2f}$"
 
-        ax = fig.add_subplot(num_rows, max_cols, i+1)
+        if include_exposure_time:
+            if np.isnan(exposure_time[i]):
+                title += f", $\Delta$t: ---s"
+            else:
+                title += f", $\Delta$t: {exposure_time[i]:d}s"
 
-        if path_i is None:
+        if path_i is None and include_missing:
+
+            ax = fig.add_subplot(num_rows, max_cols, i+1)
             image = np.zeros((cutout_height, cutout_width), dtype=float)
             ax.imshow(
                 image,
@@ -472,6 +490,7 @@ def plot_cutouts(
             )
 
         else:
+            ax = fig.add_subplot(num_rows, max_cols, i+1)
             ax = plot_cutout(
                 ax,
                 path_i,
@@ -487,8 +506,8 @@ def plot_cutouts(
                 velocity_vector_kwargs=velocity_vector_kwargs
             )
 
-        ax.set_title(title, fontsize=6, y=y)
-
-        axs.append(ax)
+        if ax is not None:
+            ax.set_title(title, fontsize=6, y=y)
+            axs.append(ax)
 
     return fig, axs
