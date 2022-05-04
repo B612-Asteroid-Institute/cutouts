@@ -1,5 +1,6 @@
 numpy
 astropy
+pandas
 pyvo
 matplotlib
 pytest
