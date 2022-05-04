@@ -1,8 +1,10 @@
 import os
 import shutil
 import logging
+import pandas as pd
 from pyvo.dal.sia import SIAService
 from typing import (
+    Tuple,
     Optional
 )
 from astropy.utils.data import download_file
@@ -13,7 +15,7 @@ def exposure_id_from_url(
         url: str,
         preamble: str = "siaRef=",
         postamble: str = ".fits.fz"
-    ):
+    ) -> str:
     """
     Attempt to determine the exposure ID from a cutout URL.
 
@@ -47,7 +49,7 @@ def find_cutout(
         height: float = 20,
         width: float = 20,
         exposure_id: Optional[str] = None,
-    ):
+    ) -> Tuple[str, pd.DataFrame]:
     """
     Find cutout for a given RA, Dec, and MJD [UTC].
 
