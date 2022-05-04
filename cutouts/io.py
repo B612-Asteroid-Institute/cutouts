@@ -1,10 +1,8 @@
 import os
 import shutil
 import logging
-import numpy as np
-import numpy.typing as npt
+from pyvo.dal.sia import SIAService
 from typing import (
-    List,
     Optional
 )
 from astropy.utils.data import download_file
@@ -39,74 +37,107 @@ def exposure_id_from_url(
     exposure_id = url[id_start + len(preamble) : id_end]
     return exposure_id
 
-def construct_url(
-        service,
-        dataset,
-        exposure_id,
-        ra,
-        dec,
-        height,
-        width,
-        preview
-    ):
-    url = f"{service}?col={dataset}&siaRef={exposure_id}.fits.fz&extn=7&POS={ra:.10f},{dec:.10f}&SIZE={height/3600},{width/3600}&preview={preview}"
-    return url
 
 def find_cutout(
-        ra,
-        dec,
-        mjd_utc,
-        sia_service,
-        delta_time=1e-8,
-        height=20,
-        width=20,
-        exposure_id=None
+        ra: float,
+        dec: float,
+        mjd_utc: float,
+        sia_service: SIAService,
+        delta_time: float = 1e-8,
+        height: float = 20,
+        width: float = 20,
+        exposure_id: Optional[str] = None,
     ):
-    center = (ra, dec)
-    result = sia_service.search(center, size=(height/3600., width/3600.)).to_table()
-    if "mjd_obs" in result.columns:
-        mjd_utcs = np.array(result["mjd_obs"]).astype(float)
-    else:
-        mjd_utcs = np.array(result["mjd_utc_obs"]).astype(float)
+    """
+    Find cutout for a given RA, Dec, and MJD [UTC].
 
-    row = result[(mjd_utcs <= mjd_utc + delta_time) & (mjd_utcs >= mjd_utc - delta_time) & (result["prodtype"] == "image")]
-    if len(row) == 0:
+    Parameters
+    ----------
+    ra : float
+        Right Ascension in degrees.
+    dec : float
+        Declination in degrees.
+    mjd_utc : float
+        Observation time in MJD [UTC].
+    sia_service : `~pyvo.dal.sia.SIAService`
+        Simple Image Access (SIA) service to query for cutout.
+    delta_time: float, optional
+        Match on observation time to within this delta. Delta should
+        be in units of days.
+    height : float, optional
+        Height of the cutout in arcseconds.
+    width : float, optional
+        Width of the cutout in arcseconds.
+    exposure_id: str, optional
+        Exposure ID, if known.
+
+    Returns
+    -------
+    cutout_url : str
+        URL to cutout
+    result : `~pandas.DataFrame`
+        Dataframe with SIA query results.
+
+    Raises
+    ------
+    FileNotFoundError: If no cutout is found at the given RA, Dec, MJD [UTC]
+        using this particular SIA Service.
+    """
+    center = (ra, dec)
+    result = sia_service.search(center, size=(height/3600., width/3600.)).to_table().to_pandas()
+    if "mjd_obs" in result.columns:
+        mjd_utcs = result["mjd_obs"].values.astype(float)
+    else:
+        mjd_utcs = result["mjd_utc_obs"].values.astype(float)
+
+    logger.info(f"SIA query returned table with {len(result)} row.")
+    result = result[(mjd_utcs <= mjd_utc + delta_time) & (mjd_utcs >= mjd_utc - delta_time) & (result["prodtype"] == "image")]
+    result.reset_index(inplace=True, drop=True)
+
+    logger.info(f"Filtering on {mjd_utc} +- {delta_time} MJD [UTC] reduces table to {len(result)} row(s).")
+    if len(result) == 0:
         err = ("No cutout found.")
         raise FileNotFoundError(err)
 
-    cutout_url = row["access_url"].value[0]
-
+    cutout_url = result["access_url"].values[0]
     if exposure_id is not None:
         url_exposure_id = exposure_id_from_url(cutout_url)
 
         if exposure_id != url_exposure_id:
             logger.warning(
                 f"Exposure ID ({url_exposure_id}) found via search on RA, Dec," \
-                f"and MJD_utc does not match the given exposure ID ({exposure_id})."
+                f"and MJD [UTC] does not match the given exposure ID ({exposure_id})."
             )
 
-    return cutout_url
+    return cutout_url, result
 
 def download_cutout(
         url: str,
-        out_file: str = None,
-        show_progress: bool = True,
-        timeout: Optional[int] = None,
-        http_headers=None,
-        ssl_context=None,
-        allow_insecure=False
+        out_file: Optional[str] = None,
+        **kwargs
     ) -> str:
+    """
+    Download cutout located at url. This function
+    uses `~astropy.utils.data.download_file`.
 
+    Parameters
+    ----------
+    url : str
+        URL of remote cutout.
+    out_file : str, optional
+        Save cutout to out_file.
+    **kwargs : dict
+        Additional keyword arguments to pass to
+        `~astropy.utils.data.download_file`.
+
+    Returns
+    -------
+    path : str
+        Location of downloaded cutout.
+    """
     path = download_file(
         url,
-        cache=True,
-        pkgname="cutouts",
-        show_progress=show_progress,
-        timeout=timeout,
-        http_headers=http_headers,
-        ssl_context=ssl_context,
-        allow_insecure=allow_insecure
-
+        **kwargs
     )
     if out_file is not None:
         os.makedirs(
