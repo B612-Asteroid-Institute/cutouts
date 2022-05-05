@@ -311,12 +311,16 @@ def plot_cutout(
         vdec: float,
         crosshair: bool = True,
         crosshair_kwargs: dict = {
+            "gap": 8,
+            "length": 8,
             "color": "r",
             "alpha": 0.9,
             "zorder": 9
         },
         velocity_vector: bool = True,
         velocity_vector_kwargs: dict = {
+            "gap": 8,
+            "length": 8,
             "color": "#34ebcd",
             "width": 0.2,
             "head_width": 2,
@@ -326,7 +330,38 @@ def plot_cutout(
         width: int = 115,
         cmap: matplotlib.cm = CMAP_BONE
     ) -> matplotlib.axes.Axes:
+    """
+    Plot a single cutout on the given axes.
 
+    Parameters
+    ----------
+    ax : `~matplotlib.axes.Axes`
+        Matplotlib axes (usually a subplot) on which to add cutout.
+    path : str
+        Location of cutout file.
+    ra : float
+        Predicted RA in degrees.
+    dec : float
+        Predicted Dec in degrees.
+    vra : float
+        Predicted RA-velocity in degrees per day.
+    vdec : float
+        Predicted Dec in degrees in degrees per day.
+    crosshair : bool, optional
+        Add crosshair centered on (RA, Dec).
+    crosshair_kwargs : dict
+        Keyword arguments to pass to `~cutouts.plot.add_crosshair`.
+    velocity_vector : bool, optional
+        Add velocity vector showing predicted motion.
+    velocity_vector_kwargs : dict
+        Keyword arguments to pass to `~cutouts.plot.add_velocity_vector`.
+    height : int, optional
+        Desired height of the cutout in pixels.
+    width : int, optional
+        Desired width of the cutout in pixels.
+    cmap : `~matplotlib.cm`
+        Colormap for the cutout.
+    """
     # Read file and get image
     hdu = fits.open(path)[0]
     image = hdu.data
@@ -391,17 +426,23 @@ def plot_cutouts(
         include_missing: bool = True,
         crosshair: bool = True,
         crosshair_detection_kwargs: dict = {
+            "gap": 8,
+            "length": 8,
             "color": "#03fc0f",
             "alpha": 1.0,
             "zorder": 9
         },
         crosshair_non_detection_kwargs: dict = {
+            "gap": 8,
+            "length": 8,
             "color": "r",
             "alpha": 1.0,
             "zorder": 9
         },
         velocity_vector: bool = True,
         velocity_vector_kwargs: dict = {
+            "gap": 8,
+            "length": 8,
             "color": "#34ebcd",
             "width": 0.2,
             "head_width": 2,
@@ -416,8 +457,74 @@ def plot_cutouts(
             "bottom": 0.02
         },
         cmap=CMAP_BONE,
-    ):
+    ) -> Tuple[matplotlib.figure.Figure, List[matplotlib.axes.Axes]]:
+    """
+    Plot cutouts on a grid.
 
+    Parameters
+    ----------
+    paths : List[str]
+        Location of cutout file.
+    ra : `~numpy.ndarray` (N)
+        Predicted RA in degrees.
+    dec : `~numpy.ndarray` (N)
+        Predicted Dec in degrees.
+    vra : `~numpy.ndarray` (N)
+        Predicted RA-velocity in degrees per day.
+    vdec : `~numpy.ndarray` (N)
+        Predicted Dec in degrees in degrees per day.
+    filters : `~numpy.ndarray` (N)
+        Filters in which the observations were made.
+    mag : `~numpy.ndarray` (N)
+        Magnitude of the observation if detected. NaN magnitudes are interpreted
+        as undetected.
+    mag_sigma: `~numpy.ndarray` (N)
+        Magnitude error of the detected observation.
+    exposure_time : `~numpy.ndarray` (N)
+        Exposure time in seconds.
+    dpi : int, optional
+        DPI of the plot.
+    max_cols : int, optional
+        Maximum number of columns the grid should have.
+    row_height : float, optional
+        Height in inches each row should have.
+    col_width : float, optional
+        Width in inches each column should have.
+    cutout_height : int, optional
+        Desired height of the cutout in pixels.
+    cutout_width : int, optional
+        Desired width of the cutout in pixels.
+    include_missing : bool, optional
+        Include an empty placeholder cutout if the cutout was not found (their paths are None).
+    crosshair : bool, optional
+        Add crosshairs centered on (RA, Dec). If the source is detected (see the magnitude
+        keyword argument), then the crosshair_detection_kwargs will be applied to the crosshair.
+        If the source is not detected (a NaN value or mag is None) then the crosshair_non_detection_kwargs
+        will be applied to the crosshair.
+    crosshair_detection_kwargs : dict
+        Keyword arguments to pass to `~cutouts.plot.add_crosshair` for detected sources.
+    crosshair_non_detection_kwargs : dict
+        Keyword arguments to pass to `~cutouts.plot.add_crosshair` for undetected sources.
+    velocity_vector : bool, optional
+        Add velocity vector showing predicted motion.
+    velocity_vector_kwargs : dict
+        Keyword arguments to pass to `~cutouts.plot.add_velocity_vector`.
+    height : int, optional
+        Desired height of the cutout in pixels.
+    width : int, optional
+        Desired width of the cutout in pixels.
+    subplots_adjust_kwargs : dict, optional
+        Keyword arguments to pass to `fig.subplots_adjust`.
+    cmap : `~matplotlib.cm`
+        Colormap for the cutout.
+
+    Returns
+    -------
+    fig : `~matplotlib.figure.Figure`
+        Matplotlib figure.
+    ax : list of `~matplotlib.axes.Axes`
+        Matplotlib axes.
+    """
     num_obs = len(paths)
     num_rows = np.ceil(num_obs / max_cols).astype(int)
 
