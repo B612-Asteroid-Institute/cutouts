@@ -35,16 +35,16 @@ from cutouts import plot_cutouts
 observations = pd.read_csv("examples/2013_RR163.csv", index_col=False)
 
 # Extract relevant quantities
-ra = results["pred_ra_deg"].values
-dec = results["pred_dec_deg"].values
-vra = results["pred_vra_degpday"].values
-vdec = results["pred_vdec_degpday"].values
-obscode = results["obscode"].values
-mag = results["mag"].values
-filter = results["filter"].values 
-mag_sigma = results["mag_sigma"].values
-times = Time(results["mjd_utc"].values, scale="utc", format="mjd")
-exposure_id = results["exposure_id"].values
+ra = observations["pred_ra_deg"].values
+dec = observations["pred_dec_deg"].values
+vra = observations["pred_vra_degpday"].values
+vdec = observations["pred_vdec_degpday"].values
+obscode = observations["obscode"].values
+mag = observations["mag"].values
+filter = observations["filter"].values 
+mag_sigma = observations["mag_sigma"].values
+times = Time(observations["mjd_utc"].values, scale="utc", format="mjd")
+exposure_id = observations["exposure_id"].values
 
 # Find cutouts and save them
 NSC_SIA_URL = "https://datalab.noirlab.edu/sia/nsc_dr2"
