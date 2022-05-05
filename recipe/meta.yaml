@@ -9,13 +9,13 @@ source:
 
 requirements:
   host:
-    - python {{ python }}
+    - python >=3.7
     - pip
     - setuptools >=45
     - setuptools_scm >=6.0
     - wheel
   run:
-    - python {{ python }}
+    - python >=3.7
     - numpy
     - astropy
     - pandas
