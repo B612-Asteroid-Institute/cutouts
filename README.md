@@ -2,6 +2,9 @@
 #### A Python package by the Asteroid Institute, a program of the B612 Foundation 
 [![Python 3.7+](https://img.shields.io/badge/Python-3.7%2B-blue)](https://img.shields.io/badge/Python-3.7%2B-blue)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)  
+[![Anaconda-Server Badge](https://anaconda.org/asteroid-institute/cutouts/badges/version.svg)](https://anaconda.org/asteroid-institute/cutouts)
+[![Anaconda-Server Badge](https://anaconda.org/asteroid-institute/cutouts/badges/platforms.svg)](https://anaconda.org/asteroid-institute/cutouts)
+[![Anaconda-Server Badge](https://anaconda.org/asteroid-institute/cutouts/badges/downloads.svg)](https://anaconda.org/asteroid-institute/cutouts)  
 
 ## Installation 
 
