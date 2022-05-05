@@ -72,5 +72,10 @@ fig, ax = plot_cutouts(
 fig.suptitle(f"(2013 RR163)", y=1.0)
 fig.savefig(f"examples/2013_RR163.jpg", bbox_inches="tight")
 ```
-![2013 RR163) Cutouts Example](examples/2013_RR163.jpg "(2013 RR163) Cutouts Example")
+![2013 RR163) Cutouts Example](examples/2013_RR163.jpg "(2013 RR163) Cutouts Example")  
 
+`cutouts` also comes with a simple command line interface (CLI) to quickly produce a grid of cutouts from a file 
+of predicted ephemerides and observations.  
+```
+cutouts examples/2013_RR163.csv --out_dir examples/cli_test
+```

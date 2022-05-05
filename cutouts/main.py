@@ -18,6 +18,7 @@ from .io import (
     find_cutout,
     download_cutout
 )
+from .plot import plot_cutouts
 
 logger = logging.getLogger("cutouts")
 
@@ -155,8 +156,87 @@ def get_cutouts(
 
 def main():
 
-    my_parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(
         prog="cutouts",
         description="Get and plot cutouts along a trajectory."
     )
-    my_parser.parse_args()
+    parser.add_argument(
+        "observations",
+        help="File containing observations and predicted ephemerides of a moving object.",
+        type=str
+        )
+    parser.add_argument(
+        "--out_dir",
+        help="Directory where to save downloaded cutouts and the grid of plotted cutouts.",
+        type=str,
+        default="."
+        )
+    parser.add_argument(
+        "--out_file",
+        help="File name (not including --out_dir) of where to save cutouts grid.",
+        type=str,
+        default="cutouts.jpg"
+    )
+    parser.add_argument(
+        "--sia_url",
+        help="Simple Image Access (SIA) URL.",
+        type=str,
+        default=SIA_URL
+        )
+    args = parser.parse_args()
+
+
+    observations = pd.read_csv(args.observations, index_col=False)
+
+    ra = observations["pred_ra_deg"].values
+    dec = observations["pred_dec_deg"].values
+    vra = observations["pred_vra_degpday"].values
+    vdec = observations["pred_vdec_degpday"].values
+    times = Time(observations["mjd_utc"].values, scale="utc", format="mjd")
+
+    if "mag" in observations.columns:
+        mag = observations["mag"].values
+    else:
+        mag = None
+
+    if "mag_sigma" in observations.columns:
+        mag_sigma = observations["mag_sigma"].values
+    else:
+        mag_sigma = None
+
+    if "filter" in observations.columns:
+        filters = observations["filter"].values
+    else:
+        filters = None
+
+    if "exposure_id" in observations.columns:
+        exposure_id = observations["exposure_id"].values
+    else:
+        exposure_id = None
+
+    cutout_paths, cutout_results = get_cutouts(
+        times, ra, dec,
+        sia_url=args.sia_url,
+        exposure_id=exposure_id,
+        out_dir=args.out_dir
+    )
+    exposure_time = cutout_results["exptime"].values.astype(int)
+
+    # Plot cutouts
+    fig, ax = plot_cutouts(
+        cutout_paths,
+        times,
+        ra,
+        dec,
+        vra,
+        vdec,
+        filters=filters,
+        mag=mag,
+        mag_sigma=mag_sigma,
+        exposure_time=exposure_time,
+        cutout_height=75,
+        cutout_width=75,
+    )
+    fig.savefig(os.path.join(args.out_dir, args.out_file), bbox_inches="tight")
+
+
