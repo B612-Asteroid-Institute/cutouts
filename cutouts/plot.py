@@ -576,25 +576,27 @@ def plot_cutouts(
             if np.isnan(exposure_time[i]):
                 title += f", $\Delta$t: ---s"
             else:
-                title += f", $\Delta$t: {exposure_time[i]:d}s"
+                title += f", $\Delta$t: {exposure_time[i]:.0f}s"
 
-        if path_i is None and include_missing:
+        if path_i is None:
 
-            ax = fig.add_subplot(num_rows, max_cols, i+1)
-            image = np.zeros((cutout_height, cutout_width), dtype=float)
-            ax.imshow(
-                image,
-                origin="lower",
-                cmap=cmap
-            )
-            ax.axis("off")
-            ax.text(
-                cutout_height/2,
-                cutout_width/2,
-                "No image found",
-                horizontalalignment="center",
-                color="w"
-            )
+            if include_missing:
+
+                ax = fig.add_subplot(num_rows, max_cols, i+1)
+                image = np.zeros((cutout_height, cutout_width), dtype=float)
+                ax.imshow(
+                    image,
+                    origin="lower",
+                    cmap=cmap
+                )
+                ax.axis("off")
+                ax.text(
+                    cutout_height/2,
+                    cutout_width/2,
+                    "No image found",
+                    horizontalalignment="center",
+                    color="w"
+                )
 
         else:
             ax = fig.add_subplot(num_rows, max_cols, i+1)
