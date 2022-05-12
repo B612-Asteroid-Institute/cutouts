@@ -525,7 +525,13 @@ def plot_cutouts(
     ax : list of `~matplotlib.axes.Axes`
         Matplotlib axes.
     """
-    num_obs = len(paths)
+    if include_missing:
+        num_obs = len(paths)
+    else:
+        num_obs = 0
+        for paths_i in paths:
+            if paths_i is not None:
+                num_obs += 1
     num_rows = np.ceil(num_obs / max_cols).astype(int)
 
     include_filters = False
@@ -545,6 +551,7 @@ def plot_cutouts(
     fig.subplots_adjust(**subplots_adjust_kwargs)
 
     axs = []
+    j = 0 
     for i, (path_i, ra_i, dec_i, vra_i, vdec_i) in enumerate(zip(paths, ra, dec, vra, vdec)):
 
         ax = None
@@ -582,7 +589,7 @@ def plot_cutouts(
 
             if include_missing:
 
-                ax = fig.add_subplot(num_rows, max_cols, i+1)
+                ax = fig.add_subplot(num_rows, max_cols, j+1)
                 image = np.zeros((cutout_height, cutout_width), dtype=float)
                 ax.imshow(
                     image,
@@ -597,9 +604,10 @@ def plot_cutouts(
                     horizontalalignment="center",
                     color="w"
                 )
+                j += 1
 
         else:
-            ax = fig.add_subplot(num_rows, max_cols, i+1)
+            ax = fig.add_subplot(num_rows, max_cols, j+1)
             ax = plot_cutout(
                 ax,
                 path_i,
@@ -614,6 +622,7 @@ def plot_cutouts(
                 velocity_vector=velocity_vector,
                 velocity_vector_kwargs=velocity_vector_kwargs
             )
+            j += 1
 
         if ax is not None:
             ax.set_title(title, fontsize=6, y=y)
