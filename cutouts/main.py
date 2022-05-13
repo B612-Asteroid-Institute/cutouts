@@ -112,7 +112,7 @@ def get_cutouts(
         except FileNotFoundError as e:
             logger.warning(f"No cutout found for {mjd_i} MJD [UTC] at (RA, Dec) = ({ra_i}, {dec_i})")
             cutout_url = None
-            results_i = pd.DataFrame()
+            results_i = pd.DataFrame({"access_url" : [None]})
 
         urls.append(cutout_url)
         results.append(results_i)
