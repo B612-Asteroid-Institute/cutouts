@@ -65,7 +65,7 @@ fig, ax = plot_cutouts(
     times, 
     ra, dec, 
     vra, vdec, 
-    filters=filters,
+    filters=filter,
     mag=mag, 
     mag_sigma=mag_sigma, 
     exposure_time=exposure_time,
