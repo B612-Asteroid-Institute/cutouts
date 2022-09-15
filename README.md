@@ -3,6 +3,8 @@
 [![Python 3.7+](https://img.shields.io/badge/Python-3.7%2B-blue)](https://img.shields.io/badge/Python-3.7%2B-blue)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![DOI](https://zenodo.org/badge/480927468.svg)](https://zenodo.org/badge/latestdoi/480927468)  
+[![Python Package with conda](https://github.com/B612-Asteroid-Institute/cutouts/actions/workflows/python-package-conda.yml/badge.svg)](https://github.com/B612-Asteroid-Institute/cutouts/actions/workflows/python-package-conda.yml)
+[![Publish Python Package to conda](https://github.com/B612-Asteroid-Institute/cutouts/actions/workflows/python-publish-conda.yml/badge.svg)](https://github.com/B612-Asteroid-Institute/cutouts/actions/workflows/python-publish-conda.yml)  
 [![Anaconda-Server Badge](https://anaconda.org/asteroid-institute/cutouts/badges/version.svg)](https://anaconda.org/asteroid-institute/cutouts)
 [![Anaconda-Server Badge](https://anaconda.org/asteroid-institute/cutouts/badges/platforms.svg)](https://anaconda.org/asteroid-institute/cutouts)
 [![Anaconda-Server Badge](https://anaconda.org/asteroid-institute/cutouts/badges/downloads.svg)](https://anaconda.org/asteroid-institute/cutouts)  
