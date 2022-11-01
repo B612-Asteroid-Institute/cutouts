@@ -2,12 +2,14 @@ import os
 import shutil
 import logging
 import pandas as pd
+from urllib.error import HTTPError
 from pyvo.dal.sia import SIAService
 from typing import (
     Tuple,
     Optional
 )
 from astropy.utils.data import download_file
+
 
 logger = logging.getLogger(__file__)
 
@@ -137,10 +139,15 @@ def download_cutout(
     path : str
         Location of downloaded cutout.
     """
-    path = download_file(
-        url,
-        **kwargs
-    )
+    try:
+        path = download_file(
+            url,
+            **kwargs
+        )
+    except HTTPError as e:
+        err = ("URL for file not found (SIA service 500 error).")
+        raise FileNotFoundError(err)
+
     if out_file is not None:
         os.makedirs(
             os.path.dirname(out_file),

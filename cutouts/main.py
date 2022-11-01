@@ -140,13 +140,16 @@ def get_cutouts(
         else:
             if not os.path.exists(out_file_i):
                 logger.info(f"Cutout {file_name} has been previously downloaded.")
-                path_i = download_cutout(
-                    url_i,
-                    out_file=out_file_i,
-                    cache=True,
-                    pkgname="cutouts",
-                    timeout=timeout,
-                )
+                try:
+                    path_i = download_cutout(
+                        url_i,
+                        out_file=out_file_i,
+                        cache=True,
+                        pkgname="cutouts",
+                        timeout=timeout,
+                    )
+                except FileNotFoundError:
+                    path_i = None
             else:
                 path_i = out_file_i
 

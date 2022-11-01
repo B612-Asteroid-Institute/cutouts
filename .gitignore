@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Cached downloaded cutouts
+examples/cutouts/*.fits
