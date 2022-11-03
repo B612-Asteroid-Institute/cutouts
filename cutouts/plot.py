@@ -131,13 +131,13 @@ def add_velocity_vector(
         Keyword arguments to pass to ax.arrow.
     """
     #x_center, y_center = wcs.world_to_array_index_values(ra, dec)
-    y_center, x_center = wcs.world_to_pixel_values(ra, dec)
+    x_center, y_center = wcs.world_to_pixel_values(ra, dec)
     x_center = x_center + x_offset
     y_center = y_center + y_offset
 
     dt = 1/24/2
     #x_propagated, y_propagated = wcs.world_to_array_index_values(ra + vra * dt, dec + vdec * dt)
-    y_propagated, x_propagated = wcs.world_to_pixel_values(ra + vra * dt, dec + vdec * dt)
+    x_propagated, y_propagated = wcs.world_to_pixel_values(ra + vra * dt, dec + vdec * dt)
     x_propagated = x_propagated + x_offset
     y_propagated = y_propagated + y_offset
     vx = (x_propagated - x_center) / dt
