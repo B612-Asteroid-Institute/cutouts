@@ -237,8 +237,8 @@ def main():
         mag=mag,
         mag_sigma=mag_sigma,
         exposure_time=exposure_time,
-        cutout_height=75,
-        cutout_width=75,
+        cutout_height_arcsec=20,
+        cutout_width_arcsec=20,
     )
     fig.savefig(os.path.join(args.out_dir, args.out_file), bbox_inches="tight")
 

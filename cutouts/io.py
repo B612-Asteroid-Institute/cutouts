@@ -4,6 +4,7 @@ import logging
 import pandas as pd
 from urllib.error import HTTPError
 from pyvo.dal.sia import SIAService
+from pyvo.dal import SIAResults
 from typing import (
     Tuple,
     Optional
@@ -88,7 +89,13 @@ def find_cutout(
         using this particular SIA Service.
     """
     center = (ra, dec)
-    result = sia_service.search(center, size=(height/3600., width/3600.)).to_table().to_pandas()
+
+    result = sia_service.search(center, size=(height/3600., width/3600.))
+    if isinstance(result, SIAResults):
+        result = pd.DataFrame(result)
+    else:
+        result = result.to_table().to_pandas()
+
     if "mjd_obs" in result.columns:
         mjd_utcs = result["mjd_obs"].values.astype(float)
     else:

@@ -11,6 +11,7 @@ from typing import (
 from astropy.time import Time
 from astropy.io import fits
 from astropy.wcs import WCS
+from astropy.wcs.utils import proj_plane_pixel_scales
 from astropy.visualization import ImageNormalize
 from astropy.visualization import ZScaleInterval
 
@@ -309,6 +310,8 @@ def plot_cutout(
         dec: float,
         vra: float,
         vdec: float,
+        height_arcsec: float = 20,
+        width_arcsec: float = 20,
         crosshair: bool = True,
         crosshair_kwargs: dict = {
             "gap": 8,
@@ -326,12 +329,13 @@ def plot_cutout(
             "head_width": 2,
             "zorder": 10
         },
-        height: int = 115,
-        width: int = 115,
         cmap: matplotlib.cm = CMAP_BONE
     ) -> matplotlib.axes.Axes:
     """
     Plot a single cutout on the given axes.
+
+    Note that when height_arcsec and width_arcsec are converted to pixel sizes, these converted
+    values are rounded up to an integer number of pixels.
 
     Parameters
     ----------
@@ -347,6 +351,10 @@ def plot_cutout(
         Predicted RA-velocity in degrees per day.
     vdec : float
         Predicted Dec in degrees in degrees per day.
+    height_arcsec : float
+        Image height in arcseconds
+    width_arcsec : float
+        Image width in arcseconds
     crosshair : bool, optional
         Add crosshair centered on (RA, Dec).
     crosshair_kwargs : dict
@@ -367,9 +375,11 @@ def plot_cutout(
     image = hdu.data
     hdr = hdu.header
     wcs = WCS(hdr)
-
-    image_centered, x_offset, y_offset = center_image(image, wcs, ra, dec, height=height, width=width)
-
+    pixel_scales = proj_plane_pixel_scales(wcs)
+    # TODO - double check image orientation 
+    height_pix = np.ceil(height_arcsec / pixel_scales[1] / 3600.).astype(int)
+    width_pix = np.ceil(width_arcsec / pixel_scales[0] / 3600.).astype(int)
+    image_centered, x_offset, y_offset = center_image(image, wcs, ra, dec, height=height_pix, width=width_pix)
     ax.imshow(
         image_centered,
         origin="lower",
@@ -421,8 +431,8 @@ def plot_cutouts(
         max_cols: int = 4,
         row_height: float = 2.,
         col_width: float = 2.,
-        cutout_height: int = 75,
-        cutout_width: int = 75,
+        cutout_height_arcsec: float = 20,
+        cutout_width_arcsec: float = 20,
         include_missing: bool = True,
         crosshair: bool = True,
         crosshair_detection_kwargs: dict = {
@@ -490,10 +500,10 @@ def plot_cutouts(
         Height in inches each row should have.
     col_width : float, optional
         Width in inches each column should have.
-    cutout_height : int, optional
-        Desired height of the cutout in pixels.
-    cutout_width : int, optional
-        Desired width of the cutout in pixels.
+    cutout_height_arcsec : float, optional
+        Desired height of the cutout in arcseconds.
+    cutout_width_arcsec : float, optional
+        Desired width of the cutout in arcseconds.
     include_missing : bool, optional
         Include an empty placeholder cutout if the cutout was not found (their paths are None).
     crosshair : bool, optional
@@ -590,7 +600,11 @@ def plot_cutouts(
             if include_missing:
 
                 ax = fig.add_subplot(num_rows, max_cols, j+1)
-                image = np.zeros((cutout_height, cutout_width), dtype=float)
+
+                # TODO - This currently will result in poorly formatted cutout output when the
+                # cutouts requested are rectangular, as any that are missing will not preserve
+                # the requested aspect ratio
+                image = np.zeros((100, 100), dtype=float)
                 ax.imshow(
                     image,
                     origin="lower",
@@ -598,8 +612,8 @@ def plot_cutouts(
                 )
                 ax.axis("off")
                 ax.text(
-                    cutout_height/2,
-                    cutout_width/2,
+                    100/2,
+                    100/2,
                     "No image found",
                     horizontalalignment="center",
                     color="w"
@@ -615,8 +629,8 @@ def plot_cutouts(
                 dec_i,
                 vra_i,
                 vdec_i,
-                height=cutout_height,
-                width=cutout_width,
+                height_arcsec=cutout_height_arcsec,
+                width_arcsec=cutout_width_arcsec,
                 crosshair=crosshair,
                 crosshair_kwargs=crosshair_kwargs_i,
                 velocity_vector=velocity_vector,
