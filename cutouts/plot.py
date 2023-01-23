@@ -55,7 +55,7 @@ def add_crosshair(
         Keyword arguments to pass to ax.hlines and ax.vlines.
     """
     # Get pixel location of RA and Dec
-    x_center, y_center = wcs.world_to_array_index_values(ra, dec)
+    y_center, x_center = wcs.world_to_array_index_values(ra, dec)
     #y_center, x_center = wcs.world_to_pixel_values(ra, dec)
     x_center = x_center + x_offset
     y_center = y_center + y_offset
