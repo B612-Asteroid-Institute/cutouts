@@ -1,6 +1,7 @@
 import os
 import shutil
 import logging
+import requests
 import pandas as pd
 from urllib.error import HTTPError
 from pyvo.dal.sia import SIAService
@@ -114,6 +115,56 @@ def find_cutout(
             )
 
     return cutout_url, result
+
+
+def find_cutout_ztf(
+        ra: float,
+        dec: float,
+        mjd_utc: float,
+        delta_time: float = 1e-8,
+        height: float = 20,
+        width: float = 20,
+        exposure_id: Optional[str] = None,
+    ) -> Tuple[str, pd.DataFrame]:
+    """
+    Find cutout for a given RA, Dec, and MJD [UTC].
+
+    Parameters
+    ----------
+    ra : float
+        Right Ascension in degrees.
+    dec : float
+        Declination in degrees.
+    mjd_utc : float
+        Observation time in MJD [UTC].
+    delta_time: float, optional
+        Match on observation time to within this delta. Delta should
+        be in units of days.
+    height : float, optional
+        Height of the cutout in arcseconds.
+    width : float, optional
+        Width of the cutout in arcseconds.
+    exposure_id: str, optional
+        Exposure ID, if known.
+
+    Returns
+    -------
+    cutout_url : str
+        URL to cutout
+    result : `~pandas.DataFrame`
+        Dataframe with image query results.
+
+    Raises
+    ------
+    FileNotFoundError: If no cutout is found at the given RA, Dec, MJD [UTC]
+        using this particular service.
+    """
+    
+    center = (ra, dec)
+
+
+    return cutout_url, result
+
 
 def download_cutout(
         url: str,

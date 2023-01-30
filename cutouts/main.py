@@ -16,6 +16,7 @@ from pyvo.dal.sia import SIAService
 
 from .io import (
     find_cutout,
+    find_cutout_ztf,
     download_cutout
 )
 from .plot import plot_cutouts
@@ -28,6 +29,7 @@ def get_cutouts(
         times: Time,
         ra: npt.NDArray[np.float64],
         dec: npt.NDArray[np.float64],
+        obscode: str,
         sia_url: str = SIA_URL,
         exposure_id: Optional[str] = None,
         delta_time: float = 1e-8,
@@ -95,24 +97,43 @@ def get_cutouts(
 
     urls = []
     results = []
-    for i, (ra_i, dec_i, mjd_i, exposure_id_i) in enumerate(zip(ra, dec, mjd, exposure_id)):
+    for i, (ra_i, dec_i, mjd_i, exposure_id_i, obscode_i) in enumerate(zip(ra, dec, mjd, exposure_id, obscode)):
 
-        try:
-            cutout_url, results_i = find_cutout(
-                ra_i,
-                dec_i,
-                mjd_i,
-                sia_service,
-                delta_time=delta_time,
-                height=height,
-                width=width,
-                exposure_id=exposure_id_i
-            )
+        if obscode_i == "I41":
+            print("ZTF test succeeded")
+            try:
+                cutout_url, results_i = find_cutout_ztf(
+                    ra_i,
+                    dec_i,
+                    mjd_i,
+                    delta_time=delta_time,
+                    height=height,
+                    width=width,
+                    exposure_id=exposure_id_i
+                )
 
-        except FileNotFoundError as e:
-            logger.warning(f"No cutout found for {mjd_i} MJD [UTC] at (RA, Dec) = ({ra_i}, {dec_i})")
-            cutout_url = None
-            results_i = pd.DataFrame({"access_url" : [None]})
+            except FileNotFoundError as e:
+                logger.warning(f"No cutout found for {mjd_i} MJD [UTC] at (RA, Dec) = ({ra_i}, {dec_i}) in ZTF archive")
+                cutout_url = None
+                results_i = pd.DataFrame({"access_url" : [None]})
+
+        else:
+            try:
+                cutout_url, results_i = find_cutout(
+                    ra_i,
+                    dec_i,
+                    mjd_i,
+                    sia_service,
+                    delta_time=delta_time,
+                    height=height,
+                    width=width,
+                    exposure_id=exposure_id_i
+                )
+
+            except FileNotFoundError as e:
+                logger.warning(f"No cutout found for {mjd_i} MJD [UTC] at (RA, Dec) = ({ra_i}, {dec_i}) in SIA Search")
+                cutout_url = None
+                results_i = pd.DataFrame({"access_url" : [None]})
 
         urls.append(cutout_url)
         results.append(results_i)
@@ -195,6 +216,7 @@ def main():
     dec = observations["pred_dec_deg"].values
     vra = observations["pred_vra_degpday"].values
     vdec = observations["pred_vdec_degpday"].values
+    obscode = observations["obscode"].values
     times = Time(observations["mjd_utc"].values, scale="utc", format="mjd")
 
     if "mag" in observations.columns:
@@ -218,7 +240,7 @@ def main():
         exposure_id = None
 
     cutout_paths, cutout_results = get_cutouts(
-        times, ra, dec,
+        times, ra, dec, obscode, 
         sia_url=args.sia_url,
         exposure_id=exposure_id,
         out_dir=args.out_dir
