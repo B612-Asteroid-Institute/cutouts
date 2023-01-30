@@ -86,6 +86,64 @@ def add_crosshair(
     )
     return
 
+
+#Adds circle around actual object  
+
+def add_circle(
+        ax: matplotlib.axes.Axes,
+        wcs: WCS,
+        obj_ra: float,
+        obj_dec: float,
+        rad: float = 4,
+        x_offset: int = 0,
+        y_offset: int = 0,
+        **kwargs
+    ):
+    """
+    Exercise of changing crosshairs into ring
+    Add a crosshair centered on RA and Dec to the given axes.
+
+    Parameter
+    ---------
+    ax : `~matplotlib.axes.Axes`
+        Matplotlib axes (usually a subplot) on which to add the crosshair.
+    wcs : `~astropy.wcs.wcs.WCS`
+        World Coordinate System (WCS) that maps pixels in an image to RA, Dec.
+    ra : float
+        Predicted RA in degrees.
+    dec : float
+        Predicted Dec in degrees.
+    gap : int
+        Distance from center in pixels to start drawing crosshair reticle bar.
+    length : int
+        Length in pixels of an individual bar reticle.
+    x_offset : int, optional
+        Offset in x-axis pixels from the sky-plane origin of the image (offsets might be non-zero
+        due to image centering, padding, and/or trimming).
+    y_offset : int, optional
+        Offset in y-axis pixels from the sky-plane origin of the image (offsets might be non-zero
+        due to image centering, padding, and/or trimming).
+    **kwargs
+        Keyword arguments to pass to ax.hlines and ax.vlines.
+    """
+    # Get pixel location of RA and Dec
+    y_center, x_center = wcs.world_to_array_index_values(obj_ra, obj_dec)
+    #y_center, x_center = wcs.world_to_pixel_values(ra, dec)
+    x_center = x_center + x_offset
+    y_center = y_center + y_offset
+
+    #Defining center and radius for the plotting circle function 
+    
+    center= (x_center, y_center)
+    
+    ax.add_patch(matplotlib.patches.Circle(center, rad, **kwargs))
+    
+    
+    
+    return
+
+
+
 def add_velocity_vector(
         ax: matplotlib.axes.Axes,
         wcs: WCS,
@@ -307,6 +365,8 @@ def plot_cutout(
         path: str,
         ra: float,
         dec: float,
+        obj_ra: float,
+        obj_dec: float,
         vra: float,
         vdec: float,
         crosshair: bool = True,
@@ -326,6 +386,16 @@ def plot_cutout(
             "head_width": 2,
             "zorder": 10
         },
+
+        circle: bool= True,
+        circle_kwargs: dict = {
+            "rad": 4,
+            "fill": False,
+            "color": "#03fc0f",
+            "alpha": 1.0,
+            "zorder": 0.9
+        },
+
         height: int = 115,
         width: int = 115,
         cmap: matplotlib.cm = CMAP_BONE
@@ -404,6 +474,18 @@ def plot_cutout(
             **velocity_vector_kwargs
         )
 
+    if circle: 
+        add_circle(
+            ax,
+            wcs,
+            obj_ra,
+            obj_dec,
+            x_offset=x_offset,
+            y_offset=y_offset,
+           
+            **circle_kwargs
+        )
+
     return ax
 
 def plot_cutouts(
@@ -411,6 +493,8 @@ def plot_cutouts(
         times: Time,
         ra: npt.NDArray[np.float64],
         dec: npt.NDArray[np.float64],
+        obj_ra: npt.NDArray[np.float64],
+        obj_dec: npt.NDArray[np.float64],
         vra: npt.NDArray[np.float64],
         vdec: npt.NDArray[np.float64],
         filters: Optional[npt.NDArray[str]] = None,
@@ -425,6 +509,8 @@ def plot_cutouts(
         cutout_width: int = 75,
         include_missing: bool = True,
         crosshair: bool = True,
+        circle: bool= True,
+        
         crosshair_detection_kwargs: dict = {
             "gap": 8,
             "length": 8,
@@ -432,9 +518,23 @@ def plot_cutouts(
             "alpha": 1.0,
             "zorder": 9
         },
+        circle_detection_kwargs: dict = {
+            "rad": 4,
+            "fill": False,
+            "color": "#03fc0f",
+            "alpha": 1.0,
+            "zorder": 9
+        },
         crosshair_non_detection_kwargs: dict = {
             "gap": 8,
             "length": 8,
+            "color": "r",
+            "alpha": 1.0,
+            "zorder": 9
+        },
+        circle_non_detection_kwargs: dict = {
+            "rad": 4,
+            "fill": False,
             "color": "r",
             "alpha": 1.0,
             "zorder": 9
@@ -552,7 +652,7 @@ def plot_cutouts(
 
     axs = []
     j = 0 
-    for i, (path_i, ra_i, dec_i, vra_i, vdec_i) in enumerate(zip(paths, ra, dec, vra, vdec)):
+    for i, (path_i, ra_i, dec_i, obj_ra_i, obj_dec_i, vra_i, vdec_i) in enumerate(zip(paths, ra, dec, obj_ra, obj_dec, vra, vdec)):
 
         ax = None
         y = 1.0
@@ -567,11 +667,14 @@ def plot_cutouts(
                 title += f": --.--"
             else:
                 crosshair_kwargs_i = crosshair_detection_kwargs
+                circle_kwargs_i= circle_detection_kwargs
                 title += f": {mag[i]:.2f}"
             y -= 0.03
 
         else:
             crosshair_kwargs_i = crosshair_detection_kwargs
+            circle_kwargs_i= circle_detection_kwargs
+
 
         if include_mag_sigma:
             if np.isnan(mag_sigma[i]):
@@ -613,6 +716,8 @@ def plot_cutouts(
                 path_i,
                 ra_i,
                 dec_i,
+                obj_ra_i,
+                obj_dec_i,
                 vra_i,
                 vdec_i,
                 height=cutout_height,
@@ -620,7 +725,9 @@ def plot_cutouts(
                 crosshair=crosshair,
                 crosshair_kwargs=crosshair_kwargs_i,
                 velocity_vector=velocity_vector,
-                velocity_vector_kwargs=velocity_vector_kwargs
+                velocity_vector_kwargs=velocity_vector_kwargs,
+                circle=circle,
+                circle_kwargs= circle_kwargs_i,
             )
             j += 1
 
