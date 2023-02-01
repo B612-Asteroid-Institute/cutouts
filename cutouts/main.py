@@ -217,6 +217,11 @@ def main():
     else:
         exposure_id = None
 
+    if "exposure_duration" in observations.columns:
+        exposure_time = observations["exposure_duration"].values
+    else:
+        exposure_time = None
+
     cutout_paths, cutout_results = get_cutouts(
         times, ra, dec,
         sia_url=args.sia_url,
