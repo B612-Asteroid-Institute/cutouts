@@ -154,8 +154,14 @@ def get_cutouts(
                 path_i = out_file_i
 
         paths.append(path_i)
+    
+    if "exptime" in results.keys():
+        exptime = results["exptime"]
+        print(exptime)
+    else:
+        exptime = None
 
-    return paths, results
+    return paths, results, exptime
 
 def main():
 
@@ -222,16 +228,21 @@ def main():
     else:
         exposure_time = None
 
-    cutout_paths, cutout_results = get_cutouts(
+    cutout_paths, cutout_results, exptime = get_cutouts(
         times, ra, dec,
         sia_url=args.sia_url,
         exposure_id=exposure_id,
         out_dir=args.out_dir
     )
-    if "exptime" in cutout_results.keys():
-        exposure_time = cutout_results["exptime"].values.astype(int)
-    else:
-        exposure_time = []
+
+    print(exposure_time)
+    print(exptime)
+
+    if exposure_time is None:
+        exposure_time = exptime
+
+    if exptime != exposure_time and exptime is not None:
+        logger.warning(f"Observation exposure time {exposure_time} and cutout exposure time {exptime} do not match.")
 
     # Plot cutouts
     fig, ax = plot_cutouts(
