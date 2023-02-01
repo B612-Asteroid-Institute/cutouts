@@ -30,6 +30,7 @@ def get_cutouts(
         dec: npt.NDArray[np.float64],
         sia_url: str = SIA_URL,
         exposure_id: Optional[str] = None,
+        exposure_time: Optional[float] = None,
         delta_time: float = 1e-8,
         height: float = 20.,
         width: float = 20.,
@@ -95,7 +96,7 @@ def get_cutouts(
 
     urls = []
     results = []
-    for i, (ra_i, dec_i, mjd_i, exposure_id_i) in enumerate(zip(ra, dec, mjd, exposure_id)):
+    for i, (ra_i, dec_i, mjd_i, exposure_id_i, exposure_time_i) in enumerate(zip(ra, dec, mjd, exposure_id, exposure_time)):
 
         try:
             cutout_url, results_i = find_cutout(
@@ -107,6 +108,7 @@ def get_cutouts(
                 height=height,
                 width=width,
                 exposure_id=exposure_id_i
+                exposure_time=exposure_time_i
             )
 
         except FileNotFoundError as e:
@@ -234,9 +236,6 @@ def main():
         exposure_id=exposure_id,
         out_dir=args.out_dir
     )
-
-    print(exposure_time)
-    print(exptime)
 
     if exposure_time is None:
         exposure_time = exptime

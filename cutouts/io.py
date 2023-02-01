@@ -51,6 +51,7 @@ def find_cutout(
         height: float = 20,
         width: float = 20,
         exposure_id: Optional[str] = None,
+        exposure_time: Optional[float] = None,
     ) -> Tuple[str, pd.DataFrame]:
     """
     Find cutout for a given RA, Dec, and MJD [UTC].
@@ -74,6 +75,7 @@ def find_cutout(
         Width of the cutout in arcseconds.
     exposure_id: str, optional
         Exposure ID, if known.
+    exposure_time: float, optional
 
     Returns
     -------
@@ -112,6 +114,22 @@ def find_cutout(
                 f"Exposure ID ({url_exposure_id}) found via search on RA, Dec," \
                 f"and MJD [UTC] does not match the given exposure ID ({exposure_id})."
             )
+
+    if "exptime" in result.columns:
+        exptime = result["exptime"].values.astype(float)
+    else:
+        exptime = None
+
+    if exposure_time is None:
+        exposure_time = exptime
+
+
+        
+        
+        print(exptime)
+    else:
+        exptime = None
+
 
     return cutout_url, result
 
