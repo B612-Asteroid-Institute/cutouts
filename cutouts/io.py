@@ -1,4 +1,5 @@
 import os
+import io
 import shutil
 import logging
 import requests
@@ -160,8 +161,42 @@ def find_cutout_ztf(
         using this particular service.
     """
     
-    center = (ra, dec)
+    ZTF_URL_BASE = "https://irsa.ipac.caltech.edu/ibe/search/ztf/products/sci"
 
+    width_deg = width / 3600
+    height_deg = height / 3600
+
+    ztf_url = f"{ZTF_URL_BASE}?POS={ra},{dec}&SIZE={width_deg},{height_deg}&ct=csv"
+    print(ztf_url)
+    #result = sia_service.search(center, size=(height/3600., width/3600.)).to_table().to_pandas()
+    response = requests.get(io.StringIO(ztf_url))
+
+    result = pd.read_csv(response.text)
+    print(result.columns)
+
+    if "mjd_obs" in result.columns:
+        mjd_utcs = result["mjd_obs"].values.astype(float)
+    else:
+        mjd_utcs = result["mjd_utc_obs"].values.astype(float)
+
+    logger.info(f"ZTF query returned table with {len(result)} row.")
+    result = result[(mjd_utcs <= mjd_utc + delta_time) & (mjd_utcs >= mjd_utc - delta_time) & (result["prodtype"] == "image")]
+    result.reset_index(inplace=True, drop=True)
+
+    logger.info(f"Filtering on {mjd_utc} +- {delta_time} MJD [UTC] reduces table to {len(result)} row(s).")
+    if len(result) == 0:
+        err = ("No cutout found.")
+        raise FileNotFoundError(err)
+
+    cutout_url = result["access_url"].values[0]
+    if exposure_id is not None:
+        url_exposure_id = exposure_id_from_url(cutout_url)
+
+        if exposure_id != url_exposure_id:
+            logger.warning(
+                f"Exposure ID ({url_exposure_id}) found via search on RA, Dec," \
+                f"and MJD [UTC] does not match the given exposure ID ({exposure_id})."
+            )
 
     return cutout_url, result
 
