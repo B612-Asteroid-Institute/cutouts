@@ -241,9 +241,6 @@ def main():
     if exposure_time is None:
         exposure_time = exptime
 
-    if exptime != exposure_time and exptime is not None:
-        logger.warning(f"Observation exposure time {exposure_time} and cutout exposure time {exptime} do not match.")
-
     # Plot cutouts
     fig, ax = plot_cutouts(
         cutout_paths,
