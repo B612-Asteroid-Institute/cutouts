@@ -244,10 +244,8 @@ def main():
         exposure_id=exposure_id,
         out_dir=args.out_dir
     )
-    if "exptime" in cutout_results.keys():
-        exposure_time = cutout_results["exptime"].values.astype(int)
-    else:
-        exposure_time = []
+
+    exposure_time = cutout_results["exptime"].values.astype(int)
 
     # Plot cutouts
     fig, ax = plot_cutouts(
