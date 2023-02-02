@@ -100,7 +100,6 @@ def get_cutouts(
     for i, (ra_i, dec_i, mjd_i, exposure_id_i, obscode_i) in enumerate(zip(ra, dec, mjd, exposure_id, obscode)):
 
         if obscode_i == "I41":
-            print("ZTF test succeeded")
             try:
                 cutout_url, results_i = find_cutout_ztf(
                     ra_i,
