@@ -83,6 +83,8 @@ def find_cutout(
         URL to cutout
     result : `~pandas.DataFrame`
         Dataframe with SIA query results.
+    exposure_time : float
+        exposure time in seconds
 
     Raises
     ------
@@ -116,22 +118,16 @@ def find_cutout(
             )
 
     if "exptime" in result.columns:
-        exptime = result["exptime"].values.astype(float)
-    else:
-        exptime = None
+        exposure_time_cutout = float(result["exptime"].values[0])
+        if exposure_time is None:
+            exposure_time = exposure_time_cutout
+        elif exposure_time != exposure_time_cutout:
+            logger.warning(
+                f"Exposure time ({exposure_time_cutout}) found via search on RA, Dec," \
+                f"and MJD [UTC] does not match the given exposure time ({exposure_time})."
+            )
 
-    if exposure_time is None:
-        exposure_time = exptime
-
-
-        
-        
-        print(exptime)
-    else:
-        exptime = None
-
-
-    return cutout_url, result
+    return cutout_url, result, exposure_time
 
 def download_cutout(
         url: str,
