@@ -204,7 +204,9 @@ def main():
     observations = pd.read_csv(args.observations, index_col=False)
 
     ra = observations["pred_ra_deg"].values
+    obj_ra= observations['ra_deg'].values
     dec = observations["pred_dec_deg"].values
+    obj_dec = observations["dec_deg"].values
     vra = observations["pred_vra_degpday"].values
     vdec = observations["pred_vdec_degpday"].values
     times = Time(observations["mjd_utc"].values, scale="utc", format="mjd")
@@ -248,6 +250,8 @@ def main():
         times,
         ra,
         dec,
+        obj_ra,
+        obj_dec,
         vra,
         vdec,
         filters=filters,
