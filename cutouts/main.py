@@ -30,6 +30,7 @@ def get_cutouts(
         dec: npt.NDArray[np.float64],
         sia_url: str = SIA_URL,
         exposure_id: Optional[str] = None,
+        exposure_time: Optional[float] = None,
         delta_time: float = 1e-8,
         height: float = 20.,
         width: float = 20.,
@@ -74,6 +75,9 @@ def get_cutouts(
         position and time then None instead.
     results : `~pandas.DataFrame`
         DataFrame containing SIA search results for each cutout.
+    exposure_times: `~numpy.ndarray` (N)
+        Exposure times in seconds
+
 
     Raises
     ------
@@ -91,14 +95,18 @@ def get_cutouts(
     if not isinstance(exposure_id, (List, np.ndarray)):
         exposure_id = [None for i in range(len(ra))]
 
+    if not isinstance(exposure_time, (List, np.ndarray)):
+        exposure_time = [None for i in range(len(ra))]
+
     mjd = times.utc.mjd
 
     urls = []
     results = []
-    for i, (ra_i, dec_i, mjd_i, exposure_id_i) in enumerate(zip(ra, dec, mjd, exposure_id)):
+    exposure_times = []
+    for i, (ra_i, dec_i, mjd_i, exposure_id_i, exposure_time_i) in enumerate(zip(ra, dec, mjd, exposure_id, exposure_time)):
 
         try:
-            cutout_url, results_i = find_cutout(
+            cutout_url, results_i, exptime_i = find_cutout(
                 ra_i,
                 dec_i,
                 mjd_i,
@@ -106,7 +114,8 @@ def get_cutouts(
                 delta_time=delta_time,
                 height=height,
                 width=width,
-                exposure_id=exposure_id_i
+                exposure_id=exposure_id_i,
+                exposure_time=exposure_time_i
             )
 
         except FileNotFoundError as e:
@@ -116,11 +125,14 @@ def get_cutouts(
 
         urls.append(cutout_url)
         results.append(results_i)
+        exposure_times.append(exptime_i)
 
     results = pd.concat(
         results,
         ignore_index=True
     )
+
+    exposure_times = np.array(exposure_times)
 
     paths = []
     for i, (ra_i, dec_i, mjd_i, exposure_id_i, url_i) in enumerate(zip(ra, dec, mjd, exposure_id, urls)):
@@ -155,7 +167,7 @@ def get_cutouts(
 
         paths.append(path_i)
 
-    return paths, results
+    return paths, results, exposure_times
 
 def main():
 
@@ -217,13 +229,18 @@ def main():
     else:
         exposure_id = None
 
-    cutout_paths, cutout_results = get_cutouts(
+    if "exposure_duration" in observations.columns:
+        exposure_time = observations["exposure_duration"].values
+    else:
+        exposure_time = None
+
+    cutout_paths, cutout_results, exposure_times = get_cutouts(
         times, ra, dec,
         sia_url=args.sia_url,
+        exposure_time=exposure_time,
         exposure_id=exposure_id,
         out_dir=args.out_dir
     )
-    exposure_time = cutout_results["exptime"].values.astype(int)
 
     # Plot cutouts
     fig, ax = plot_cutouts(
@@ -236,7 +253,7 @@ def main():
         filters=filters,
         mag=mag,
         mag_sigma=mag_sigma,
-        exposure_time=exposure_time,
+        exposure_time=exposure_times,
         cutout_height_arcsec=20,
         cutout_width_arcsec=20,
     )

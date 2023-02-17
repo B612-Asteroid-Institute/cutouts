@@ -52,6 +52,7 @@ def find_cutout(
         height: float = 20,
         width: float = 20,
         exposure_id: Optional[str] = None,
+        exposure_time: Optional[float] = None,
     ) -> Tuple[str, pd.DataFrame]:
     """
     Find cutout for a given RA, Dec, and MJD [UTC].
@@ -75,6 +76,7 @@ def find_cutout(
         Width of the cutout in arcseconds.
     exposure_id: str, optional
         Exposure ID, if known.
+    exposure_time: float, optional
 
     Returns
     -------
@@ -82,6 +84,8 @@ def find_cutout(
         URL to cutout
     result : `~pandas.DataFrame`
         Dataframe with SIA query results.
+    exposure_time : float
+        exposure time in seconds
 
     Raises
     ------
@@ -120,7 +124,17 @@ def find_cutout(
                 f"and MJD [UTC] does not match the given exposure ID ({exposure_id})."
             )
 
-    return cutout_url, result
+    if "exptime" in result.columns:
+        exposure_time_cutout = float(result["exptime"].values[0])
+        if exposure_time is None:
+            exposure_time = exposure_time_cutout
+        elif exposure_time != exposure_time_cutout:
+            logger.warning(
+                f"Exposure time ({exposure_time_cutout}) found via search on RA, Dec," \
+                f"and MJD [UTC] does not match the given exposure time ({exposure_time})."
+            )
+
+    return cutout_url, result, exposure_time
 
 def download_cutout(
         url: str,
