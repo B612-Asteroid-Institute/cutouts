@@ -375,10 +375,10 @@ def plot_cutout(
     image = hdu.data
     hdr = hdu.header
     wcs = WCS(hdr)
-    pixel_scales = proj_plane_pixel_scales(wcs)
+    width_pixel_scale, height_pixel_scale = proj_plane_pixel_scales(wcs)
     # TODO - double check image orientation 
-    height_pix = np.ceil(height_arcsec / pixel_scales[1] / 3600.).astype(int)
-    width_pix = np.ceil(width_arcsec / pixel_scales[0] / 3600.).astype(int)
+    height_pix = np.ceil(height_arcsec / height_pixel_scale / 3600.).astype(int)
+    width_pix = np.ceil(width_arcsec / width_pixel_scale / 3600.).astype(int)
     image_centered, x_offset, y_offset = center_image(image, wcs, ra, dec, height=height_pix, width=width_pix)
     ax.imshow(
         image_centered,

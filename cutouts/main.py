@@ -12,7 +12,7 @@ from typing import (
     Union,
     Tuple
 )
-from pyvo.dal.sia import SIAService
+from .sia import SIAHandler
 
 from .io import (
     find_cutout,
@@ -84,7 +84,7 @@ def get_cutouts(
     ValueError: If times is not an `~astropy.Time` object.
     """
     # Connect to Simple Image Access catalog
-    sia_service = SIAService(sia_url)
+    sia_handler = SIAHandler(sia_url)
 
     if not isinstance(times, Time):
         err = (
@@ -110,7 +110,7 @@ def get_cutouts(
                 ra_i,
                 dec_i,
                 mjd_i,
-                sia_service,
+                sia_handler,
                 delta_time=delta_time,
                 height=height,
                 width=width,

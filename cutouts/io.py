@@ -1,24 +1,22 @@
+import logging
 import os
 import shutil
-import logging
-import pandas as pd
+from typing import Optional, Tuple
 from urllib.error import HTTPError
-from pyvo.dal.sia import SIAService
-from pyvo.dal import SIAResults
-from typing import (
-    Tuple,
-    Optional
-)
+
+import pandas as pd
 from astropy.utils.data import download_file
 
+from .sia import SIAHandler
 
 logger = logging.getLogger(__file__)
+
 
 def exposure_id_from_url(
         url: str,
         preamble: str = "siaRef=",
         postamble: str = ".fits.fz"
-    ) -> str:
+) -> str:
     """
     Attempt to determine the exposure ID from a cutout URL.
 
@@ -47,7 +45,7 @@ def find_cutout(
         ra: float,
         dec: float,
         mjd_utc: float,
-        sia_service: SIAService,
+        sia_handler: SIAHandler,
         delta_time: float = 1e-8,
         height: float = 20,
         width: float = 20,
@@ -65,8 +63,8 @@ def find_cutout(
         Declination in degrees.
     mjd_utc : float
         Observation time in MJD [UTC].
-    sia_service : `~pyvo.dal.sia.SIAService`
-        Simple Image Access (SIA) service to query for cutout.
+    sia_handler : SIAHandler
+        SIAHandler instance
     delta_time: float, optional
         Match on observation time to within this delta. Delta should
         be in units of days.
@@ -92,21 +90,14 @@ def find_cutout(
     FileNotFoundError: If no cutout is found at the given RA, Dec, MJD [UTC]
         using this particular SIA Service.
     """
-    center = (ra, dec)
-
-    result = sia_service.search(center, size=(height/3600., width/3600.))
-    if isinstance(result, SIAResults):
-        result = pd.DataFrame(result)
-    else:
-        result = result.to_table().to_pandas()
-
+    result = sia_handler.search(ra, dec, height, width)
     if "mjd_obs" in result.columns:
         mjd_utcs = result["mjd_obs"].values.astype(float)
     else:
         mjd_utcs = result["mjd_utc_obs"].values.astype(float)
 
     logger.info(f"SIA query returned table with {len(result)} row.")
-    result = result[(mjd_utcs <= mjd_utc + delta_time) & (mjd_utcs >= mjd_utc - delta_time) & (result["prodtype"] == "image")]
+    result = result[(mjd_utcs <= mjd_utc + delta_time) & (mjd_utcs >= mjd_utc - delta_time)]
     result.reset_index(inplace=True, drop=True)
 
     logger.info(f"Filtering on {mjd_utc} +- {delta_time} MJD [UTC] reduces table to {len(result)} row(s).")
@@ -140,7 +131,7 @@ def download_cutout(
         url: str,
         out_file: Optional[str] = None,
         **kwargs
-    ) -> str:
+) -> str:
     """
     Download cutout located at url. This function
     uses `~astropy.utils.data.download_file`.
