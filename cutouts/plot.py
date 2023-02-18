@@ -23,8 +23,8 @@ def add_crosshair(
         wcs: WCS,
         ra: float,
         dec: float,
-        gap: int = 8,
-        length: int = 8,
+        gap: float = 2,
+        length: int = 2,
         x_offset: int = 0,
         y_offset: int = 0,
         **kwargs
@@ -43,9 +43,9 @@ def add_crosshair(
     dec : float
         Predicted Dec in degrees.
     gap : int
-        Distance from center in pixels to start drawing crosshair reticle bar.
+        Distance from center in arcseconds to start drawing crosshair reticle bar.
     length : int
-        Length in pixels of an individual bar reticle.
+        Length in arcseconds of an individual bar reticle.
     x_offset : int, optional
         Offset in x-axis pixels from the sky-plane origin of the image (offsets might be non-zero
         due to image centering, padding, and/or trimming).
@@ -57,32 +57,37 @@ def add_crosshair(
     """
     # Get pixel location of RA and Dec
     y_center, x_center = wcs.world_to_array_index_values(ra, dec)
-    #y_center, x_center = wcs.world_to_pixel_values(ra, dec)
+    
     x_center = x_center + x_offset
     y_center = y_center + y_offset
 
+    width_pixel_scale, height_pixel_scale = proj_plane_pixel_scales(wcs)
+
+    gap_scaled = (gap / 3600.) / width_pixel_scale
+    length_scaled = (length / 3600.) / width_pixel_scale
+
     ax.vlines(
         x_center,
-        y_center + gap,
-        y_center + gap + length,
+        y_center + gap_scaled,
+        y_center + gap_scaled + length_scaled,
         **kwargs
     )
     ax.vlines(
         x_center,
-        y_center - gap,
-        y_center - gap - length,
+        y_center - gap_scaled,
+        y_center - gap_scaled - length_scaled,
         **kwargs
     )
     ax.hlines(
         y_center,
-        x_center + gap,
-        x_center + gap + length,
+        x_center + gap_scaled,
+        x_center + gap_scaled + length_scaled,
         **kwargs
     )
     ax.hlines(
         y_center,
-        x_center - gap,
-        x_center - gap - length,
+        x_center - gap_scaled,
+        x_center - gap_scaled - length_scaled,
         **kwargs
     )
     return
@@ -119,9 +124,9 @@ def add_velocity_vector(
     vdec : float
         Predicted Dec in degrees in degrees per day.
     gap : int
-        Distance from center in pixels to start drawing velocity vector.
+        Distance from center in arcseconds to start drawing velocity vector.
     length : int
-        Length in pixels of velocity vector.
+        Length in arcseconds of velocity vector.
     x_offset : int, optional
         Offset in x-axis pixels from the sky-plane origin of the image (offsets might be non-zero
         due to image centering and padding, and/or trimming).
@@ -136,6 +141,11 @@ def add_velocity_vector(
     x_center = x_center + x_offset
     y_center = y_center + y_offset
 
+    width_pixel_scale, height_pixel_scale = proj_plane_pixel_scales(wcs)
+
+    length_scaled = (length / 3600.) / width_pixel_scale
+    gap_scaled = (gap / 3600.) / width_pixel_scale
+
     dt = 1/24/2
     #x_propagated, y_propagated = wcs.world_to_array_index_values(ra + vra * dt, dec + vdec * dt)
     x_propagated, y_propagated = wcs.world_to_pixel_values(ra + vra * dt, dec + vdec * dt)
@@ -148,10 +158,10 @@ def add_velocity_vector(
     vy_hat = vy / np.sqrt(vx**2 + vy**2)
 
     ax.arrow(
-        x_center + gap*vx_hat,
-        y_center + gap*vy_hat,
-        length*vx_hat,
-        length*vy_hat,
+        x_center + gap_scaled*vx_hat,
+        y_center + gap_scaled*vy_hat,
+        length_scaled*vx_hat,
+        length_scaled*vy_hat,
         length_includes_head=True,
         **kwargs
     )
@@ -314,16 +324,16 @@ def plot_cutout(
         width_arcsec: float = 20,
         crosshair: bool = True,
         crosshair_kwargs: dict = {
-            "gap": 8,
-            "length": 8,
+            "gap": 2,
+            "length": 2,
             "color": "r",
             "alpha": 0.9,
             "zorder": 9
         },
         velocity_vector: bool = True,
         velocity_vector_kwargs: dict = {
-            "gap": 8,
-            "length": 8,
+            "gap": 2,
+            "length": 2,
             "color": "#34ebcd",
             "width": 0.2,
             "head_width": 2,
@@ -436,23 +446,23 @@ def plot_cutouts(
         include_missing: bool = True,
         crosshair: bool = True,
         crosshair_detection_kwargs: dict = {
-            "gap": 8,
-            "length": 8,
+            "gap": 2,
+            "length": 2,
             "color": "#03fc0f",
             "alpha": 1.0,
             "zorder": 9
         },
         crosshair_non_detection_kwargs: dict = {
-            "gap": 8,
-            "length": 8,
+            "gap": 2,
+            "length": 2,
             "color": "r",
             "alpha": 1.0,
             "zorder": 9
         },
         velocity_vector: bool = True,
         velocity_vector_kwargs: dict = {
-            "gap": 8,
-            "length": 8,
+            "gap": 2,
+            "length": 2,
             "color": "#34ebcd",
             "width": 0.2,
             "head_width": 2,
