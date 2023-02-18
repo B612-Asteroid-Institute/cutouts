@@ -605,6 +605,10 @@ def plot_cutouts(
             else:
                 title += f", $\Delta$t: {exposure_time[i]:.0f}s"
 
+        if crosshair:
+            crosshair_size = crosshair_kwargs_i["length"]*2.0+crosshair_kwargs_i["gap"]
+            title += f", Xhair width: {crosshair_size}\""
+
         if path_i is None:
 
             if include_missing:
