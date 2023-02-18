@@ -42,9 +42,9 @@ def add_crosshair(
         Predicted RA in degrees.
     dec : float
         Predicted Dec in degrees.
-    gap : int
+    gap : float
         Distance from center in arcseconds to start drawing crosshair reticle bar.
-    length : int
+    length : float
         Length in arcseconds of an individual bar reticle.
     x_offset : int, optional
         Offset in x-axis pixels from the sky-plane origin of the image (offsets might be non-zero
@@ -99,8 +99,8 @@ def add_velocity_vector(
         dec: float,
         vra: float,
         vdec: float,
-        gap: int = 8,
-        length: int = 8,
+        gap: float = 8,
+        length: float = 8,
         x_offset: int = 0,
         y_offset: int = 0,
         **kwargs
@@ -123,9 +123,9 @@ def add_velocity_vector(
         Predicted RA-velocity in degrees per day.
     vdec : float
         Predicted Dec in degrees in degrees per day.
-    gap : int
+    gap : float
         Distance from center in arcseconds to start drawing velocity vector.
-    length : int
+    length : float
         Length in arcseconds of velocity vector.
     x_offset : int, optional
         Offset in x-axis pixels from the sky-plane origin of the image (offsets might be non-zero
