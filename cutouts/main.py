@@ -106,7 +106,7 @@ def get_cutouts(
     results = []
 
     exposure_times = []
-    for i, (ra_i, dec_i, mjd_i, exposure_id_i, exposure_time_i) in enumerate(zip(ra, dec, mjd, exposure_id, exposure_time)):
+    for i, (ra_i, dec_i, mjd_i, exposure_id_i, exposure_time_i, obscode_i) in enumerate(zip(ra, dec, mjd, exposure_id, exposure_time, obscode)):
 
         if obscode_i == "I41":
             try:
