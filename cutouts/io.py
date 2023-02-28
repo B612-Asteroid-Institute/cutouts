@@ -140,6 +140,7 @@ def find_cutout_ztf(
         height: float = 20,
         width: float = 20,
         exposure_id: Optional[str] = None,
+        exposure_time: Optional[float] = None,
     ) -> Tuple[str, pd.DataFrame]:
     """
     Find cutout for a given RA, Dec, and MJD [UTC].
@@ -196,7 +197,7 @@ def find_cutout_ztf(
         err = ("No cutout found.")
         raise FileNotFoundError(err)
 
-    #Assign values based on the iamge metadata to form the url 
+    #Assign values based on the image metadata to form the url 
     filefracday=str(result["filefracday"].values[0])
     year = str(filefracday)[:4]
     monthday = str(filefracday)[4:8]
@@ -210,7 +211,7 @@ def find_cutout_ztf(
     image_url = 'https://irsa.ipac.caltech.edu/ibe/data/ztf/products/sci/'+year+'/'+monthday+'/'+fracday+'/ztf_'+filefracday+'_'+paddedfield+'_'+filtercode+'_c'+paddedccdid+'_'+imgtypecode+'_q'+qid+'_sciimg.fits'
     cutout_url = f'{image_url}?center={ra},{dec}&size={height},{width}arcsec&gzip=false'
 
-    return cutout_url, result
+    return cutout_url, result, exposure_time
 
 
 def download_cutout(
