@@ -1,6 +1,8 @@
 import os
+import io
 import shutil
 import logging
+import requests
 import pandas as pd
 from urllib.error import HTTPError
 from pyvo.dal.sia import SIAService
@@ -128,6 +130,89 @@ def find_cutout(
             )
 
     return cutout_url, result, exposure_time
+
+
+def find_cutout_ztf(
+        ra: float,
+        dec: float,
+        mjd_utc: float,
+        delta_time: float = 1e-8,
+        height: float = 20,
+        width: float = 20,
+        exposure_id: Optional[str] = None,
+        exposure_time: Optional[float] = None,
+    ) -> Tuple[str, pd.DataFrame]:
+    """
+    Find cutout for a given RA, Dec, and MJD [UTC].
+
+    Parameters
+    ----------
+    ra : float
+        Right Ascension in degrees.
+    dec : float
+        Declination in degrees.
+    mjd_utc : float
+        Observation time in MJD [UTC].
+    delta_time: float, optional
+        Match on observation time to within this delta. Delta should
+        be in units of days.
+    height : float, optional
+        Height of the cutout in arcseconds.
+    width : float, optional
+        Width of the cutout in arcseconds.
+    exposure_id: str, optional
+        Exposure ID, if known.
+
+    Returns
+    -------
+    cutout_url : str
+        URL to cutout
+    result : `~pandas.DataFrame`
+        Dataframe with image query results.
+
+    Raises
+    ------
+    FileNotFoundError: If no cutout is found at the given RA, Dec, MJD [UTC]
+        using this particular service.
+    """
+    
+    ZTF_URL_BASE = "https://irsa.ipac.caltech.edu/ibe/search/ztf/products/sci"
+
+    width_deg = width / 3600
+    height_deg = height / 3600
+
+    search_url = f"{ZTF_URL_BASE}?POS={ra},{dec}&SIZE={width_deg},{height_deg}&ct=csv"
+    response = requests.get(search_url)
+
+    result = pd.read_csv(io.StringIO(response.text))
+
+    mjd_utcs = result["obsjd"].values.astype(float) - 2400000.5
+
+    logger.info(f"ZTF query returned table with {len(result)} row.")
+    result = result[(mjd_utcs <= mjd_utc + delta_time) & (mjd_utcs >= mjd_utc - delta_time)]
+    result.reset_index(inplace=True, drop=True)
+
+    logger.info(f"Filtering on {mjd_utc} +- {delta_time} MJD [UTC] reduces table to {len(result)} row(s).")
+    if len(result) == 0:
+        err = ("No cutout found.")
+        raise FileNotFoundError(err)
+
+    #Assign values based on the image metadata to form the url 
+    filefracday=str(result["filefracday"].values[0])
+    year = str(filefracday)[:4]
+    monthday = str(filefracday)[4:8]
+    fracday = str(filefracday)[8:]
+    paddedfield=str(result["field"].values[0]).zfill(6)
+    paddedccdid=str(result["ccdid"].values[0]).zfill(2)
+    imgtypecode=str(result["imgtypecode"].values[0])
+    filtercode=str(result["filtercode"].values[0])
+    qid=str(result["qid"].values[0])
+
+    image_url = 'https://irsa.ipac.caltech.edu/ibe/data/ztf/products/sci/'+year+'/'+monthday+'/'+fracday+'/ztf_'+filefracday+'_'+paddedfield+'_'+filtercode+'_c'+paddedccdid+'_'+imgtypecode+'_q'+qid+'_sciimg.fits'
+    cutout_url = f'{image_url}?center={ra},{dec}&size={height},{width}arcsec&gzip=false'
+
+    return cutout_url, result, exposure_time
+
 
 def download_cutout(
         url: str,
