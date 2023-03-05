@@ -130,3 +130,6 @@ dmypy.json
 
 # Cached downloaded cutouts
 examples/cutouts/*.fits
+
+# vscode
+.vscode/
