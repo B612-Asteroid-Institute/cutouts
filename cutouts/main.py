@@ -1,26 +1,6 @@
-import os
-<<<<<<< Updated upstream
-import logging
 import argparse
-import numpy as np
-import numpy.typing as npt
-import pandas as pd
-
-from astropy.time import Time
-from typing import (
-    List,
-    Optional,
-    Union,
-    Tuple
-)
-from pyvo.dal.sia import SIAService
-
-from .io import (
-    find_cutout,
-    find_cutout_ztf,
-    download_cutout
-)
-=======
+import logging
+import os
 import pathlib
 from typing import Any, Iterable, List, Optional, Tuple, Union, cast
 
@@ -34,7 +14,6 @@ from pyvo.dal.sia import SIAService
 
 from .io import download_cutout, find_cutout
 from .io.types import CutoutRequest, CutoutRequestSchema
->>>>>>> Stashed changes
 from .plot import plot_cutouts
 
 logger = logging.getLogger("cutouts")
@@ -94,12 +73,6 @@ def get_cutouts(
     ------
     ValueError: If times is not an `~astropy.Time` object.
     """
-<<<<<<< Updated upstream
-    # Connect to Simple Image Access catalog
-    sia_service = SIAService(sia_url)
-=======
-    # TODO: Type checking of input request
->>>>>>> Stashed changes
 
     # Get urls and metadata for each cutout
 
@@ -230,23 +203,8 @@ def main():
 
     # Plot cutouts
     fig, ax = plot_cutouts(
-<<<<<<< Updated upstream
-        cutout_paths,
-        times,
-        ra,
-        dec,
-        vra,
-        vdec,
-        filters=filters,
-        mag=mag,
-        mag_sigma=mag_sigma,
-        exposure_time=exposure_times,
-        cutout_height=75,
-        cutout_width=75,
-=======
         plot_candidates,
         cutout_height_arcsec=20,
         cutout_width_arcsec=20,
->>>>>>> Stashed changes
     )
     fig.savefig(os.path.join(args.out_dir, args.out_file), bbox_inches="tight")
