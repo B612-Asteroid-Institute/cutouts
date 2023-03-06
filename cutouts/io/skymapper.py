@@ -46,7 +46,7 @@ def find_cutout_skymapper(
             Observatory code.
         exposure_start_mjd
             Exposure modified Julian date in UTC.
-        delta_time : float
+        delta_time : floatp
             Time window in days.
         ra_deg : float
             Right ascension in degrees of the observation
@@ -55,19 +55,25 @@ def find_cutout_skymapper(
         height_arcsec : float
             Height of the cutout in arcseconds.
         width_arcsec : float
+            Width of the cutout in arcseconds.
         exposure_id : str
-            Exposure ID.
+            Requested exposure ID.
         exposure_duration : float
-            Exposure duration in seconds.
+            Expected exposure duration in seconds.
 
     result : `~pandas.DataFrame`
         filter : str
             Filter name.
         cutout_url : str
             URL of remote cutout.
-            Width of the cutout in arcseconds.
         exposure_start : float
             Exposure start time in MJD [UTC].
+        exposure_id : str
+            Exposure ID.
+        exposure_duration : float
+            Exposure duration in seconds.
+
+
 
 
 

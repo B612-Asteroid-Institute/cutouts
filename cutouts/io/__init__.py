@@ -9,7 +9,7 @@ from astropy.utils.data import download_file
 
 from .nsc_dr2 import find_cutout_nsc_dr2
 from .skymapper import find_cutout_skymapper
-from .types import CutoutRequest
+from .types import CutoutRequest, CutoutResult
 from .ztf import find_cutout_ztf
 
 logger = logging.getLogger(__file__)
@@ -71,7 +71,7 @@ def verify_exposure_duration(
         logger.warning(err)
 
 
-def find_cutout(cutout_request: CutoutRequest) -> dict:
+def find_cutout(cutout_request: CutoutRequest) -> CutoutResult:
     """
     High level function to find a cutout at a given Observatory, RA, Dec, and MJD [UTC].
 
@@ -102,7 +102,7 @@ def find_cutout(cutout_request: CutoutRequest) -> dict:
         The best matched result from the query
         url: str
             URL of remote cutout.
-        exposure_start: float
+        exposure_start_mjd: float
             Exposure start time in MJD [UTC].
         exposure_id: str
             Exposure ID.
@@ -153,6 +153,8 @@ def find_cutout(cutout_request: CutoutRequest) -> dict:
                 "Check that the exposure duration is correct."
             )
             raise ValueError(err)
+
+    result = CutoutResult(**result)
 
     return result
 

@@ -43,3 +43,18 @@ class CutoutRequest(BaseModel):
     height_arcsec: float
     width_arcsec: float
     delta_time: float
+
+
+class CutoutResult(BaseModel):
+    """
+    Reference to a single cutout result
+    """
+
+    request_id: Optional[str]
+    url: str
+    exposure_start_mjd: float
+    exposure_duration: float
+    ra_deg: float
+    dec_deg: float
+    height_arcsec: float
+    width_arcsec: float
