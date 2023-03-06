@@ -192,7 +192,7 @@ def get_cutouts(
 
         paths.append(path_i)
 
-    return paths, results, exposure_times
+    return paths, results, exposure_times, urls
 
 def main():
 
