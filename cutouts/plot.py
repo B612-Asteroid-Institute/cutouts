@@ -514,7 +514,7 @@ def plot_cutouts(
 
     num_rows = np.ceil(num_obs / max_cols).astype(int)
 
-    paths = cutouts["file_path"].values
+    paths = cutouts["cutout_image_path"].values
     ra = cutouts["ra"].values
     dec = cutouts["dec"].values
     vra = cutouts["vra"].values
@@ -611,8 +611,8 @@ def plot_cutouts(
                 dec_i,
                 vra_i,
                 vdec_i,
-                height=cutout_height,
-                width=cutout_width,
+                height_arcsec=cutout_height_arcsec,
+                width_arcsec=cutout_width_arcsec,
                 crosshair=crosshair,
                 crosshair_kwargs=crosshair_kwargs_i,
                 velocity_vector=velocity_vector,

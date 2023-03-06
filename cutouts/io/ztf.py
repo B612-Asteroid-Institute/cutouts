@@ -1,16 +1,16 @@
 import io
 import logging
-from typing import Optional, Tuple
+from typing import Tuple
 
 import pandas as pd
 import requests
 
-from .types import CutoutRequest
+from .types import CutoutRequest, CutoutResult
 
 logger = logging.getLogger(__file__)
 
 
-def generate_ztf_cutout_url_for_result(
+def generate_ztf_image_urls_for_result(
     ra_deg: float,
     dec_deg: float,
     height_arcsec: float,
@@ -21,7 +21,7 @@ def generate_ztf_cutout_url_for_result(
     imgtypecode: str,
     filtercode: str,
     qid: int,
-) -> str:
+) -> Tuple[str, str]:
     """
     Generate a cutout URL from a ZTF SIA result.
 
@@ -60,43 +60,14 @@ def generate_ztf_cutout_url_for_result(
     )
 
     cutout_url = f"{image_url}?center={ra_deg},{dec_deg}&size={height_arcsec},{width_arcsec}arcsec&gzip=false"
-    return cutout_url
+    return image_url, cutout_url
 
 
-def find_cutout_ztf(cutout_request: CutoutRequest) -> pd.DataFrame:
-    """
-    Find cutout for a given RA, Dec, and MJD [UTC].
-
-    Parameters
-    ----------
-    ra : float
-        Right Ascension in degrees.
-    dec : float
-        Declination in degrees.
-    mjd_utc : float
-        Observation time in MJD [UTC].
-    delta_time: float, optional
-        Match on observation time to within this delta. Delta should
-        be in units of days.
-    height : float, optional
-        Height of the cutout in arcseconds.
-    width : float, optional
-        Width of the cutout in arcseconds.
-    exposure_id: str, optional
-        Exposure ID, if known.
-
-    Returns
-    -------
-    cutout_url : str
-        URL to cutout
-    result : `~pandas.DataFrame`
-        Dataframe with image query results.
-
-    Raises
-    ------
-    FileNotFoundError: If no cutout is found at the given RA, Dec, MJD [UTC]
-        using this particular service.
-    """
+def find_cutout_ztf(cutout_request: CutoutRequest) -> CutoutResult:
+    """ """
+    logger.info(
+        f"Fetching ZTF cutout with ra: {cutout_request.ra_deg} dec: {cutout_request.dec_deg} exposure start mjd: {cutout_request.exposure_start_mjd}"
+    )
 
     ZTF_URL_BASE = "https://irsa.ipac.caltech.edu/ibe/search/ztf/products/sci"
 
@@ -140,31 +111,64 @@ def find_cutout_ztf(cutout_request: CutoutRequest) -> pd.DataFrame:
         raise FileNotFoundError(err)
 
     # Assign values based on the image metadata to form the url
-    results["cutout_url"] = results.apply(
-        lambda row: generate_ztf_cutout_url_for_result(
-            ra_deg=cutout_request.ra_deg,
-            dec_deg=cutout_request.dec_deg,
+    full_image_urls = []
+    cutout_urls = []
+
+    for result in results.to_dict(orient="records"):
+        full_image_url, cutout_url = generate_ztf_image_urls_for_result(
+            ra_deg=result["ra_deg"],
+            dec_deg=result["dec_deg"],
             height_arcsec=cutout_request.height_arcsec,
             width_arcsec=cutout_request.width_arcsec,
-            filefracday=row["filefracday"],
-            field=row["field"],
-            ccdid=row["ccdid"],
-            imgtypecode=row["imgtypecode"],
-            filtercode=row["filter"],
-            qid=row["qid"],
-        ),
-        axis=1,
-    )
+            filefracday=result["filefracday"],
+            field=result["field"],
+            ccdid=result["ccdid"],
+            imgtypecode=result["filter"],
+            filtercode=result["filter"],
+            qid=result["qid"],
+        )
+        full_image_urls.append(full_image_url)
+        cutout_urls.append(cutout_url)
+
+    results["cutout_url"] = cutout_urls
+    results["image_url"] = full_image_urls
+
+    print(results.columns)
 
     results = results[
         [
             "cutout_url",
-            "exposure_start_mjd",
-            "ra_deg",
             "dec_deg",
-            "filter",
             "exposure_duration",
+            "exposure_id",
+            "exposure_start_mjd",
+            "filter",
+            "image_url",
+            "ra_deg",
         ]
     ]
 
-    return results
+    result = results.to_dict(orient="records")[0]
+    result = CutoutResult(
+        cutout_url=result["cutout_url"],
+        dec_deg=result["dec_deg"],
+        exposure_duration=result["exposure_duration"],
+        exposure_start_mjd=result["exposure_start_mjd"],
+        filter=result["filter"],
+        exposure_id=result["exposure_id"],
+        height_arcsec=cutout_request.height_arcsec,
+        image_url=result["image_url"],
+        ra_deg=result["ra_deg"],
+        request_id=cutout_request.request_id,
+        width_arcsec=cutout_request.height_arcsec,
+    )
+
+    if cutout_request.exposure_duration is not None:
+        if cutout_request.exposure_duration != result.exposure_duration:
+            err = (
+                f"Exposure duration {cutout_request.exposure_duration} does not match any cutouts. "
+                "Check that the exposure duration is correct."
+            )
+            raise ValueError(err)
+
+    return result

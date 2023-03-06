@@ -1,49 +1,38 @@
+import logging
+
 import numpy as np
 import pandas as pd
 from pyvo.dal.sia import SIAResults
 
 from .sia import SIAHandler
+from .types import CutoutRequest, CutoutResult
 from .util import exposure_id_from_url
+
+logger = logging.getLogger(__name__)
+
+
+def _get_generic_image_url_from_cutout_url(cutout_url: str):
+    """ """
+    return cutout_url.split("&POS=")[0]
 
 
 def find_cutout_nsc_dr2(
-    ra_deg: float,
-    dec_deg: float,
-    mjd_utc: float,
-    delta_time: float = 1e-8,
-    height_arcsec: float = 20,
-    width_arcsec: float = 20,
-) -> pd.DataFrame:
+    cutout_request: CutoutRequest,
+) -> CutoutResult:
     """
     Search the NOIRLab Science Archive for a cutout at a given RA, Dec, and MJD [UTC].
-
-    Parameters
-    ----------
-    ra_deg : float
-        Right Ascension in degrees.
-    dec_deg : float
-        Declination in degrees.
-    mjd_utc : float
-        Observation time in MJD [UTC].
-    delta_time: float, optional
-        Match on observation time to within this delta. Delta should
-        be in decimal units of days.
-    height_arcsec : float, optional
-        Height of the cutout in arcseconds.
-    width_arcsec : float, optional
-        Width of the cutout in arcseconds.
-    exposure_id: str, optional
-        Exposure ID, if known.
-    exposure_duration: float, optional
-        Exposure duration in seconds, if known.
-
-    Returns
-    -------
-    results : `~pandas.DataFrame`
-        Dataframe with SIA query results.
     """
+    logger.info(
+        f"Fetching NSC cutout with ra: {cutout_request.ra_deg} dec: {cutout_request.dec_deg} exposure start mjd: {cutout_request.exposure_start_mjd}"
+    )
+
     sia_handler = NSC_DR2_SIA()
-    results = sia_handler.search(ra_deg, dec_deg, height_arcsec, width_arcsec)
+    results = sia_handler.search(
+        cutout_request.ra_deg,
+        cutout_request.dec_deg,
+        cutout_request.height_arcsec,
+        cutout_request.width_arcsec,
+    )
 
     results = results.to_table().to_pandas()
 
@@ -54,7 +43,7 @@ def find_cutout_nsc_dr2(
     results.columns.rename(
         {
             "obs_id": "observation_id",
-            "access_url": "url",
+            "access_url": "cutout_url",
             "exptime": "exposure_duration",
             "s_ra": "ra_deg",
             "s_dec": "dec_deg",
@@ -65,27 +54,73 @@ def find_cutout_nsc_dr2(
         inplace=True,
     )
 
-    # Filter out results that don't match the observation time
-    results = results[np.abs(results["exposure_start"] - mjd_utc) < delta_time]
+    results["image_url"] = results["cutout_url"].apply(
+        _get_generic_image_url_from_cutout_url
+    )
 
-    results["exposure_id"] = results["url"].apply(exposure_id_from_url)
+    # Filter out results that don't match the observation time
+    results = results[
+        np.abs(results["exposure_start"] - cutout_request.exposure_start_mjd)
+        < cutout_request.delta_time
+    ]
+
+    results["exposure_id"] = results["cutout_url"].apply(exposure_id_from_url)
 
     # Only include the columns we care about
     results = results[
         [
-            "url",
-            "exposure_start",
-            "ra_deg",
+            "cutout_url",
             "dec_deg",
-            "exposure_id",
             "exposure_duration",
+            "exposure_id",
+            "exposure_start_mjd",
+            "filter",
             "height_arcsec",
+            "image_url",
+            "ra_deg",
             "width_arcsec",
         ]
     ]
 
     results.reset_index(inplace=True, drop=True)
-    return results
+
+    if len(results) == 0:
+        raise ValueError("No results found.")
+
+    # For now return just the first result
+    # we may want this to be more sophistocated in the future
+    result = results.to_dict(orient="records")[0]
+    result = CutoutResult(
+        cutout_url=result["cutout_url"],
+        dec_deg=result["dec_deg"],
+        exposure_duration=result["exposure_duration"],
+        exposure_id=result["exposure_id"],
+        exposure_start_mjd=result["exposure_start_mjd"],
+        filter=result["filter"],
+        height_arcsec=result["height_arcsec"],
+        image_url=result["image_url"],
+        ra_deg=result["ra_deg"],
+        request_id=cutout_request.request_id,
+        width_arcsec=result["width_arcsec"],
+    )
+
+    if cutout_request.exposure_id is not None:
+        if cutout_request.exposure_id != result.exposure_id:
+            err = (
+                f"Exposure ID {cutout_request.exposure_id} does not match any cutouts. "
+                "Check that the exposure ID is correct."
+            )
+            raise ValueError(err)
+
+    if cutout_request.exposure_duration is not None:
+        if cutout_request.exposure_duration != result.exposure_duration:
+            err = (
+                f"Exposure duration {cutout_request.exposure_duration} does not match any cutouts. "
+                "Check that the exposure duration is correct."
+            )
+            raise ValueError(err)
+
+    return result
 
 
 class NSC_DR2_SIA(SIAHandler):

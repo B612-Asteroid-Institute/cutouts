@@ -50,11 +50,14 @@ class CutoutResult(BaseModel):
     Reference to a single cutout result
     """
 
-    request_id: Optional[str]
-    url: str
-    exposure_start_mjd: float
-    exposure_duration: float
-    ra_deg: float
+    cutout_url: str
     dec_deg: float
+    exposure_duration: float
+    exposure_id: Optional[str]
+    exposure_start_mjd: float
+    filter: Optional[str]
     height_arcsec: float
+    image_url: str
+    ra_deg: float
+    request_id: Optional[str]
     width_arcsec: float
