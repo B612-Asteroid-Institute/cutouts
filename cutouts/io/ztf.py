@@ -149,8 +149,6 @@ def find_cutout_ztf(cutout_request: CutoutRequest) -> CutoutResult:
     results["cutout_url"] = cutout_urls
     results["image_url"] = full_image_urls
 
-    print(results.columns)
-
     results = results[
         [
             "cutout_url",

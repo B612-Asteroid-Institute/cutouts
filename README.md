@@ -16,17 +16,11 @@
 To get the latest released version and install it into a conda environment:  
 `conda install -c asteroid-institute cutouts`  
 
-### Source
+### Source / Pip
 
-To install the bleeding edge source code, clone this repository and then:  
+To install the latest from source:
+`pip install git+https://github.com/B612-Asteroid-Institute/cutouts.git@main#egg=cutouts`
 
-If you use conda to manage packages and environments:  
-`conda install -c defaults -c conda-forge --file requirements.txt`  
-`pip install . --no-deps`  
-
-If you would rather download dependencies with pip:  
-`pip install -r requirements.txt`  
-`pip install . --no-deps`  
 
 ## Example 
 To reproduce the example that ships with the repository:
