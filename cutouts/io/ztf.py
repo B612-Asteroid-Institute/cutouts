@@ -2,6 +2,7 @@ import io
 import logging
 from typing import Tuple
 
+import backoff
 import pandas as pd
 import requests
 
@@ -63,6 +64,21 @@ def generate_ztf_image_urls_for_result(
     return image_url, cutout_url
 
 
+@backoff.on_exception(
+    backoff.expo,
+    (
+        requests.exceptions.Timeout,
+        requests.exceptions.ConnectionError,
+        requests.exceptions.HTTPError,
+    ),
+    max_tries=5,
+)
+def perform_request(search_url):
+    response = requests.get(search_url)
+    response.raise_for_status()
+    return response.text
+
+
 def find_cutout_ztf(cutout_request: CutoutRequest) -> CutoutResult:
     """ """
     logger.info(
@@ -75,9 +91,9 @@ def find_cutout_ztf(cutout_request: CutoutRequest) -> CutoutResult:
     height_deg = cutout_request.height_arcsec / 3600
 
     search_url = f"{ZTF_URL_BASE}?POS={cutout_request.ra_deg},{cutout_request.dec_deg}&SIZE={width_deg},{height_deg}&ct=csv"
-    response = requests.get(search_url)
-    response.raise_for_status()
-    results = pd.read_csv(io.StringIO(response.text))
+
+    content = perform_request(search_url)
+    results = pd.read_csv(io.StringIO(content))
     results["exposure_start_mjd"] = results["obsjd"].values.astype(float) - 2400000.5
     results.rename(
         columns={

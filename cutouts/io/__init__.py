@@ -84,6 +84,7 @@ def find_cutout(cutout_request: CutoutRequest) -> CutoutResult:
             f"No search method found for obscode {cutout_request.observatory_code}."
         )
 
+
     exposure_match = search_method(cutout_request)
 
     return exposure_match
@@ -110,6 +111,7 @@ def download_cutout(url: str, out_file: Optional[str] = None, **kwargs) -> str:
         Location of downloaded cutout.
     """
     try:
+        logger.info(f"Fetching {url}..."}")
         path = download_file(url, **kwargs)
     except HTTPError as e:
         raise FileNotFoundError(str(e))

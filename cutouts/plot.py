@@ -514,7 +514,7 @@ def plot_cutouts(
 
     num_rows = np.ceil(num_obs / max_cols).astype(int)
 
-    paths = cutouts["cutout_image_path"].values
+    paths = cutouts["path"].values
     ra = cutouts["ra"].values
     dec = cutouts["dec"].values
     vra = cutouts["vra"].values
@@ -523,7 +523,7 @@ def plot_cutouts(
     mag = cutouts["mag"].values
     mag_sigma = cutouts["mag_sigma"].values
     exposure_time = cutouts["exposure_duration"].values
-    times = Time(cutouts["exposure_start"].values)
+    times = Time(cutouts["exposure_start"].values, format="mjd", scale="utc")
 
     include_filters = False
     include_mag = False

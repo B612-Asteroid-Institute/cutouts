@@ -82,8 +82,8 @@ def generate_local_image_paths(result: dict) -> Tuple[str, str]:
     if result["exposure_id"] is not None:
         exposure_id_str = f"_expid_{result['exposure_id']}"
 
-    cutout_path = f"cutout_{Time(result['exposure_start_mjd']).utc.isot}_ra{result['ra_deg']:.8f}_dec{result['dec_deg']:.8f}{exposure_id_str}_h{result['height_arcsec']}_w{result['width_arcsec']}.fits"
-    full_image_path = f"{Time(result['exposure_start_mjd']).utc.isot}_ra{result['ra_deg']:.8f}_dec{result['dec_deg']:.8f}{exposure_id_str}_h{result['height_arcsec']}_w{result['width_arcsec']}.fits"
+    cutout_path = f"cutout_{Time(result['exposure_start_mjd'], format='mjd', scale='utc').utc.isot}_ra{result['ra_deg']:.8f}_dec{result['dec_deg']:.8f}{exposure_id_str}_h{result['height_arcsec']}_w{result['width_arcsec']}.fits"
+    full_image_path = f"{Time(result['exposure_start_mjd'], format='mjd', scale='utc').utc.isot}_ra{result['ra_deg']:.8f}_dec{result['dec_deg']:.8f}{exposure_id_str}_h{result['height_arcsec']}_w{result['width_arcsec']}.fits"
 
     return full_image_path, cutout_path
 
@@ -170,23 +170,36 @@ def run_cutouts_from_precovery(
     plot_candidates = []
     for i, result in enumerate(cutout_results):
         if "error" in result:
-            continue
-        candidate = {
-            "path": result["file_path"],
-            "ra": result["ra_deg"],
-            "dec": result["dec_deg"],
-            "vra": observations["pred_vra_degpday"][i],
-            "vdec": observations["pred_vdec_degpday"][i],
-            "mag": observations["mag_sigma"][i],
-            "mag_sigma": observations["mag_sigma"][i],
-            "filter": observations["filter"][i],
-            "exposure_start": result["exposure_mjd_start"][i],
-            "exposure_duration": result["exposure_duration"][i],
-        }
+            candidate = {
+                "path": None,
+                "ra": observations["ra_deg"][i],
+                "dec": observations["dec_deg"][i],
+                "vra": observations["pred_vra_degpday"][i],
+                "vdec": observations["pred_vdec_degpday"][i],
+                "mag": observations["mag_sigma"][i],
+                "mag_sigma": observations["mag_sigma"][i],
+                "filter": observations["filter"][i],
+                "exposure_start": observations["exposure_mjd_start"][i],
+                "exposure_duration": observations["exposure_duration"][i],
+                "exposure_id": observations["exposure_id"][i],
+            }
+        else:
+            candidate = {
+                "path": result["cutout_image_path"],
+                "ra": result["ra_deg"],
+                "dec": result["dec_deg"],
+                "vra": observations["pred_vra_degpday"][i],
+                "vdec": observations["pred_vdec_degpday"][i],
+                "mag": observations["mag_sigma"][i],
+                "mag_sigma": observations["mag_sigma"][i],
+                "filter": observations["filter"][i],
+                "exposure_start": result["exposure_mjd_start"][i],
+                "exposure_duration": result["exposure_duration"][i],
+            }
         plot_candidates.append(candidate)
 
     plot_candidates = pd.DataFrame(plot_candidates)
-
+    print(plot_candidates.columns)
     # Plot cutouts
     fig, ax = plot_cutouts(
         plot_candidates,
