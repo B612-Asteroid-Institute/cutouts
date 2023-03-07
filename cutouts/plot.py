@@ -130,12 +130,11 @@ def add_velocity_vector(
 
     image_width_pixels, image_height_pixels = wcs.array_shape
 
-    length_scaled = np.floor(length * image_width_pixels)
-    gap_scaled = np.floor(gap * image_width_pixels)
-    width_scaled = np.floor(width * image_width_pixels)
+    length_scaled = length * image_width_pixels
+    gap_scaled = gap * image_width_pixels
+    width_scaled = width * image_width_pixels
 
     dt = 1 / 24 / 2
-    # x_propagated, y_propagated = wcs.world_to_array_index_values(ra + vra * dt, dec + vdec * dt)
     x_propagated, y_propagated = wcs.world_to_pixel_values(
         ra + vra * dt, dec + vdec * dt
     )
@@ -146,15 +145,15 @@ def add_velocity_vector(
 
     vx_hat = vx / np.sqrt(vx**2 + vy**2)
     vy_hat = vy / np.sqrt(vx**2 + vy**2)
-
+    # print(3 * width_scaled)
     ax.arrow(
         x_center + gap_scaled * vx_hat,
         y_center + gap_scaled * vy_hat,
         length_scaled * vx_hat,
         length_scaled * vy_hat,
         width=width_scaled,
-        head_width=3 * width_scaled,
-        length_includes_head=True,
+        head_width=7 * width_scaled,
+        # length_includes_head=True,
         **kwargs,
     )
     return
@@ -440,7 +439,7 @@ def plot_cutouts(
         "gap": 0.05,
         "length": 0.15,
         "color": "#34ebcd",
-        "width": 0.04,
+        "width": 0.005,
         "zorder": 10,
     },
     subplots_adjust_kwargs: dict = {
