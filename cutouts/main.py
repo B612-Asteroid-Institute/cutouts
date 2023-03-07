@@ -176,7 +176,7 @@ def run_cutouts_from_precovery(
                 "dec": observations["dec_deg"][i],
                 "vra": observations["pred_vra_degpday"][i],
                 "vdec": observations["pred_vdec_degpday"][i],
-                "mag": observations["mag_sigma"][i],
+                "mag": observations["mag"][i],
                 "mag_sigma": observations["mag_sigma"][i],
                 "filter": observations["filter"][i],
                 "exposure_start": observations["exposure_mjd_start"][i],
@@ -190,11 +190,11 @@ def run_cutouts_from_precovery(
                 "dec": result["dec_deg"],
                 "vra": observations["pred_vra_degpday"][i],
                 "vdec": observations["pred_vdec_degpday"][i],
-                "mag": observations["mag_sigma"][i],
+                "mag": observations["mag"][i],
                 "mag_sigma": observations["mag_sigma"][i],
                 "filter": observations["filter"][i],
-                "exposure_start": result["exposure_mjd_start"][i],
-                "exposure_duration": result["exposure_duration"][i],
+                "exposure_start": result["exposure_start_mjd"],
+                "exposure_duration": result["exposure_duration"],
             }
         plot_candidates.append(candidate)
 

@@ -139,7 +139,7 @@ def find_cutout_ztf(cutout_request: CutoutRequest) -> CutoutResult:
             filefracday=result["filefracday"],
             field=result["field"],
             ccdid=result["ccdid"],
-            imgtypecode=result["filter"],
+            imgtypecode=result["imgtypecode"],
             filtercode=result["filter"],
             qid=result["qid"],
         )

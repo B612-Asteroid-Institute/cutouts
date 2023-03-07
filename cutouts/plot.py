@@ -1,15 +1,15 @@
-from typing import List, Optional, Tuple, Union
-
-import matplotlib
-import matplotlib.pyplot as plt
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from astropy.io import fits
+import matplotlib
+import matplotlib.pyplot as plt
+from typing import List, Tuple
 from astropy.time import Time
-from astropy.visualization import ImageNormalize, ZScaleInterval
+from astropy.io import fits
 from astropy.wcs import WCS
 from astropy.wcs.utils import proj_plane_pixel_scales
+from astropy.visualization import ImageNormalize
+from astropy.visualization import ZScaleInterval
 
 CMAP_BONE = matplotlib.cm.bone.copy()
 CMAP_BONE.set_bad("black")
@@ -28,7 +28,6 @@ def add_crosshair(
 ):
     """
     Add a crosshair centered on RA and Dec to the given axes.
-
     Parameter
     ---------
     ax : `~matplotlib.axes.Axes`
@@ -39,10 +38,10 @@ def add_crosshair(
         Predicted RA in degrees.
     dec : float
         Predicted Dec in degrees.
-    gap : int
-        Distance from center in pixels to start drawing crosshair reticle bar.
-    length : int
-        Length in pixels of an individual bar reticle.
+    gap : float
+        Distance from center in arcseconds to start drawing crosshair reticle bar.
+    length : float
+        Length in arcseconds of an individual bar reticle.
     x_offset : int, optional
         Offset in x-axis pixels from the sky-plane origin of the image (offsets might be non-zero
         due to image centering, padding, and/or trimming).
@@ -53,15 +52,28 @@ def add_crosshair(
         Keyword arguments to pass to ax.hlines and ax.vlines.
     """
     # Get pixel location of RA and Dec
-    x_center, y_center = wcs.world_to_array_index_values(ra, dec)
-    # y_center, x_center = wcs.world_to_pixel_values(ra, dec)
+    y_center, x_center = wcs.world_to_array_index_values(ra, dec)
+
     x_center = x_center + x_offset
     y_center = y_center + y_offset
 
-    ax.vlines(x_center, y_center + gap, y_center + gap + length, **kwargs)
-    ax.vlines(x_center, y_center - gap, y_center - gap - length, **kwargs)
-    ax.hlines(y_center, x_center + gap, x_center + gap + length, **kwargs)
-    ax.hlines(y_center, x_center - gap, x_center - gap - length, **kwargs)
+    width_pixel_scale, height_pixel_scale = proj_plane_pixel_scales(wcs)
+
+    gap_scaled = (gap / 3600.0) / width_pixel_scale
+    length_scaled = (length / 3600.0) / width_pixel_scale
+
+    ax.vlines(
+        x_center, y_center + gap_scaled, y_center + gap_scaled + length_scaled, **kwargs
+    )
+    ax.vlines(
+        x_center, y_center - gap_scaled, y_center - gap_scaled - length_scaled, **kwargs
+    )
+    ax.hlines(
+        y_center, x_center + gap_scaled, x_center + gap_scaled + length_scaled, **kwargs
+    )
+    ax.hlines(
+        y_center, x_center - gap_scaled, x_center - gap_scaled - length_scaled, **kwargs
+    )
     return
 
 
@@ -74,6 +86,7 @@ def add_velocity_vector(
     vdec: float,
     gap: float = 8,
     length: float = 8,
+    width: float = 1,
     x_offset: int = 0,
     y_offset: int = 0,
     **kwargs,
@@ -81,7 +94,6 @@ def add_velocity_vector(
     """
     Add a velocity vector showing the predicted velocity of an object
     to an image.
-
     Parameters
     ----------
     ax : `~matplotlib.axes.Axes`
@@ -96,10 +108,12 @@ def add_velocity_vector(
         Predicted RA-velocity in degrees per day.
     vdec : float
         Predicted Dec in degrees in degrees per day.
-    gap : int
-        Distance from center in pixels to start drawing velocity vector.
-    length : int
-        Length in pixels of velocity vector.
+    gap : float
+        Distance from center in percentage of img width to start drawing velocity vector.
+    length : float
+        Length in percentage of img width of velocity vector.
+    width : float
+        width in percentage of img width of velocity vector.
     x_offset : int, optional
         Offset in x-axis pixels from the sky-plane origin of the image (offsets might be non-zero
         due to image centering and padding, and/or trimming).
@@ -114,10 +128,11 @@ def add_velocity_vector(
     x_center = x_center + x_offset
     y_center = y_center + y_offset
 
-    width_pixel_scale, height_pixel_scale = proj_plane_pixel_scales(wcs)
+    image_width_pixels, image_height_pixels = wcs.array_shape
 
-    length_scaled = (length / 3600.0) / width_pixel_scale
-    gap_scaled = (gap / 3600.0) / width_pixel_scale
+    length_scaled = np.floor(length * image_width_pixels)
+    gap_scaled = np.floor(gap * image_width_pixels)
+    width_scaled = np.floor(width * image_width_pixels)
 
     dt = 1 / 24 / 2
     # x_propagated, y_propagated = wcs.world_to_array_index_values(ra + vra * dt, dec + vdec * dt)
@@ -137,6 +152,8 @@ def add_velocity_vector(
         y_center + gap_scaled * vy_hat,
         length_scaled * vx_hat,
         length_scaled * vy_hat,
+        width=width_scaled,
+        head_width=3 * width_scaled,
         length_includes_head=True,
         **kwargs,
     )
@@ -158,7 +175,6 @@ def center_image(
     will center (RA, Dec) as much as possible, and if the image is not the desired
     shape then this function will pad columns/rows or trim columns/rows until it is the
     desired shape.
-
     Parameters
     ----------
     image : `~numpy.ndarray` (N, M)
@@ -173,7 +189,6 @@ def center_image(
         The desired height of the image.
     width : int, optional
         The desired width of the image.
-
     Returns
     -------
     image_centered : `~numpy.ndarray` (height, width)
@@ -285,7 +300,9 @@ def center_image(
                 image_copy = image_copy[1:, :]
                 y_offset -= 1
             else:
-                image_copy = image_copy[:-1,]
+                image_copy = image_copy[
+                    :-1,
+                ]
 
     return image_copy, x_offset, y_offset
 
@@ -313,14 +330,14 @@ def plot_cutout(
         "length": 2,
         "color": "#34ebcd",
         "width": 0.2,
-        "head_width": 2,
         "zorder": 10,
     },
     cmap: matplotlib.cm = CMAP_BONE,
 ) -> matplotlib.axes.Axes:
     """
     Plot a single cutout on the given axes.
-
+    Note that when height_arcsec and width_arcsec are converted to pixel sizes, these converted
+    values are rounded up to an integer number of pixels.
     Parameters
     ----------
     ax : `~matplotlib.axes.Axes`
@@ -335,6 +352,10 @@ def plot_cutout(
         Predicted RA-velocity in degrees per day.
     vdec : float
         Predicted Dec in degrees in degrees per day.
+    height_arcsec : float
+        Image height in arcseconds
+    width_arcsec : float
+        Image width in arcseconds
     crosshair : bool, optional
         Add crosshair centered on (RA, Dec).
     crosshair_kwargs : dict
@@ -355,7 +376,6 @@ def plot_cutout(
     image = hdu.data
     hdr = hdu.header
     wcs = WCS(hdr)
-
     width_pixel_scale, height_pixel_scale = proj_plane_pixel_scales(wcs)
     # TODO - double check image orientation
     height_pix = np.ceil(height_arcsec / height_pixel_scale / 3600.0).astype(int)
@@ -369,7 +389,6 @@ def plot_cutout(
         cmap=cmap,
         norm=ImageNormalize(image, interval=ZScaleInterval()),
     )
-
     ax.axis("off")
 
     if crosshair:
@@ -393,7 +412,7 @@ def plot_cutout(
 
 
 def plot_cutouts(
-    cutouts: pd.DataFrame,
+    candidates: pd.DataFrame,
     dpi: int = 200,
     max_cols: int = 4,
     row_height: float = 2.0,
@@ -418,11 +437,10 @@ def plot_cutouts(
     },
     velocity_vector: bool = True,
     velocity_vector_kwargs: dict = {
-        "gap": 2,
-        "length": 2,
+        "gap": 0.05,
+        "length": 0.15,
         "color": "#34ebcd",
-        "width": 0.2,
-        "head_width": 2,
+        "width": 0.04,
         "zorder": 10,
     },
     subplots_adjust_kwargs: dict = {
@@ -437,34 +455,27 @@ def plot_cutouts(
 ) -> Tuple[matplotlib.figure.Figure, List[matplotlib.axes.Axes]]:
     """
     Plot cutouts on a grid.
-
     Parameters
     ----------
-    cutouts : `~pandas.DataFrame`
-        List of cutouts to plot.
-
-        path: str
-            Location of cutout file.
-        ra: float
-            Predicted RA in degrees.
-        dec: float
-            Predicted Dec in degrees.
-        vra: float
-            Predicted RA-velocity in degrees per day.
-        vdec: float
-            Predicted Dec in degrees in degrees per day.
-        filter: str
-            Filter in which the observation was made.
-        mag: float
-            Magnitude of the observation if detected. NaN magnitudes are interpreted
-            as undetected.
-        mag_sigma: float
-            Magnitude error of the detected observation.
-        exposure_start: float
-            Start time of the exposure in MJD.
-        exposure_duration: float
-            Exposure time in seconds.
-
+    paths : List[str]
+        Location of cutout file.
+    ra : `~numpy.ndarray` (N)
+        Predicted RA in degrees.
+    dec : `~numpy.ndarray` (N)
+        Predicted Dec in degrees.
+    vra : `~numpy.ndarray` (N)
+        Predicted RA-velocity in degrees per day.
+    vdec : `~numpy.ndarray` (N)
+        Predicted Dec in degrees in degrees per day.
+    filters : `~numpy.ndarray` (N)
+        Filters in which the observations were made.
+    mag : `~numpy.ndarray` (N)
+        Magnitude of the observation if detected. NaN magnitudes are interpreted
+        as undetected.
+    mag_sigma: `~numpy.ndarray` (N)
+        Magnitude error of the detected observation.
+    exposure_time : `~numpy.ndarray` (N)
+        Exposure time in seconds.
     dpi : int, optional
         DPI of the plot.
     max_cols : int, optional
@@ -473,10 +484,10 @@ def plot_cutouts(
         Height in inches each row should have.
     col_width : float, optional
         Width in inches each column should have.
-    cutout_height : int, optional
-        Desired height of the cutout in pixels.
-    cutout_width : int, optional
-        Desired width of the cutout in pixels.
+    cutout_height_arcsec : float, optional
+        Desired height of the cutout in arcseconds.
+    cutout_width_arcsec : float, optional
+        Desired width of the cutout in arcseconds.
     include_missing : bool, optional
         Include an empty placeholder cutout if the cutout was not found (their paths are None).
     crosshair : bool, optional
@@ -500,7 +511,6 @@ def plot_cutouts(
         Keyword arguments to pass to `fig.subplots_adjust`.
     cmap : `~matplotlib.cm`
         Colormap for the cutout.
-
     Returns
     -------
     fig : `~matplotlib.figure.Figure`
@@ -508,22 +518,25 @@ def plot_cutouts(
     ax : list of `~matplotlib.axes.Axes`
         Matplotlib axes.
     """
-    num_obs = len(cutouts)
-    if not include_missing:
-        num_obs = len(cutouts[cutouts["file_path"].notnull()])
+    paths = candidates["path"]
+    times = candidates["exposure_start"].map(lambda x: Time(x, scale="utc", format="mjd"))
+    ra = candidates["ra"]
+    dec = candidates["dec"]
+    vra = candidates["vra"]
+    vdec = candidates["vdec"]
+    filters = candidates["filter"]
+    mag = candidates["mag"]
+    mag_sigma = candidates["mag_sigma"]
+    exposure_time = candidates["exposure_duration"]
 
+    if include_missing:
+        num_obs = len(paths)
+    else:
+        num_obs = 0
+        for paths_i in paths:
+            if paths_i is not None:
+                num_obs += 1
     num_rows = np.ceil(num_obs / max_cols).astype(int)
-
-    paths = cutouts["path"].values
-    ra = cutouts["ra"].values
-    dec = cutouts["dec"].values
-    vra = cutouts["vra"].values
-    vdec = cutouts["vdec"].values
-    filters = cutouts["filter"].values
-    mag = cutouts["mag"].values
-    mag_sigma = cutouts["mag_sigma"].values
-    exposure_time = cutouts["exposure_duration"].values
-    times = Time(cutouts["exposure_start"].values, format="mjd", scale="utc")
 
     include_filters = False
     include_mag = False
@@ -546,6 +559,7 @@ def plot_cutouts(
     for i, (path_i, ra_i, dec_i, vra_i, vdec_i) in enumerate(
         zip(paths, ra, dec, vra, vdec)
     ):
+
         ax = None
         y = 1.0
         title = ""
@@ -584,7 +598,9 @@ def plot_cutouts(
             title += f', Xhair width: {crosshair_size}"'
 
         if path_i is None:
+
             if include_missing:
+
                 ax = fig.add_subplot(num_rows, max_cols, j + 1)
 
                 # TODO - This currently will result in poorly formatted cutout output when the

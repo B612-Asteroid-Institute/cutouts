@@ -22,9 +22,9 @@ class CutoutRequestSchema(pa.SchemaModel):
     exposure_duration: Optional[Series[float]] = pa.Field(
         ge=0, le=2000, coerce=True, nullable=True
     )
-    height_arcsec: Series[float] = pa.Field(ge=0, le=200, coerce=True)
-    width_arcsec: Series[float] = pa.Field(ge=0, le=200, coerce=True)
-    delta_time: Series[float] = pa.Field(ge=0, le=100, coerce=True)
+    height_arcsec: Series[float] = pa.Field(ge=0, le=200, coerce=True, nullable=True)
+    width_arcsec: Series[float] = pa.Field(ge=0, le=200, coerce=True, nullable=True)
+    delta_time: Series[float] = pa.Field(ge=0, le=100, coerce=True, nullable=True)
 
 
 class CutoutRequest(BaseModel):
