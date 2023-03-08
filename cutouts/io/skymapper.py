@@ -28,7 +28,6 @@ def find_cutout_skymapper(
         cutout_request.width_arcsec,
     )
     results = pd.DataFrame(results)
-    print(results)
 
     results.rename(
         columns={
@@ -50,13 +49,10 @@ def find_cutout_skymapper(
         lambda x: x.split("-")[0]
     )
 
-    print(list(results["exposure_id"]))
-
     # TODO: calculate a larger cutout since we can't get the whole
     # image from the SIA service.
     results["image_url"] = ""
 
-    print(list(np.abs(results["exposure_start_mjd"] - cutout_request.exposure_start_mjd)))
     results = results[
         np.abs(results["exposure_start_mjd"] - cutout_request.exposure_start_mjd)
         < cutout_request.delta_time
@@ -76,7 +72,6 @@ def find_cutout_skymapper(
             "width_arcsec",
         ]
     ]
-    print(results)
     result = results.to_dict(orient="records")[0]
     result = CutoutResult(
         cutout_url=result["cutout_url"],

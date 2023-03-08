@@ -210,7 +210,6 @@ def run_cutouts_from_precovery(
         plot_candidates.append(candidate)
 
     plot_candidates = pd.DataFrame(plot_candidates)
-    print(plot_candidates.columns)
     # Plot cutouts
     fig, ax = plot_cutouts(
         plot_candidates,

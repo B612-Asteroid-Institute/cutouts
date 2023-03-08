@@ -21,7 +21,7 @@ def add_crosshair(
     ra: float,
     dec: float,
     gap: float = 2,
-    length: int = 2,
+    length: float = 2,
     x_offset: int = 0,
     y_offset: int = 0,
     **kwargs,
@@ -52,7 +52,7 @@ def add_crosshair(
         Keyword arguments to pass to ax.hlines and ax.vlines.
     """
     # Get pixel location of RA and Dec
-    y_center, x_center = wcs.world_to_array_index_values(ra, dec)
+    x_center, y_center = wcs.world_to_pixel_values(ra, dec)
 
     x_center = x_center + x_offset
     y_center = y_center + y_offset
@@ -541,13 +541,13 @@ def plot_cutouts(
     include_mag = False
     include_mag_sigma = False
     include_exposure_time = False
-    if isinstance(filters, np.ndarray):
+    if isinstance(filters, pd.Series):
         include_filters = True
-    if isinstance(mag, np.ndarray):
+    if isinstance(mag, pd.Series):
         include_mag = True
-    if isinstance(mag_sigma, np.ndarray):
+    if isinstance(mag_sigma, pd.Series):
         include_mag_sigma = True
-    if isinstance(exposure_time, np.ndarray):
+    if isinstance(exposure_time, pd.Series):
         include_exposure_time = True
 
     fig = plt.figure(figsize=(col_width * max_cols, row_height * num_rows), dpi=dpi)
