@@ -45,9 +45,7 @@ def find_cutout_skymapper(
 
     results["height_arcsec"] = results["size"].apply(lambda x: x[0])
     results["width_arcsec"] = results["size"].apply(lambda x: x[1])
-    results["exposure_id"] = results["unique_image_id"].apply(
-        lambda x: x.split("-")[0]
-    )
+    results["exposure_id"] = results["unique_image_id"].apply(lambda x: x.split("-")[0])
 
     # TODO: calculate a larger cutout since we can't get the whole
     # image from the SIA service.
@@ -87,21 +85,21 @@ def find_cutout_skymapper(
         width_arcsec=result["width_arcsec"],
     )
 
-    if cutout_request.exposure_id is not None:
-        if cutout_request.exposure_id != result.exposure_id:
-            err = (
-                f"Exposure ID {cutout_request.exposure_id} does not match any cutouts. "
-                "Check that the exposure ID is correct."
-            )
-            raise ValueError(err)
-
-    if cutout_request.exposure_duration is not None:
-        if cutout_request.exposure_duration != result.exposure_duration:
-            err = (
-                f"Exposure duration {cutout_request.exposure_duration} does not match any cutouts. "
-                "Check that the exposure duration is correct."
-            )
-            raise ValueError(err)
+    for field in [
+        "exposure_id",
+        "exposure_start_mjd",
+        "exposure_duration",
+        "ra_deg",
+        "dec_deg",
+        "filter",
+    ]:
+        request_value = getattr(cutout_request, field)
+        result_value = getattr(result, field)
+        if request_value is not None:
+            if request_value != result_value:
+                logger.warning(
+                    f"Requested {field} {request_value} does not match result {result_value}"
+                )
 
     return result
 
