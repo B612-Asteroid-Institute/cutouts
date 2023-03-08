@@ -24,6 +24,7 @@ EXPOSURE_SEARCH_MAPPING = {
 }
 
 
+
 def filter_by_exposure_id(
     exposure_matches: pd.DataFrame, exposure_id: str
 ) -> pd.DataFrame:

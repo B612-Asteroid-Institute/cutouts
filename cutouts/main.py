@@ -20,6 +20,15 @@ from .plot import plot_cutouts
 logger = logging.getLogger("cutouts")
 
 
+OBSCODE_TOLERANCE_MAPPING = {
+    "I41": 1e-8,
+    "Q55": 1e-5,
+    "W84": 1e-8,
+    "V00": 1e-8,
+    "695": 1e-8,
+}
+
+
 @pa.check_types
 def get_cutouts(
     cutout_requests: DataFrame[CutoutRequestSchema],
@@ -127,6 +136,7 @@ def run_cutouts_from_precovery(
     observations: pd.DataFrame,
     out_dir: pathlib.Path = pathlib.Path("."),
     out_file: pathlib.Path = pathlib.Path("cutout.png"),
+
 ):
     cutout_requests = observations[
         [
@@ -159,7 +169,9 @@ def run_cutouts_from_precovery(
     cutout_requests["width_arcsec"].fillna(20.0, inplace=True)
 
     if "delta_time" not in cutout_requests:
-        cutout_requests["delta_time"] = 1e-8
+        cutout_requests["delta_time"] = cutout_requests["observatory_code"].apply(
+            lambda x: OBSCODE_TOLERANCE_MAPPING[x]
+        )
     cutout_requests["delta_time"].fillna(1e-8, inplace=True)
 
     cutout_results = get_cutouts(

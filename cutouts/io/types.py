@@ -51,13 +51,13 @@ class CutoutResult(BaseModel):
     """
 
     cutout_url: str
-    dec_deg: float
+    dec_deg: Optional[float]
     exposure_duration: float
     exposure_id: Optional[str]
     exposure_start_mjd: float
     filter: Optional[str]
     height_arcsec: float
     image_url: str
-    ra_deg: float
+    ra_deg: Optional[float]
     request_id: Optional[str]
     width_arcsec: float

@@ -38,18 +38,16 @@ def find_cutout_nsc_dr2(
 
     # Only include image type results.
     results = results[results["prodtype"] == "image"]
-
     # Rename columns to match the cutout schema
-    results.columns.rename(
-        {
+    results.rename(
+        columns={
             "obs_id": "observation_id",
             "access_url": "cutout_url",
             "exptime": "exposure_duration",
             "s_ra": "ra_deg",
             "s_dec": "dec_deg",
-            "mjd_obs": "exposure_start",
-            "height": "height_arcsec",
-            "width": "width_arcsec",
+            "mjd_obs": "exposure_start_mjd",
+            "obs_bandpass": "filter",
         },
         inplace=True,
     )
@@ -60,7 +58,7 @@ def find_cutout_nsc_dr2(
 
     # Filter out results that don't match the observation time
     results = results[
-        np.abs(results["exposure_start"] - cutout_request.exposure_start_mjd)
+        np.abs(results["exposure_start_mjd"].astype("float") - cutout_request.exposure_start_mjd)
         < cutout_request.delta_time
     ]
 
@@ -75,10 +73,8 @@ def find_cutout_nsc_dr2(
             "exposure_id",
             "exposure_start_mjd",
             "filter",
-            "height_arcsec",
             "image_url",
             "ra_deg",
-            "width_arcsec",
         ]
     ]
 
@@ -97,12 +93,14 @@ def find_cutout_nsc_dr2(
         exposure_id=result["exposure_id"],
         exposure_start_mjd=result["exposure_start_mjd"],
         filter=result["filter"],
-        height_arcsec=result["height_arcsec"],
         image_url=result["image_url"],
         ra_deg=result["ra_deg"],
         request_id=cutout_request.request_id,
-        width_arcsec=result["width_arcsec"],
+        # As a fallback, we load this from the initial request
+        height_arcsec=cutout_request.height_arcsec,
+        width_arcsec=cutout_request.width_arcsec,
     )
+
 
     if cutout_request.exposure_id is not None:
         if cutout_request.exposure_id != result.exposure_id:

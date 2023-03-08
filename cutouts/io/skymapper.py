@@ -1,6 +1,7 @@
 import logging
 from typing import Optional
 
+import numpy as np
 import pandas as pd
 
 from .sia import SIAHandler
@@ -27,13 +28,39 @@ def find_cutout_skymapper(
         cutout_request.width_arcsec,
     )
     results = pd.DataFrame(results)
+    print(results)
+
+    results.rename(
+        columns={
+            "band": "filter",
+            "exptime": "exposure_duration",
+            "ra_cntr": "ra_deg",
+            "dec_cntr": "dec_deg",
+            "mjd_obs": "exposure_start_mjd",
+        },
+        inplace=True,
+    )
 
     # Normalize the image url column
     results["cutout_url"] = results["get_fits"]
 
+    results["height_arcsec"] = results["size"].apply(lambda x: x[0])
+    results["width_arcsec"] = results["size"].apply(lambda x: x[1])
+    results["exposure_id"] = results["unique_image_id"].apply(
+        lambda x: x.split("-")[0]
+    )
+
+    print(list(results["exposure_id"]))
+
     # TODO: calculate a larger cutout since we can't get the whole
     # image from the SIA service.
     results["image_url"] = ""
+
+    print(list(np.abs(results["exposure_start_mjd"] - cutout_request.exposure_start_mjd)))
+    results = results[
+        np.abs(results["exposure_start_mjd"] - cutout_request.exposure_start_mjd)
+        < cutout_request.delta_time
+    ]
 
     results = results[
         [
@@ -49,11 +76,10 @@ def find_cutout_skymapper(
             "width_arcsec",
         ]
     ]
-
+    print(results)
     result = results.to_dict(orient="records")[0]
     result = CutoutResult(
         cutout_url=result["cutout_url"],
-        dec_deg=result["dec_deg"],
         exposure_duration=result["exposure_duration"],
         exposure_id=result["exposure_id"],
         exposure_start_mjd=result["exposure_start_mjd"],
@@ -61,6 +87,7 @@ def find_cutout_skymapper(
         height_arcsec=result["height_arcsec"],
         image_url=result["image_url"],
         ra_deg=result["ra_deg"],
+        dec_deg=result["dec_deg"],
         request_id=cutout_request.request_id,
         width_arcsec=result["width_arcsec"],
     )
@@ -85,7 +112,7 @@ def find_cutout_skymapper(
 
 
 class Skymapper_SIA(SIAHandler):
-    SIA_URL = "https://datalab.noirlab.edu/sia/nsc_dr2"
+    SIA_URL = "https://api.skymapper.nci.org.au/public/siap/dr2/query?"
 
     def search(
         self,

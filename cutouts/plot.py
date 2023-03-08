@@ -135,7 +135,7 @@ def add_velocity_vector(
     width_scaled = width * image_width_pixels
 
     dt = 1 / 24 / 2
-    x_propagated, y_propagated = wcs.world_to_pixel_values(
+    y_propagated, x_propagated = wcs.world_to_pixel_values(
         ra + vra * dt, dec + vdec * dt
     )
     x_propagated = x_propagated + x_offset
@@ -567,7 +567,7 @@ def plot_cutouts(
             title += f"\n{filters[i]}"
 
         if include_mag:
-            if np.isnan(mag[i]):
+            if np.isnan(mag[i]) or mag[i] is None:
                 crosshair_kwargs_i = crosshair_non_detection_kwargs
                 title += f": --.--"
             else:
