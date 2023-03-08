@@ -197,8 +197,8 @@ def run_cutouts_from_precovery(
         else:
             candidate = {
                 "path": result["cutout_image_path"],
-                "ra": result["ra_deg"],
-                "dec": result["dec_deg"],
+                "ra": observations["pred_ra_deg"].values[i],
+                "dec": observations["pred_dec_deg"].values[i],
                 "vra": observations["pred_vra_degpday"].values[i],
                 "vdec": observations["pred_vdec_degpday"].values[i],
                 "mag": observations["mag"].values[i],

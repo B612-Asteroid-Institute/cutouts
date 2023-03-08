@@ -133,8 +133,8 @@ def find_cutout_ztf(cutout_request: CutoutRequest) -> CutoutResult:
 
     for result in results.to_dict(orient="records"):
         full_image_url, cutout_url = generate_ztf_image_urls_for_result(
-            ra_deg=result["ra_deg"],
-            dec_deg=result["dec_deg"],
+            ra_deg=cutout_request.ra_deg,
+            dec_deg=cutout_request.dec_deg,
             height_arcsec=cutout_request.height_arcsec,
             width_arcsec=cutout_request.width_arcsec,
             filefracday=result["filefracday"],
