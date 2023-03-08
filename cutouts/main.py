@@ -1,289 +1,223 @@
-import os
-import logging
 import argparse
+import logging
+import os
+import pathlib
+import sys
+from typing import Any, Iterable, List, Optional, Tuple, Union, cast
+
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-
+import pandera as pa
 from astropy.time import Time
-from typing import (
-    List,
-    Optional,
-    Union,
-    Tuple
-)
+from pandera.typing import DataFrame
 from pyvo.dal.sia import SIAService
 
-from .io import (
-    find_cutout,
-    find_cutout_ztf,
-    download_cutout
-)
+from .io import download_cutout, find_cutout
+from .io.types import CutoutRequest, CutoutRequestSchema, CutoutResult
 from .plot import plot_cutouts
 
 logger = logging.getLogger("cutouts")
 
-SIA_URL = "https://datalab.noirlab.edu/sia/nsc_dr2"
 
+OBSCODE_TOLERANCE_MAPPING = {
+    "I41": 1e-8,
+    "Q55": 1e-5,
+    "W84": 1e-8,
+    "V00": 1e-8,
+    "695": 1e-8,
+}
+
+
+@pa.check_types
 def get_cutouts(
-        times: Time,
-        ra: npt.NDArray[np.float64],
-        dec: npt.NDArray[np.float64],
-        obscode: str,
-        sia_url: str = SIA_URL,
-        exposure_id: Optional[str] = None,
-        exposure_time: Optional[float] = None,
-        delta_time: float = 1e-8,
-        height: float = 20.,
-        width: float = 20.,
-        out_dir: Optional[str] = None,
-        timeout: Optional[int] = 180,
-    ) -> Tuple[List[Union[str, None]], pd.DataFrame]:
-    """
-    Attempt to find cutouts by querying the given Simple Image Access (SIA)
-    catalog for cutouts at each RA, Dec, and MJD [UTC]. If the exposure ID is known
-    an additional check will be made to make sure the exposure ID matches the cutout.
-    If it does not, then a warning will be thrown.
+    cutout_requests: DataFrame[CutoutRequestSchema],
+    out_dir: str = "~/.cutouts",
+    timeout: Optional[int] = 180,
+    use_cache: bool = True,
+) -> Iterable[dict[str, Any]]:
+    """ """
 
-    Parameters
-    ----------
-    times : `~astropy.time.core.Time` (N)
-        Observation times.
-    ra : `~numpy.ndarray` (N)
-        Right Ascension in degrees.
-    dec :`~numpy.ndarray` (N)
-        Declination in degrees.
-    sia_url : str
-        Simple Image Access (SIA) service URL.
-    exposure_id: str, optional
-        Exposure ID, if known.
-    delta_time: float, optional
-        Match on observation time to within this delta. Delta should
-        be in units of days.
-    height : float, optional
-        Height of the cutout in arcseconds.
-    width : float, optional
-        Width of the cutout in arcseconds.
-    out_dir : str, optional
-        Save cutouts to this directory. If None, cutouts are saved to
-        the package cache located at ~/.cutouts.
-    timeout : int, optional
-        Timeout in seconds before giving up on downloading cutout.
+    # Get urls and metadata for each cutout
+    logger.info(f"Getting cutouts for {len(cutout_requests)} requests.")
 
-    Returns
-    -------
-    list : str
-        Paths of the downloaded cutouts, if no cutout was found for a particular
-        position and time then None instead.
-    results : `~pandas.DataFrame`
-        DataFrame containing SIA search results for each cutout.
-    exposure_times: `~numpy.ndarray` (N)
-        Exposure times in seconds
-
-
-    Raises
-    ------
-    ValueError: If times is not an `~astropy.Time` object.
-    """
-    # Connect to Simple Image Access catalog
-    sia_service = SIAService(sia_url)
-
-    if not isinstance(times, Time):
-        err = (
-            "times should be an astropy.time object"
-        )
-        raise ValueError(err)
-
-    if not isinstance(exposure_id, (List, np.ndarray)):
-        exposure_id = [None for i in range(len(ra))]
-
-    if not isinstance(exposure_time, (List, np.ndarray)):
-        exposure_time = [None for i in range(len(ra))]
-
-    mjd = times.utc.mjd
-
-    urls = []
     results = []
+    for record in cutout_requests.to_dict(orient="records"):
+        try:
+            cutout_request = CutoutRequest(**record)  # type: ignore
+            result = find_cutout(cutout_request)
+        except FileNotFoundError as e:
+            logger.warning(e)
+            result = {"error": e}
 
-    exposure_times = []
-    for i, (ra_i, dec_i, mjd_i, exposure_id_i, exposure_time_i, obscode_i) in enumerate(zip(ra, dec, mjd, exposure_id, exposure_time, obscode)):
+        result = dict(result)
+        results.append(result)
 
-        if obscode_i == "I41":
-            try:
-                cutout_url, results_i, exptime_i = find_cutout_ztf(
-                    ra_i,
-                    dec_i,
-                    mjd_i,
-                    delta_time=delta_time,
-                    height=height,
-                    width=width,
-                    exposure_id=exposure_id_i,
-                    exposure_time=exposure_time_i
-                )
+    for result in results:
+        # Don't bother trying to download url if we didn't get a
+        # result
+        if "error" in result:
+            continue
 
-            except FileNotFoundError as e:
-                logger.warning(f"No cutout found for {mjd_i} MJD [UTC] at (RA, Dec) = ({ra_i}, {dec_i}) in ZTF archive")
-                cutout_url = None
-                exptime_i = None
-                results_i = pd.DataFrame({"access_url" : [None]})
+        full_image_path, cutout_image_path = generate_local_image_paths(result)
 
-        else:
-            try:
-                cutout_url, results_i, exptime_i = find_cutout(
-                    ra_i,
-                    dec_i,
-                    mjd_i,
-                    sia_service,
-                    delta_time=delta_time,
-                    height=height,
-                    width=width,
-                    exposure_id=exposure_id_i,
-                    exposure_time=exposure_time_i
-                )
+        result["full_image_path"] = pathlib.Path(out_dir) / full_image_path
+        result["cutout_image_path"] = pathlib.Path(out_dir) / cutout_image_path
 
-            except FileNotFoundError as e:
-                logger.warning(f"No cutout found for {mjd_i} MJD [UTC] at (RA, Dec) = ({ra_i}, {dec_i}) in SIA Search")
-                cutout_url = None
-                exptime_i = None
-                results_i = pd.DataFrame({"access_url" : [None]})
-
-
-        urls.append(cutout_url)
-        results.append(results_i)
-        exposure_times.append(exptime_i)
-
-    results = pd.concat(
-        results,
-        ignore_index=True
-    )
-
-    exposure_times = np.array(exposure_times)
-
-    paths = []
-    for i, (ra_i, dec_i, mjd_i, exposure_id_i, url_i) in enumerate(zip(ra, dec, mjd, exposure_id, urls)):
-
-        if exposure_id_i is None:
-            file_name = f"{times[i].utc.isot}_ra{ra_i:.8f}_dec{dec_i:.8f}_h{height}_w{width}.fits"
-        else:
-            file_name = f"{times[i].utc.isot}_ra{ra_i:.8f}_dec{dec_i:.8f}_expid_{exposure_id_i}_h{height}_w{width}.fits"
-
-        if out_dir is not None:
-            out_file_i = os.path.join(out_dir, file_name)
-        else:
-            out_file_i = None
-
-        if url_i is None:
-            path_i = None
-        else:
-            if not os.path.exists(out_file_i):
-                logger.info(f"Cutout {file_name} has been previously downloaded.")
-                try:
-                    path_i = download_cutout(
-                        url_i,
-                        out_file=out_file_i,
-                        cache=True,
-                        pkgname="cutouts",
-                        timeout=timeout,
+        for path in [result["full_image_path"], result["cutout_image_path"]]:
+            if path.exists():
+                if use_cache:
+                    logger.info(
+                        f"{path} already exists locally and using cache, skipping"
                     )
-                except FileNotFoundError:
-                    path_i = None
-            else:
-                path_i = out_file_i
+                    continue
 
-        paths.append(path_i)
+            try:
+                download_cutout(
+                    result["cutout_url"],
+                    out_file=path.as_posix(),
+                    cache=True,
+                    pkgname="cutouts",
+                    timeout=timeout,
+                )
+            except FileNotFoundError as e:
+                result["error"] = str(e)
 
-    return paths, results, exposure_times
+    return results
+
+
+def generate_local_image_paths(result: dict) -> Tuple[str, str]:
+    exposure_id_str = ""
+    if result["exposure_id"] is not None:
+        exposure_id_str = f"_expid_{result['exposure_id']}"
+
+    cutout_path = f"cutout_{Time(result['exposure_start_mjd'], format='mjd', scale='utc').utc.isot}_ra{result['ra_deg']:.8f}_dec{result['dec_deg']:.8f}{exposure_id_str}_h{result['height_arcsec']}_w{result['width_arcsec']}.fits"
+    full_image_path = f"{Time(result['exposure_start_mjd'], format='mjd', scale='utc').utc.isot}_ra{result['ra_deg']:.8f}_dec{result['dec_deg']:.8f}{exposure_id_str}_h{result['height_arcsec']}_w{result['width_arcsec']}.fits"
+
+    return full_image_path, cutout_path
+
 
 def main():
-
     parser = argparse.ArgumentParser(
-        prog="cutouts",
-        description="Get and plot cutouts along a trajectory."
+        prog="cutouts", description="Get and plot cutouts along a trajectory."
     )
     parser.add_argument(
         "observations",
         help="File containing observations and predicted ephemerides of a moving object.",
-        type=str
-        )
+        type=str,
+    )
     parser.add_argument(
         "--out_dir",
         help="Directory where to save downloaded cutouts and the grid of plotted cutouts.",
         type=str,
-        default="."
-        )
+        default=".",
+    )
     parser.add_argument(
         "--out_file",
         help="File name (not including --out_dir) of where to save cutouts grid.",
         type=str,
-        default="cutouts.jpg"
+        default="cutouts.jpg",
     )
-    parser.add_argument(
-        "--sia_url",
-        help="Simple Image Access (SIA) URL.",
-        type=str,
-        default=SIA_URL
-        )
+
+    # Set root logger to log to stdout for info and above
+    logging.basicConfig(stream=sys.stdout, level=logging.INFO, format="%(message)s")
+
     args = parser.parse_args()
 
+    observations = pd.read_csv(args.observations, index_col=None)
 
-    observations = pd.read_csv(args.observations, index_col=False)
+    output = run_cutouts_from_precovery(
+        observations, pathlib.Path(args.out_dir), pathlib.Path(args.out_file)
+    )
+    print(pd.DataFrame(output).to_csv(index=False))
 
-    ra = observations["pred_ra_deg"].values
-    dec = observations["pred_dec_deg"].values
-    vra = observations["pred_vra_degpday"].values
-    vdec = observations["pred_vdec_degpday"].values
-    obscode = observations["obscode"].values
-    times = Time(observations["exposure_mjd_start"].values, scale="utc", format="mjd")
 
-    if "mag" in observations.columns:
-        mag = observations["mag"].values
-    else:
-        mag = None
+def run_cutouts_from_precovery(
+    observations: pd.DataFrame,
+    out_dir: pathlib.Path = pathlib.Path("."),
+    out_file: pathlib.Path = pathlib.Path("cutout.png"),
+    cutout_height_arcsec: float = 20.0,
+    cutout_width_arcsec: float = 20.0,
+):
+    cutout_requests = observations[
+        [
+            "obscode",
+            "exposure_mjd_start",
+            "pred_ra_deg",
+            "pred_dec_deg",
+            "exposure_id",
+            "exposure_duration",
+        ]
+    ].copy()
 
-    if "mag_sigma" in observations.columns:
-        mag_sigma = observations["mag_sigma"].values
-    else:
-        mag_sigma = None
+    cutout_requests.reset_index()
 
-    if "filter" in observations.columns:
-        filters = observations["filter"].values
-    else:
-        filters = None
-
-    if "exposure_id" in observations.columns:
-        exposure_id = observations["exposure_id"].values
-    else:
-        exposure_id = None
-
-    if "exposure_duration" in observations.columns:
-        exposure_time = observations["exposure_duration"].values
-    else:
-        exposure_time = None
-
-    
-    cutout_paths, cutout_results, exposure_times = get_cutouts(
-        times, ra, dec, obscode,
-        sia_url=args.sia_url,
-        exposure_time=exposure_time,
-        exposure_id=exposure_id,
-        out_dir=args.out_dir
+    cutout_requests.rename(
+        columns={
+            "obscode": "observatory_code",
+            "exposure_mjd_start": "exposure_start_mjd",
+            "pred_ra_deg": "ra_deg",
+            "pred_dec_deg": "dec_deg",
+        },
+        inplace=True,
     )
 
+    if "height_arcsec" not in cutout_requests:
+        cutout_requests["height_arcsec"] = cutout_height_arcsec
+    if "width_arcsec" not in cutout_requests:
+        cutout_requests["width_arcsec"] = cutout_width_arcsec
+    cutout_requests["height_arcsec"].fillna(cutout_height_arcsec, inplace=True)
+    cutout_requests["width_arcsec"].fillna(cutout_width_arcsec, inplace=True)
+
+    if "delta_time" not in cutout_requests:
+        cutout_requests["delta_time"] = cutout_requests["observatory_code"].apply(
+            lambda x: OBSCODE_TOLERANCE_MAPPING[x]
+        )
+    cutout_requests["delta_time"].fillna(1e-8, inplace=True)
+
+    cutout_results = get_cutouts(
+        cast(DataFrame[CutoutRequestSchema], cutout_requests),
+        out_dir=str(out_dir),
+    )
+
+    plot_candidates = []
+    for i, result in enumerate(cutout_results):
+        if "error" in result:
+            candidate = {
+                "path": None,
+                "ra": observations["pred_ra_deg"].values[i],
+                "dec": observations["pred_dec_deg"].values[i],
+                "vra": observations["pred_vra_degpday"].values[i],
+                "vdec": observations["pred_vdec_degpday"].values[i],
+                "mag": observations["mag"].values[i],
+                "mag_sigma": observations["mag_sigma"].values[i],
+                "filter": observations["filter"].values[i],
+                "exposure_start": observations["exposure_mjd_start"].values[i],
+                "exposure_duration": observations["exposure_duration"].values[i],
+                "exposure_id": observations["exposure_id"].values[i],
+            }
+        else:
+            candidate = {
+                "path": result["cutout_image_path"],
+                "ra": observations["pred_ra_deg"].values[i],
+                "dec": observations["pred_dec_deg"].values[i],
+                "vra": observations["pred_vra_degpday"].values[i],
+                "vdec": observations["pred_vdec_degpday"].values[i],
+                "mag": observations["mag"].values[i],
+                "mag_sigma": observations["mag_sigma"].values[i],
+                "filter": observations["filter"].values[i],
+                "exposure_start": result["exposure_start_mjd"],
+                "exposure_duration": result["exposure_duration"],
+            }
+        plot_candidates.append(candidate)
+
+    plot_candidates = pd.DataFrame(plot_candidates)
     # Plot cutouts
     fig, ax = plot_cutouts(
-        cutout_paths,
-        times,
-        ra,
-        dec,
-        vra,
-        vdec,
-        filters=filters,
-        mag=mag,
-        mag_sigma=mag_sigma,
-        exposure_time=exposure_times,
-        cutout_height=75,
-        cutout_width=75,
+        plot_candidates,
+        cutout_height_arcsec=cutout_height_arcsec,
+        cutout_width_arcsec=cutout_width_arcsec,
     )
-    fig.savefig(os.path.join(args.out_dir, args.out_file), bbox_inches="tight")
+    fig.savefig(os.path.join(out_dir, out_file), bbox_inches="tight")
 
-
+    return cutout_results

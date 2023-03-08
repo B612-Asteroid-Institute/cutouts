@@ -1,4 +1,5 @@
-from ..io import exposure_id_from_url
+from ..io.util import exposure_id_from_url
+
 
 def test_exposure_id_from_url():
     ### Test several URLs to make sure the exposure ID is correctly read.
