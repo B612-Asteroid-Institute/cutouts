@@ -136,7 +136,6 @@ def run_cutouts_from_precovery(
     observations: pd.DataFrame,
     out_dir: pathlib.Path = pathlib.Path("."),
     out_file: pathlib.Path = pathlib.Path("cutout.png"),
-
 ):
     cutout_requests = observations[
         [
@@ -184,8 +183,8 @@ def run_cutouts_from_precovery(
         if "error" in result:
             candidate = {
                 "path": None,
-                "ra": observations["ra_deg"].values[i],
-                "dec": observations["dec_deg"].values[i],
+                "ra": observations["pred_ra_deg"].values[i],
+                "dec": observations["pred_dec_deg"].values[i],
                 "vra": observations["pred_vra_degpday"].values[i],
                 "vdec": observations["pred_vdec_degpday"].values[i],
                 "mag": observations["mag"].values[i],

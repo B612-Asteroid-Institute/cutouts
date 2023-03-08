@@ -74,6 +74,7 @@ def generate_ztf_image_urls_for_result(
     max_tries=5,
 )
 def perform_request(search_url):
+    logger.info(f"Performing request to {search_url}")
     response = requests.get(search_url)
     response.raise_for_status()
     return response.text
@@ -171,18 +172,26 @@ def find_cutout_ztf(cutout_request: CutoutRequest) -> CutoutResult:
         filter=result["filter"],
         exposure_id=result["exposure_id"],
         height_arcsec=cutout_request.height_arcsec,
+        width_arcsec=cutout_request.width_arcsec,
         image_url=result["image_url"],
         ra_deg=result["ra_deg"],
         request_id=cutout_request.request_id,
-        width_arcsec=cutout_request.height_arcsec,
     )
 
-    if cutout_request.exposure_duration is not None:
-        if cutout_request.exposure_duration != result.exposure_duration:
-            err = (
-                f"Exposure duration {cutout_request.exposure_duration} does not match any cutouts. "
-                "Check that the exposure duration is correct."
-            )
-            raise ValueError(err)
+    for field in [
+        "exposure_id",
+        "exposure_start_mjd",
+        "exposure_duration",
+        "ra_deg",
+        "dec_deg",
+        "filter",
+    ]:
+        request_value = getattr(cutout_request, field)
+        result_value = getattr(result, field)
+        if request_value is not None:
+            if request_value != result_value:
+                logger.warning(
+                    f"Requested {field} {request_value} does not match result {result_value}"
+                )
 
     return result
