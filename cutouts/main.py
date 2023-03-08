@@ -136,6 +136,8 @@ def run_cutouts_from_precovery(
     observations: pd.DataFrame,
     out_dir: pathlib.Path = pathlib.Path("."),
     out_file: pathlib.Path = pathlib.Path("cutout.png"),
+    cutout_height_arcsec: float = 20.0,
+    cutout_width_arcsec: float = 20.0,
 ):
     cutout_requests = observations[
         [
@@ -161,11 +163,11 @@ def run_cutouts_from_precovery(
     )
 
     if "height_arcsec" not in cutout_requests:
-        cutout_requests["height_arcsec"] = 20.0
+        cutout_requests["height_arcsec"] = cutout_height_arcsec
     if "width_arcsec" not in cutout_requests:
-        cutout_requests["width_arcsec"] = 20.0
-    cutout_requests["height_arcsec"].fillna(20.0, inplace=True)
-    cutout_requests["width_arcsec"].fillna(20.0, inplace=True)
+        cutout_requests["width_arcsec"] = cutout_width_arcsec
+    cutout_requests["height_arcsec"].fillna(cutout_height_arcsec, inplace=True)
+    cutout_requests["width_arcsec"].fillna(cutout_width_arcsec, inplace=True)
 
     if "delta_time" not in cutout_requests:
         cutout_requests["delta_time"] = cutout_requests["observatory_code"].apply(
@@ -213,8 +215,8 @@ def run_cutouts_from_precovery(
     # Plot cutouts
     fig, ax = plot_cutouts(
         plot_candidates,
-        cutout_height_arcsec=20,
-        cutout_width_arcsec=20,
+        cutout_height_arcsec=cutout_height_arcsec,
+        cutout_width_arcsec=cutout_width_arcsec,
     )
     fig.savefig(os.path.join(out_dir, out_file), bbox_inches="tight")
 

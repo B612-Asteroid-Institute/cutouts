@@ -81,8 +81,8 @@ def find_cutout_skymapper(
         filter=result["filter"],
         height_arcsec=result["height_arcsec"],
         image_url=result["image_url"],
-        ra_deg=result["ra_deg"],
-        dec_deg=result["dec_deg"],
+        ra_deg=cutout_request.ra_deg,
+        dec_deg=cutout_request.dec_deg,
         request_id=cutout_request.request_id,
         width_arcsec=result["width_arcsec"],
     )
