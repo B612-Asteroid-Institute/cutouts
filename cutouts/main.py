@@ -2,7 +2,7 @@ import argparse
 import logging
 import pathlib
 import sys
-from typing import Any, Iterable, Optional, Tuple, cast
+from typing import Any, Dict, Iterable, Optional, Tuple, cast
 
 import pandas as pd
 import pandera as pa
@@ -32,7 +32,7 @@ def get_cutouts(
     out_dir: str = "~/.cutouts",
     timeout: Optional[int] = 180,
     use_cache: bool = True,
-) -> Iterable[dict[str, Any]]:
+) -> Iterable[Dict[str, Any]]:
     """ """
 
     # Get urls and metadata for each cutout
