@@ -1,11 +1,12 @@
-numpy
 astropy
+backoff
+numpy
 pandas
+pandera
 pyvo
 matplotlib
 pytest
 pytest-cov
-coveralls
 setuptools>=45
 wheel
 setuptools_scm>=6.0
