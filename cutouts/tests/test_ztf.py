@@ -1,8 +1,8 @@
 from cutouts.io.types import CutoutRequest
-from cutouts.io.ztf import find_cutout_ztf
+from cutouts.io.ztf import find_cutouts_ztf
 
 
-def test_find_cutout_ztf():
+def test_find_cutouts_ztf():
     cutout_request = CutoutRequest(
         request_id="2022YP2",
         observatory_code="I41",
@@ -16,4 +16,4 @@ def test_find_cutout_ztf():
         width_arcsec=20.0,
         delta_time=1e-8,
     )
-    return find_cutout_ztf(cutout_request)
+    return find_cutouts_ztf(cutout_request)

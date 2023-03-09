@@ -1,23 +1,34 @@
 import logging
-from typing import Optional
 
-import numpy as np
 import pandas as pd
 
 from .sia import SIAHandler
-from .types import CutoutRequest, CutoutResult
+from .types import CutoutRequest
 
 logger = logging.getLogger(__name__)
 
 
-def find_cutout_skymapper(
+def find_cutouts_skymapper(
     cutout_request: CutoutRequest,
-) -> CutoutResult:
+) -> pd.DataFrame:
     """
-    Search the Skymapper SIA service for a cutout at a given RA, Dec, and MJD [UTC].
+    Search the Skymapper SIA service for cutouts and images at a given RA, Dec.
+
+    Parameters
+    ----------
+    cutout_request : CutoutRequest
+        The cutout request.
+
+    Returns
+    -------
+    cutout_results : pd.DataFrame
+        The cutout results for this area of the sky.
+        Columns:
+            ra_deg, dec_deg, filter, exposure_id, exposure_start_mjd, exposure_duration,
+            cutout_url, image_url, height_arcsec, width_arcsec
     """
     logger.info(
-        f"Fetching Skymapper cutout with ra: {cutout_request.ra_deg} dec: {cutout_request.dec_deg} exposure start mjd: {cutout_request.exposure_start_mjd}"
+        f"Fetching Skymapper cutouts with ra: {cutout_request.ra_deg} dec: {cutout_request.dec_deg}."
     )
 
     sia = Skymapper_SIA()
@@ -52,56 +63,20 @@ def find_cutout_skymapper(
     results["image_url"] = ""
 
     results = results[
-        np.abs(results["exposure_start_mjd"] - cutout_request.exposure_start_mjd)
-        < cutout_request.delta_time
-    ]
-
-    results = results[
         [
-            "filter",
-            "cutout_url",
-            "exposure_start_mjd",
-            "exposure_id",
-            "exposure_duration",
-            "image_url",
             "ra_deg",
             "dec_deg",
+            "filter",
+            "exposure_id",
+            "exposure_start_mjd",
+            "exposure_duration",
+            "cutout_url",
+            "image_url",
             "height_arcsec",
             "width_arcsec",
         ]
     ]
-    result = results.to_dict(orient="records")[0]
-    result = CutoutResult(
-        cutout_url=result["cutout_url"],
-        exposure_duration=result["exposure_duration"],
-        exposure_id=result["exposure_id"],
-        exposure_start_mjd=result["exposure_start_mjd"],
-        filter=result["filter"],
-        height_arcsec=result["height_arcsec"],
-        image_url=result["image_url"],
-        ra_deg=cutout_request.ra_deg,
-        dec_deg=cutout_request.dec_deg,
-        request_id=cutout_request.request_id,
-        width_arcsec=result["width_arcsec"],
-    )
-
-    for field in [
-        "exposure_id",
-        "exposure_start_mjd",
-        "exposure_duration",
-        "ra_deg",
-        "dec_deg",
-        "filter",
-    ]:
-        request_value = getattr(cutout_request, field)
-        result_value = getattr(result, field)
-        if request_value is not None:
-            if request_value != result_value:
-                logger.warning(
-                    f"Requested {field} {request_value} does not match result {result_value}"
-                )
-
-    return result
+    return results
 
 
 class Skymapper_SIA(SIAHandler):

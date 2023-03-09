@@ -7,22 +7,21 @@ from urllib.error import HTTPError
 import pandas as pd
 from astropy.utils.data import download_file
 
-from .nsc_dr2 import find_cutout_nsc_dr2
-from .skymapper import find_cutout_skymapper
-from .types import CutoutRequest, CutoutResult
-from .ztf import find_cutout_ztf
+from .nsc_dr2 import find_cutouts_nsc_dr2
+from .skymapper import find_cutouts_skymapper
+from .types import CutoutRequest
+from .ztf import find_cutouts_ztf
 
 logger = logging.getLogger(__file__)
 
 
 EXPOSURE_SEARCH_MAPPING = {
-    "I41": find_cutout_ztf,
-    "Q55": find_cutout_skymapper,
-    "W84": find_cutout_nsc_dr2,
-    "V00": find_cutout_nsc_dr2,
-    "695": find_cutout_nsc_dr2,
+    "I41": find_cutouts_ztf,
+    "Q55": find_cutouts_skymapper,
+    "W84": find_cutouts_nsc_dr2,
+    "V00": find_cutouts_nsc_dr2,
+    "695": find_cutouts_nsc_dr2,
 }
-
 
 
 def filter_by_exposure_id(
@@ -74,9 +73,9 @@ def verify_exposure_duration(
         logger.warning(err)
 
 
-def find_cutout(cutout_request: CutoutRequest) -> CutoutResult:
+def find_cutouts(cutout_request: CutoutRequest) -> pd.DataFrame:
     """
-    High level function to find a cutout at a given Observatory, RA, Dec, and MJD [UTC].
+    High level function to find a cutouts at a given Observatory, RA, Dec.
 
     """
     search_method = EXPOSURE_SEARCH_MAPPING.get(cutout_request.observatory_code, None)
