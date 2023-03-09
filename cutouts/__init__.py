@@ -1,2 +1,2 @@
-from .main import get_cutouts
-from .plot import plot_cutouts
+from .main import get_cutouts  # noqa: F401
+from .plot import plot_cutouts  # noqa: F401
