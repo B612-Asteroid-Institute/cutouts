@@ -1,18 +1,21 @@
+import logging
+from typing import List, Tuple
+
+import matplotlib
+import matplotlib.pyplot as plt
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-import matplotlib
-import matplotlib.pyplot as plt
-from typing import List, Tuple
-from astropy.time import Time
 from astropy.io import fits
+from astropy.time import Time
+from astropy.visualization import ImageNormalize, ZScaleInterval
 from astropy.wcs import WCS
 from astropy.wcs.utils import proj_plane_pixel_scales
-from astropy.visualization import ImageNormalize
-from astropy.visualization import ZScaleInterval
 
 CMAP_BONE = matplotlib.cm.bone.copy()
 CMAP_BONE.set_bad("black")
+
+logger = logging.getLogger(__file__)
 
 
 def add_crosshair(
@@ -166,7 +169,7 @@ def center_image(
     dec: float,
     height: int = 115,
     width: int = 115,
-) -> npt.NDArray[np.float64]:
+) -> Tuple[npt.NDArray[np.float64], int, int]:
     """
     Given an image and its WCS, ensure that (RA, Dec) is actually as near
     to the center of the image as possible. Also, ensure that the image
@@ -299,9 +302,7 @@ def center_image(
                 image_copy = image_copy[1:, :]
                 y_offset -= 1
             else:
-                image_copy = image_copy[
-                    :-1,
-                ]
+                image_copy = image_copy[:-1, :]
 
     return image_copy, x_offset, y_offset
 
@@ -518,7 +519,9 @@ def plot_cutouts(
         Matplotlib axes.
     """
     paths = candidates["path"]
-    times = candidates["exposure_start"].map(lambda x: Time(x, scale="utc", format="mjd"))
+    times = candidates["exposure_start"].map(
+        lambda x: Time(x, scale="utc", format="mjd")
+    )
     ra = candidates["ra"]
     dec = candidates["dec"]
     vra = candidates["vra"]
@@ -558,7 +561,6 @@ def plot_cutouts(
     for i, (path_i, ra_i, dec_i, vra_i, vdec_i) in enumerate(
         zip(paths, ra, dec, vra, vdec)
     ):
-
         ax = None
         y = 1.0
         title = ""
@@ -569,7 +571,7 @@ def plot_cutouts(
         if include_mag:
             if np.isnan(mag[i]) or mag[i] is None:
                 crosshair_kwargs_i = crosshair_non_detection_kwargs
-                title += f": --.--"
+                title += ": --.--"
             else:
                 crosshair_kwargs_i = crosshair_detection_kwargs
                 title += f": {mag[i]:.2f}"
@@ -580,15 +582,15 @@ def plot_cutouts(
 
         if include_mag_sigma:
             if np.isnan(mag_sigma[i]):
-                title += f":$\pm$--.--"
+                title += ":$\pm$--.--"  # noqa: W605
             else:
-                title += f"$\pm{mag_sigma[i]:.2f}$"
+                title += f"$\pm{mag_sigma[i]:.2f}$"  # noqa: W605
 
         if include_exposure_time:
             if np.isnan(exposure_time[i]):
-                title += f", $\Delta$t: ---s"
+                title += ", $\Delta$t: ---s"  # noqa: W605
             else:
-                title += f", $\Delta$t: {exposure_time[i]:.0f}s"
+                title += f", $\Delta$t: {exposure_time[i]:.0f}s"  # noqa: W605
 
         if crosshair:
             crosshair_size = (
@@ -597,9 +599,7 @@ def plot_cutouts(
             title += f', Xhair width: {crosshair_size}"'
 
         if path_i is None:
-
             if include_missing:
-
                 ax = fig.add_subplot(num_rows, max_cols, j + 1)
 
                 # TODO - This currently will result in poorly formatted cutout output when the

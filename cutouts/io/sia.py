@@ -13,7 +13,7 @@ class SIAHandler(metaclass=ABCMeta):
         """ """
         self.sia_service = SIAService(self.SIA_URL)
 
-    SIA_URL = None
+    SIA_URL = ""
 
     @abstractmethod
     def search(

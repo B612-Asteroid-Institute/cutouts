@@ -1,20 +1,17 @@
 import argparse
 import logging
-import os
 import pathlib
 import sys
-from typing import Any, Iterable, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, Iterable, Optional, Tuple, cast
 
-import numpy as np
-import numpy.typing as npt
 import pandas as pd
 import pandera as pa
 from astropy.time import Time
 from pandera.typing import DataFrame
-from pyvo.dal.sia import SIAService
 
-from .io import download_cutout, find_cutout
-from .io.types import CutoutRequest, CutoutRequestSchema, CutoutResult
+from .filter import select_cutout
+from .io import download_cutout, find_cutouts
+from .io.types import CutoutRequest, CutoutRequestSchema
 from .plot import plot_cutouts
 
 logger = logging.getLogger("cutouts")
@@ -35,7 +32,7 @@ def get_cutouts(
     out_dir: str = "~/.cutouts",
     timeout: Optional[int] = 180,
     use_cache: bool = True,
-) -> Iterable[dict[str, Any]]:
+) -> Iterable[Dict[str, Any]]:
     """ """
 
     # Get urls and metadata for each cutout
@@ -45,7 +42,9 @@ def get_cutouts(
     for record in cutout_requests.to_dict(orient="records"):
         try:
             cutout_request = CutoutRequest(**record)  # type: ignore
-            result = find_cutout(cutout_request)
+            results_df = find_cutouts(cutout_request)
+            result = select_cutout(results_df, cutout_request)
+
         except FileNotFoundError as e:
             logger.warning(e)
             result = {"error": e}
@@ -91,8 +90,11 @@ def generate_local_image_paths(result: dict) -> Tuple[str, str]:
     if result["exposure_id"] is not None:
         exposure_id_str = f"_expid_{result['exposure_id']}"
 
-    cutout_path = f"cutout_{Time(result['exposure_start_mjd'], format='mjd', scale='utc').utc.isot}_ra{result['ra_deg']:.8f}_dec{result['dec_deg']:.8f}{exposure_id_str}_h{result['height_arcsec']}_w{result['width_arcsec']}.fits"
-    full_image_path = f"{Time(result['exposure_start_mjd'], format='mjd', scale='utc').utc.isot}_ra{result['ra_deg']:.8f}_dec{result['dec_deg']:.8f}{exposure_id_str}_h{result['height_arcsec']}_w{result['width_arcsec']}.fits"
+    exposure_mjd_isot = Time(
+        result["exposure_start_mjd"], format="mjd", scale="utc"
+    ).utc.isot
+    cutout_path = f"cutout_{exposure_mjd_isot}_ra{result['ra_deg']:.8f}_dec{result['dec_deg']:.8f}{exposure_id_str}_h{result['height_arcsec']}_w{result['width_arcsec']}.fits"  # noqa: E501
+    full_image_path = f"{exposure_mjd_isot}_ra{result['ra_deg']:.8f}_dec{result['dec_deg']:.8f}{exposure_id_str}_h{result['height_arcsec']}_w{result['width_arcsec']}.fits"  # noqa: E501
 
     return full_image_path, cutout_path
 
@@ -218,6 +220,6 @@ def run_cutouts_from_precovery(
         cutout_height_arcsec=cutout_height_arcsec,
         cutout_width_arcsec=cutout_width_arcsec,
     )
-    fig.savefig(os.path.join(out_dir, out_file), bbox_inches="tight")
+    fig.savefig(out_dir.joinpath(out_file), bbox_inches="tight")
 
     return cutout_results
