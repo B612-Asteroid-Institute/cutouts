@@ -53,6 +53,8 @@ def find_cutouts_skymapper(
         cutout_request.width_arcsec,
     )
     results = pd.DataFrame(results)
+    # Limit results to just fits files
+    results = results[results["format"] == "image/fits"]
 
     results.rename(
         columns={
