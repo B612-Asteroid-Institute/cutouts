@@ -22,6 +22,7 @@ requirements:
     - pandas
     - pyvo
     - matplotlib
+    - imageio
     - pandera
     - pydantic
   test:

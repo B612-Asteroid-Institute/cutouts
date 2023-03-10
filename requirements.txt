@@ -5,6 +5,7 @@ pandas
 pandera
 pyvo
 matplotlib
+imageio
 pytest
 pytest-cov
 pre-commit
