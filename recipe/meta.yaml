@@ -17,20 +17,22 @@ requirements:
   run:
     - python >=3.7
     - numpy
+    - backoff
     - astropy
     - pandas
     - pyvo
     - matplotlib
+    - pandera
+    - pydantic
+  test:
     - pytest
     - pytest-cov
-    - coveralls
-    - setuptools >=45
-    - setuptools_scm >=6.0
-    - wheel
+    - precommit
+
 
 build:
   noarch: python
-  script: python setup.py install --single-version-externally-managed --record=record.txt
+  script: pip install . --no-deps
 
 test:
   imports:
