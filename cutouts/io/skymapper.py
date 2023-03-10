@@ -1,16 +1,19 @@
 import logging
 
 import pandas as pd
+import pandera as pa
+from pandera.typing import DataFrame
 
 from .sia import SIAHandler
-from .types import CutoutRequest
+from .types import CutoutRequest, CutoutsResultSchema
 
 logger = logging.getLogger(__name__)
 
 
+@pa.check_types
 def find_cutouts_skymapper(
     cutout_request: CutoutRequest,
-) -> pd.DataFrame:
+) -> DataFrame[CutoutsResultSchema]:
     """
     Search the Skymapper SIA service for cutouts and images at a given RA, Dec.
 

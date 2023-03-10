@@ -4,9 +4,11 @@ from typing import Tuple
 
 import backoff
 import pandas as pd
+import pandera as pa
 import requests
+from pandera.typing import DataFrame
 
-from .types import CutoutRequest
+from .types import CutoutRequest, CutoutsResultSchema
 
 logger = logging.getLogger(__file__)
 
@@ -80,7 +82,8 @@ def perform_request(search_url):
     return response.text
 
 
-def find_cutouts_ztf(cutout_request: CutoutRequest) -> pd.DataFrame:
+@pa.check_types()
+def find_cutouts_ztf(cutout_request: CutoutRequest) -> DataFrame[CutoutsResultSchema]:
     """
     Search the ZTF service for cutouts and images at a given RA, Dec.
 
@@ -121,6 +124,9 @@ def find_cutouts_ztf(cutout_request: CutoutRequest) -> pd.DataFrame:
         },
         inplace=True,
     )
+
+    # Cast the exposure_id to a string
+    results["exposure_id"] = results["exposure_id"].astype(str)
 
     logger.info(f"ZTF query returned table with {len(results)} row.")
     if len(results) == 0:
