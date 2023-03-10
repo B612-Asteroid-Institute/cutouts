@@ -1,4 +1,4 @@
-name: Publish Python Package to conda
+name: conda - Publish
 
 on:
   push:
