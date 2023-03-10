@@ -9,7 +9,7 @@ import pandera as pa
 from astropy.time import Time
 from pandera.typing import DataFrame
 
-from .filter import select_cutout
+from .filter import select_comparison_cutout, select_cutout
 from .io import download_cutout, find_cutouts
 from .io.types import CutoutRequest, CutoutRequestSchema
 from .plot import plot_cutouts
@@ -32,15 +32,22 @@ def get_cutouts(
     out_dir: pathlib.Path,
     timeout: Optional[int] = 180,
     full_image_timeout: Optional[int] = 600,
-    use_cache: Optional[bool] = True,
-    download_full_image: Optional[bool] = False,
-) -> Iterable[Dict[str, Any]]:
+    use_cache: bool = True,
+    download_full_image: bool = False,
+    compare: bool = False,
+    compare_kwargs: dict = {
+        "min_time_separation": 1 / 24,
+        "min_exposure_duration_ratio": 1.0,
+        "same_filter": True,
+    },
+) -> Tuple[Iterable[Dict[str, Any]], Iterable[Dict[str, Any]]]:
     """ """
 
     # Get urls and metadata for each cutout
     logger.info(f"Getting cutouts for {len(cutout_requests)} requests.")
 
     results = []
+    comparison_results = []
     for record in cutout_requests.to_dict(orient="records"):
         try:
             cutout_request = CutoutRequest(**record)  # type: ignore
@@ -53,6 +60,23 @@ def get_cutouts(
 
         result = dict(result)
         results.append(result)
+
+        if compare:
+            try:
+                comparison_result = select_comparison_cutout(
+                    results_df, result, cutout_request, **compare_kwargs
+                )
+                comparison_result = dict(comparison_result)
+
+            except FileNotFoundError as e:
+                logger.warning(e)
+                comparison_result = {"error": e}
+
+            comparison_result = dict(comparison_result)
+            comparison_results.append(comparison_result)
+
+        else:
+            comparison_results.append(None)
 
     for result in results:
         # Don't bother trying to download url if we didn't get a
@@ -101,7 +125,40 @@ def get_cutouts(
                 except FileNotFoundError as e:
                     result["error"] = str(e)
 
-    return results
+    # Download comparison cutouts
+    if compare:
+        for result in comparison_results:
+            if result is not None:
+                if "error" in result:
+                    continue
+
+                (
+                    comparison_full_image_path,
+                    comparison_cutout_image_path,
+                ) = generate_local_image_paths(result)
+                result["cutout_image_path"] = (
+                    pathlib.Path(out_dir) / "comparison" / comparison_cutout_image_path
+                )
+                path = result["cutout_image_path"]
+                if path.exists():
+                    if use_cache:
+                        logger.info(
+                            f"{path} already exists locally and using cache, skipping"
+                        )
+                        continue
+
+                try:
+                    download_cutout(
+                        result["cutout_url"],
+                        out_file=path.as_posix(),
+                        cache=True,
+                        pkgname="cutouts",
+                        timeout=timeout,
+                    )
+                except FileNotFoundError as e:
+                    result["error"] = str(e)
+
+    return results, comparison_results
 
 
 def generate_local_image_paths(result: dict) -> Tuple[str, str]:
@@ -153,11 +210,20 @@ def main():
 
 def run_cutouts_from_precovery(
     observations: pd.DataFrame,
-    out_dir: Optional[str] = ".",
-    out_file: Optional[str] = "cutout.png",
-    cutout_height_arcsec: Optional[float] = 20.0,
-    cutout_width_arcsec: Optional[float] = 20.0,
-    download_full_image: Optional[bool] = False,
+    out_dir: str = ".",
+    out_file: str = "cutout.png",
+    cutout_height_arcsec: float = 20.0,
+    cutout_width_arcsec: float = 20.0,
+    download_full_image: bool = False,
+    timeout: Optional[int] = 180,
+    full_image_timeout: Optional[int] = 600,
+    use_cache: bool = True,
+    compare: bool = False,
+    compare_kwargs: dict = {
+        "min_time_separation": 1 / 24,
+        "min_exposure_duration_ratio": 1.0,
+        "same_filter": True,
+    },
 ):
 
     # This seems unecessary but linting fails without it
@@ -200,10 +266,15 @@ def run_cutouts_from_precovery(
         )
     cutout_requests["delta_time"].fillna(1e-8, inplace=True)
 
-    cutout_results = get_cutouts(
+    cutout_results, comparison_results = get_cutouts(
         cast(DataFrame[CutoutRequestSchema], cutout_requests),
         out_dir=out_dir_path,
         download_full_image=download_full_image,
+        timeout=timeout,
+        full_image_timeout=full_image_timeout,
+        use_cache=use_cache,
+        compare=compare,
+        compare_kwargs=compare_kwargs,
     )
 
     plot_candidates = []
