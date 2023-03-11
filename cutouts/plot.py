@@ -455,6 +455,7 @@ def plot_cutouts(
 ) -> Tuple[matplotlib.figure.Figure, List[matplotlib.axes.Axes]]:
     """
     Plot cutouts on a grid.
+
     Parameters
     ----------
     paths : List[str]
@@ -511,6 +512,7 @@ def plot_cutouts(
         Keyword arguments to pass to `fig.subplots_adjust`.
     cmap : `~matplotlib.cm`
         Colormap for the cutout.
+
     Returns
     -------
     fig : `~matplotlib.figure.Figure`
@@ -565,8 +567,9 @@ def plot_cutouts(
         y = 1.0
         title = ""
         title += f"{times[i].iso}"
+        title += f"\nRA: {ra_i:.4f}, Dec: {dec_i:.4f}"
         if include_filters:
-            title += f"\n{filters[i]}"
+            title += f", {filters[i]}"
 
         if include_mag:
             if np.isnan(mag[i]) or mag[i] is None:
@@ -592,11 +595,11 @@ def plot_cutouts(
             else:
                 title += f", $\Delta$t: {exposure_time[i]:.0f}s"  # noqa: W605
 
-        if crosshair:
-            crosshair_size = (
-                crosshair_kwargs_i["length"] * 2.0 + crosshair_kwargs_i["gap"]
-            )
-            title += f', Xhair width: {crosshair_size}"'
+        # if crosshair:
+        # crosshair_size = (
+        #    crosshair_kwargs_i["length"] * 2.0 + crosshair_kwargs_i["gap"]
+        # )
+        # title += f', Xhair width: {crosshair_size}"'
 
         if path_i is None:
             if include_missing:
@@ -636,7 +639,7 @@ def plot_cutouts(
             j += 1
 
         if ax is not None:
-            ax.set_title(title, fontsize=6, y=y)
+            ax.set_title(title, fontsize=5, y=y)
             axs.append(ax)
 
     return fig, axs

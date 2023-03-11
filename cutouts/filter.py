@@ -185,7 +185,9 @@ def select_comparison_cutout(
         )
 
     # Sort by delta time
-    candidates_filtered = candidates_filtered.sort_values(by="abs_delta_time")
+    candidates_filtered = candidates_filtered.sort_values(
+        by="abs_delta_time", ascending=True
+    )
 
     # Select the first cutout
     candidate = candidates_filtered.to_dict(orient="records")[0]
