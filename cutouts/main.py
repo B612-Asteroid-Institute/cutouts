@@ -4,6 +4,7 @@ import pathlib
 import sys
 from typing import Any, Dict, Iterable, Optional, Tuple, cast
 
+import numpy as np
 import pandas as pd
 import pandera as pa
 from astropy.time import Time
@@ -12,7 +13,7 @@ from pandera.typing import DataFrame
 from .filter import select_comparison_cutout, select_cutout
 from .io import download_cutout, find_cutouts
 from .io.types import CutoutRequest, CutoutRequestSchema
-from .plot import plot_cutouts
+from .plot import generate_gif, plot_comparison_cutouts, plot_cutouts
 
 logger = logging.getLogger("cutouts")
 
@@ -58,15 +59,11 @@ def get_cutouts(
             logger.warning(e)
             result = {"error": e}
 
-        result = dict(result)
-        results.append(result)
-
         if compare:
             try:
                 comparison_result = select_comparison_cutout(
                     results_df, result, cutout_request, **compare_kwargs
                 )
-                comparison_result = dict(comparison_result)
 
             except FileNotFoundError as e:
                 logger.warning(e)
@@ -77,6 +74,9 @@ def get_cutouts(
 
         else:
             comparison_results.append(None)
+
+        result = dict(result)
+        results.append(result)
 
     for result in results:
         # Don't bother trying to download url if we didn't get a
@@ -305,6 +305,7 @@ def run_cutouts_from_precovery(
                 "filter": observations["filter"].values[i],
                 "exposure_start": result["exposure_start_mjd"],
                 "exposure_duration": result["exposure_duration"],
+                "exposure_id": result["exposure_id"],
             }
         plot_candidates.append(candidate)
 
@@ -317,4 +318,52 @@ def run_cutouts_from_precovery(
     )
     fig.savefig(out_dir_path.joinpath(out_file_path), bbox_inches="tight")
 
-    return cutout_results
+    if compare:
+        plot_comparison_candidates = []
+        for i, result in enumerate(comparison_results):
+            if "error" in result:
+                candidate = {
+                    "path": None,
+                    "ra": observations["pred_ra_deg"].values[i],
+                    "dec": observations["pred_dec_deg"].values[i],
+                    "vra": np.NaN,
+                    "vdec": np.NaN,
+                    "mag": np.NaN,
+                    "mag_sigma": np.NaN,
+                    "filter": result["filter"],
+                    "exposure_start": result["exposure_start_mjd"],
+                    "exposure_duration": result["exposure_duration"],
+                    "exposure_id": result["exposure_id"],
+                }
+            else:
+                candidate = {
+                    "path": result["cutout_image_path"],
+                    "ra": observations["pred_ra_deg"].values[i],
+                    "dec": observations["pred_dec_deg"].values[i],
+                    "vra": np.NaN,
+                    "vdec": np.NaN,
+                    "mag": np.NaN,
+                    "mag_sigma": np.NaN,
+                    "filter": result["filter"],
+                    "exposure_start": result["exposure_start_mjd"],
+                    "exposure_duration": result["exposure_duration"],
+                    "exposure_id": result["exposure_id"],
+                }
+            plot_comparison_candidates.append(candidate)
+
+        plot_comparison_candidates = pd.DataFrame(plot_comparison_candidates)
+
+        figs, axs = plot_comparison_cutouts(
+            plot_candidates,
+            plot_comparison_candidates,
+            cutout_height_arcsec=cutout_height_arcsec,
+            cutout_width_arcsec=cutout_width_arcsec,
+        )
+        generate_gif(
+            figs,
+            out_dir=out_dir_path,
+            out_file=out_file_path.with_suffix(".gif"),
+            cleanup=True,
+        )
+
+    return cutout_results, comparison_results

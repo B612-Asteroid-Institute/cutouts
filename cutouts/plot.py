@@ -1,6 +1,9 @@
 import logging
-from typing import List, Optional, Tuple
+import pathlib
+from typing import List, Tuple
 
+import imageio
+import imageio.v3 as iio
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -314,8 +317,8 @@ def plot_cutout(
     dec: float,
     vra: float,
     vdec: float,
-    height_arcsec: Optional[float] = 20,
-    width_arcsec: Optional[float] = 20,
+    height_arcsec: float = 20,
+    width_arcsec: float = 20,
     crosshair: bool = True,
     crosshair_kwargs: dict = {
         "gap": 2,
@@ -338,6 +341,7 @@ def plot_cutout(
     Plot a single cutout on the given axes.
     Note that when height_arcsec and width_arcsec are converted to pixel sizes, these converted
     values are rounded up to an integer number of pixels.
+
     Parameters
     ----------
     ax : `~matplotlib.axes.Axes`
@@ -417,8 +421,8 @@ def plot_cutouts(
     max_cols: int = 4,
     row_height: float = 2.0,
     col_width: float = 2.0,
-    cutout_height_arcsec: Optional[float] = 20,
-    cutout_width_arcsec: Optional[float] = 20,
+    cutout_height_arcsec: float = 20,
+    cutout_width_arcsec: float = 20,
     include_missing: bool = True,
     crosshair: bool = True,
     crosshair_detection_kwargs: dict = {
@@ -458,25 +462,8 @@ def plot_cutouts(
 
     Parameters
     ----------
-    paths : List[str]
-        Location of cutout file.
-    ra : `~numpy.ndarray` (N)
-        Predicted RA in degrees.
-    dec : `~numpy.ndarray` (N)
-        Predicted Dec in degrees.
-    vra : `~numpy.ndarray` (N)
-        Predicted RA-velocity in degrees per day.
-    vdec : `~numpy.ndarray` (N)
-        Predicted Dec in degrees in degrees per day.
-    filters : `~numpy.ndarray` (N)
-        Filters in which the observations were made.
-    mag : `~numpy.ndarray` (N)
-        Magnitude of the observation if detected. NaN magnitudes are interpreted
-        as undetected.
-    mag_sigma: `~numpy.ndarray` (N)
-        Magnitude error of the detected observation.
-    exposure_time : `~numpy.ndarray` (N)
-        Exposure time in seconds.
+    candidates : `~pandas.DataFrame`
+        DataFrame containing the candidates to plot.
     dpi : int, optional
         DPI of the plot.
     max_cols : int, optional
@@ -643,3 +630,192 @@ def plot_cutouts(
             axs.append(ax)
 
     return fig, axs
+
+
+def plot_comparison_cutouts(
+    candidates: pd.DataFrame,
+    comparison_candidates: pd.DataFrame,
+    dpi: int = 200,
+    max_cols: int = 4,
+    row_height: float = 2.0,
+    col_width: float = 2.0,
+    cutout_height_arcsec: float = 20,
+    cutout_width_arcsec: float = 20,
+    include_missing: bool = True,
+    crosshair: bool = True,
+    crosshair_detection_kwargs: dict = {
+        "gap": 2,
+        "length": 2,
+        "color": "#03fc0f",
+        "alpha": 1.0,
+        "zorder": 9,
+    },
+    crosshair_non_detection_kwargs: dict = {
+        "gap": 2,
+        "length": 2,
+        "color": "r",
+        "alpha": 1.0,
+        "zorder": 9,
+    },
+    velocity_vector: bool = True,
+    velocity_vector_kwargs: dict = {
+        "gap": 0.05,
+        "length": 0.15,
+        "color": "#34ebcd",
+        "width": 0.005,
+        "zorder": 10,
+    },
+    subplots_adjust_kwargs: dict = {
+        "hspace": 0.15,
+        "wspace": 0.15,
+        "left": 0.05,
+        "right": 0.95,
+        "top": 0.95,
+        "bottom": 0.02,
+    },
+    cmap=CMAP_BONE,
+) -> Tuple[List[matplotlib.figure.Figure], List[List[matplotlib.axes.Axes]]]:
+    """
+    Plot comparison cutouts. First, all comparison cutouts are plotted, then each
+    actual observation candidate is added one by one.
+
+    Parameters
+    ----------
+    candidates : pd.DataFrame
+        DataFrame containing the candidate observations.
+    comparison_candidates : pd.DataFrame
+        DataFrame containing the comparison observations.
+    dpi : int, optional
+        DPI of the plot.
+    max_cols : int, optional
+        Maximum number of columns the grid should have.
+    row_height : float, optional
+        Height in inches each row should have.
+    col_width : float, optional
+        Width in inches each column should have.
+    cutout_height_arcsec : float, optional
+        Desired height of the cutout in arcseconds.
+    cutout_width_arcsec : float, optional
+        Desired width of the cutout in arcseconds.
+    include_missing : bool, optional
+        Include an empty placeholder cutout if the cutout was not found (their paths are None).
+    crosshair : bool, optional
+        Add crosshairs centered on (RA, Dec). If the source is detected (see the magnitude
+        keyword argument), then the crosshair_detection_kwargs will be applied to the crosshair.
+        If the source is not detected (a NaN value or mag is None) then the crosshair_non_detection_kwargs
+        will be applied to the crosshair.
+    crosshair_detection_kwargs : dict
+        Keyword arguments to pass to `~cutouts.plot.add_crosshair` for detected sources.
+    crosshair_non_detection_kwargs : dict
+        Keyword arguments to pass to `~cutouts.plot.add_crosshair` for undetected sources.
+    velocity_vector : bool, optional
+        Add velocity vector showing predicted motion.
+    velocity_vector_kwargs : dict
+        Keyword arguments to pass to `~cutouts.plot.add_velocity_vector`.
+    height : int, optional
+        Desired height of the cutout in pixels.
+    width : int, optional
+        Desired width of the cutout in pixels.
+    subplots_adjust_kwargs : dict, optional
+        Keyword arguments to pass to `fig.subplots_adjust`.
+    cmap : `~matplotlib.cm`
+        Colormap for the cutout.
+
+    Returns
+    -------
+    figs : `~matplotlib.figure.Figure`
+        Matplotlib figure.
+    axs : list of `~matplotlib.axes.Axes`
+        Matplotlib axes.
+    """
+    figs = []
+    axs = []
+
+    for i in range(len(candidates) + 1):
+        candidates_i = pd.concat(
+            [candidates.iloc[:i], comparison_candidates.iloc[i:]], ignore_index=True
+        )
+
+        fig, ax = plot_cutouts(
+            candidates_i,
+            dpi=dpi,
+            max_cols=max_cols,
+            row_height=row_height,
+            col_width=col_width,
+            cutout_height_arcsec=cutout_height_arcsec,
+            cutout_width_arcsec=cutout_width_arcsec,
+            include_missing=include_missing,
+            crosshair=crosshair,
+            crosshair_detection_kwargs=crosshair_detection_kwargs,
+            crosshair_non_detection_kwargs=crosshair_non_detection_kwargs,
+            velocity_vector=velocity_vector,
+            velocity_vector_kwargs=velocity_vector_kwargs,
+            subplots_adjust_kwargs=subplots_adjust_kwargs,
+            cmap=cmap,
+        )
+
+        for j, a in enumerate(ax[:i]):
+            delta_time = (
+                candidates["exposure_start"].values[j]
+                - comparison_candidates["exposure_start"].values[j]
+            )
+            xlim = a.get_xlim()
+            xrange = xlim[1] - xlim[0]
+            xlim_min = xlim[0] + 0.05 * xrange
+
+            ylim = a.get_ylim()
+            yrange = ylim[1] - ylim[0]
+            ylim_max = ylim[1] - 0.1 * yrange
+
+            a.text(xlim_min, ylim_max, f"{delta_time:+.5f} d", c="#03fc0f", fontsize=10)
+
+        figs.append(fig)
+        axs.append(ax)
+
+    return figs, axs
+
+
+def generate_gif(
+    figs: List[matplotlib.figure.Figure],
+    out_dir: pathlib.Path = pathlib.Path("."),
+    out_file: pathlib.Path = pathlib.Path("cutout.gif"),
+    dpi: int = 200,
+    cleanup: bool = True,
+):
+    """
+    Generate a GIF from a list of matplotlib figures.
+
+    Parameters
+    ----------
+    figs : list of `~matplotlib.figure.Figure`
+        Matplotlib figures.
+    out_dir : `~pathlib.Path`
+        Output directory.
+    out_file : `~pathlib.Path`
+        Output file.
+    dpi : int, optional
+        DPI of the output GIF.
+    cleanup : bool, optional
+        Delete the individual PNG files after generating the GIF.
+    """
+    files = []
+    for i, fig in enumerate(figs):
+        file_path = out_dir.joinpath(f"comparison_{i:03d}.png")
+        fig.savefig(file_path, dpi=dpi, bbox_inches="tight")
+        files.append(file_path)
+
+    images = []
+    for file in files:
+        images.append(iio.imread(file))
+
+    imageio.mimsave(
+        out_dir.joinpath(out_file),
+        images,
+        duration=0.5 + 0.5 * len(files),
+        format="GIF",
+    )
+    if cleanup:
+        for file in files:
+            file.unlink()
+
+    return
