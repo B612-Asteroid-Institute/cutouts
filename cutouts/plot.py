@@ -527,7 +527,15 @@ def plot_cutouts(
         for paths_i in paths:
             if paths_i is not None:
                 num_obs += 1
-    num_rows = np.ceil(num_obs / max_cols).astype(int)
+
+    # If the number of observations is less than the maximum number of columns,
+    # then we can just use the number of observations as the number of columns.
+    if num_obs < max_cols:
+        num_cols = num_obs
+    else:
+        num_cols = max_cols
+
+    num_rows = np.ceil(num_obs / num_cols).astype(int)
 
     include_filters = False
     include_mag = False
@@ -542,7 +550,7 @@ def plot_cutouts(
     if isinstance(exposure_time, pd.Series):
         include_exposure_time = True
 
-    fig = plt.figure(figsize=(col_width * max_cols, row_height * num_rows), dpi=dpi)
+    fig = plt.figure(figsize=(col_width * num_cols, row_height * num_rows), dpi=dpi)
     fig.subplots_adjust(**subplots_adjust_kwargs)
 
     axs = []
@@ -590,7 +598,7 @@ def plot_cutouts(
 
         if path_i is None:
             if include_missing:
-                ax = fig.add_subplot(num_rows, max_cols, j + 1)
+                ax = fig.add_subplot(num_rows, num_cols, j + 1)
 
                 # TODO - This currently will result in poorly formatted cutout output when the
                 # cutouts requested are rectangular, as any that are missing will not preserve
@@ -608,7 +616,7 @@ def plot_cutouts(
                 j += 1
 
         else:
-            ax = fig.add_subplot(num_rows, max_cols, j + 1)
+            ax = fig.add_subplot(num_rows, num_cols, j + 1)
             ax = plot_cutout(
                 ax,
                 path_i,
@@ -801,7 +809,7 @@ def generate_gif(
     files = []
     for i, fig in enumerate(figs):
         file_path = out_dir.joinpath(f"comparison_{i:03d}.png")
-        fig.savefig(file_path, dpi=dpi, bbox_inches="tight")
+        fig.savefig(file_path, dpi=dpi)
         files.append(file_path)
 
     images = []
