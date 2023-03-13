@@ -2,7 +2,6 @@ import logging
 import pathlib
 from typing import List, Tuple
 
-import imageio
 import imageio.v3 as iio
 import matplotlib
 import matplotlib.pyplot as plt
@@ -816,11 +815,11 @@ def generate_gif(
     for file in files:
         images.append(iio.imread(file))
 
-    imageio.mimsave(
+    iio.imwrite(
         out_dir.joinpath(out_file),
         images,
-        duration=0.5 + 0.5 * len(files),
-        format="GIF",
+        duration=1000,  # time per frame in ms
+        loop=0,  # loop forever
     )
     if cleanup:
         for file in files:
