@@ -9,11 +9,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
+from astropy import units as u
+from astropy.coordinates import SkyCoord
 from astropy.io import fits
+from astropy.nddata import Cutout2D
 from astropy.time import Time
 from astropy.visualization import ImageNormalize, ZScaleInterval
 from astropy.wcs import WCS
-from astropy.wcs.utils import proj_plane_pixel_scales
 
 CMAP_BONE = matplotlib.cm.bone.copy()
 CMAP_BONE.set_bad("black")
@@ -159,161 +161,14 @@ def add_velocity_vector(
     return
 
 
-def center_image(
-    image: npt.NDArray[np.float64],
-    wcs: WCS,
-    ra: float,
-    dec: float,
-    height: int = 115,
-    width: int = 115,
-) -> Tuple[npt.NDArray[np.float64], int, int]:
-    """
-    Given an image and its WCS, ensure that (RA, Dec) is actually as near
-    to the center of the image as possible. Also, ensure that the image
-    is sized as (height, width). If the image is not centered, this function
-    will center (RA, Dec) as much as possible, and if the image is not the desired
-    shape then this function will pad columns/rows or trim columns/rows until it is the
-    desired shape.
-    Parameters
-    ----------
-    image : `~numpy.ndarray` (N, M)
-        2D array with image data.
-    wcs : `~astropy.wcs.wcs.WCS`
-        World Coordinate System (WCS) that maps pixels in an image to RA, Dec.
-    ra : float
-        RA in degrees of the desired center of the image.
-    dec : float
-        Dec in degrees of the desired center of the image.
-    height : int, optional
-        The desired height of the image.
-    width : int, optional
-        The desired width of the image.
-    Returns
-    -------
-    image_centered : `~numpy.ndarray` (height, width)
-        Image with desired height and width with RA, Dec as near to the center as possible.
-    x_offset : int
-        Offset in x-axis pixels from the sky-plane origin of the image (offsets might be non-zero
-        due to image centering and padding, and/or trimming).
-    y_offset : int
-        Offset in y-axis pixels from the sky-plane origin of the image (offsets might be non-zero
-        due to image centering, padding, and/or trimming)
-    """
-    # Calculate where RA and Dec fall in the actual image
-    image_x_center, image_y_center = wcs.world_to_array_index_values(ra, dec)
-
-    # The following is not a typo: note x,y change
-    pimage_y_center, pimage_x_center = wcs.world_to_pixel_values(ra, dec)
-
-    image_copy = image.copy()
-    num_rows, num_cols = image_copy.shape
-
-    cols_from_left = num_cols - 2 * image_x_center
-    rows_from_top = num_rows - 2 * image_y_center
-    x_offset, y_offset = 0, 0
-
-    if cols_from_left > 0:
-        pad_cols = np.abs(np.ceil(cols_from_left)).astype(int)
-        left_padding = np.zeros((image_copy.shape[0], pad_cols))
-        image_copy = np.hstack([left_padding, image_copy])
-        x_offset += pad_cols
-
-    elif cols_from_left < 0:
-        pad_cols = np.abs(np.ceil(-cols_from_left)).astype(int)
-        right_padding = np.zeros((image_copy.shape[0], pad_cols))
-        image_copy = np.hstack([image_copy, right_padding])
-
-    if rows_from_top > 0:
-        pad_rows = np.abs(np.ceil(rows_from_top)).astype(int)
-        top_padding = np.zeros((pad_rows, image_copy.shape[1]))
-        image_copy = np.vstack([top_padding, image_copy])
-        y_offset += pad_rows
-
-    elif rows_from_top < 0:
-        pad_rows = np.abs(np.ceil(-rows_from_top)).astype(int)
-        bottom_padding = np.zeros((pad_rows, image_copy.shape[1]))
-        image_copy = np.vstack([image_copy, bottom_padding])
-
-    # Update shape parameters
-    num_rows, num_cols = image_copy.shape
-
-    # Disable xbit, ybit for the time being
-    xbit = 0
-    if image_x_center - pimage_x_center > 0:
-        xbit = 0
-
-    ybit = 0
-    if image_y_center - pimage_y_center > 0:
-        ybit = 0
-
-    # If the image is not the desired width, pad more columns
-    # until it is
-    if num_cols < width:
-        num_cols = width - num_cols
-        for i in range(num_cols):
-            padding = np.zeros((image_copy.shape[0], 1))
-            if i % 2 == 0 + xbit:
-                image_copy = np.hstack([padding, image_copy])
-                x_offset += 1
-            else:
-                image_copy = np.hstack([image_copy, padding])
-
-    # Update shape parameters
-    num_rows, num_cols = image_copy.shape
-
-    # If the image is larger than the desired width, remove
-    # columns until it is
-    if num_cols > width:
-        num_cols = num_cols - width
-        for i in range(num_cols):
-            if i % 2 == 0 + xbit:
-                image_copy = image_copy[:, 1:]
-                x_offset -= 1
-            else:
-                image_copy = image_copy[:, :-1]
-
-    # Update shape parameters
-    num_rows, num_cols = image_copy.shape
-
-    # If the image is not the desired height, pad more rows
-    # until it is
-    if num_rows < height:
-        num_rows = height - num_rows
-        for i in range(num_rows):
-            padding = np.zeros((1, image_copy.shape[1]))
-            if i % 2 == 0 + ybit:
-                image_copy = np.vstack([padding, image_copy])
-                y_offset += 1
-            else:
-                image_copy = np.vstack([image_copy, padding])
-
-    # Update shape parameters
-    num_rows, num_cols = image_copy.shape
-
-    # If the image is larger than the desired height, remove
-    # rows until it is
-    if num_rows > height:
-        num_rows = num_rows - height
-        for i in range(num_rows):
-            if i % 2 == 0 + ybit:
-                image_copy = image_copy[1:, :]
-                y_offset -= 1
-            else:
-                image_copy = image_copy[:-1, :]
-
-    return image_copy, x_offset, y_offset
-
-
 def plot_cutout(
     ax: matplotlib.axes.Axes,
-    path: str,
+    image: npt.NDArray[np.float64],
     ra: float,
     dec: float,
     vra: float,
     vdec: float,
     dt: float,
-    height_arcsec: float = 20,
-    width_arcsec: float = 20,
     crosshair: bool = True,
     crosshair_kwargs: dict = CROSSHAIR_DETECTION_KWARGS,
     velocity_vector: bool = True,
@@ -322,15 +177,13 @@ def plot_cutout(
 ) -> matplotlib.axes.Axes:
     """
     Plot a single cutout on the given axes.
-    Note that when height_arcsec and width_arcsec are converted to pixel sizes, these converted
-    values are rounded up to an integer number of pixels.
 
     Parameters
     ----------
     ax : `~matplotlib.axes.Axes`
         Matplotlib axes (usually a subplot) on which to add cutout.
-    path : str
-        Location of cutout file.
+    image : `~numpy.ndarray` (N, M)
+        Image data.
     ra : float
         Predicted RA in degrees.
     dec : float
@@ -341,10 +194,6 @@ def plot_cutout(
         Predicted Dec in degrees in degrees per day.
     dt : float
         Exposure duration in units of seconds. Used to scale the velocity vector.
-    height_arcsec : float
-        Image height in arcseconds
-    width_arcsec : float
-        Image width in arcseconds
     crosshair : bool, optional
         Add crosshair centered on (RA, Dec).
     crosshair_kwargs : dict
@@ -353,32 +202,15 @@ def plot_cutout(
         Add velocity vector showing predicted motion.
     velocity_vector_kwargs : dict
         Keyword arguments to pass to `~cutouts.plot.add_velocity_vector`.
-    height : int, optional
-        Desired height of the cutout in pixels.
-    width : int, optional
-        Desired width of the cutout in pixels.
     cmap : `~matplotlib.cm`
         Colormap for the cutout.
     """
-    # Read file and get image
-    hdu = fits.open(path)[0]
-    image = hdu.data
-    hdr = hdu.header
-    wcs = WCS(hdr)
-    width_pixel_scale, height_pixel_scale = proj_plane_pixel_scales(wcs)
-    # TODO - double check image orientation
-    height_pix = np.ceil(height_arcsec / height_pixel_scale / 3600.0).astype(int)
-    width_pix = np.ceil(width_arcsec / width_pixel_scale / 3600.0).astype(int)
-    image_centered, x_offset, y_offset = center_image(
-        image, wcs, ra, dec, height=height_pix, width=width_pix
-    )
     ax.imshow(
-        image_centered,
+        image,
         origin="lower",
         cmap=cmap,
         norm=ImageNormalize(image, interval=ZScaleInterval()),
     )
-    ax.axis("off")
 
     if crosshair:
         add_crosshair(ax, ra, dec, **crosshair_kwargs)
@@ -393,6 +225,7 @@ def plot_cutout(
             **velocity_vector_kwargs,
         )
 
+    ax.axis("off")
     return ax
 
 
@@ -543,7 +376,7 @@ def plot_cutouts(
 
         if include_mag_sigma:
             if np.isnan(mag_sigma[i]):
-                title += ":$\pm$--.--"  # noqa: W605
+                title += "$\pm$--.--"  # noqa: W605
             else:
                 title += f"$\pm{mag_sigma[i]:.2f}$"  # noqa: W605
 
@@ -586,17 +419,32 @@ def plot_cutouts(
             hdr = hdu.header
             wcs = WCS(hdr)
 
+            # Center the cutout on the candidate's position and update
+            # the wcs to match
+            # Create SkyCoordinate for the center
+            center = SkyCoord(ra_i, dec_i, unit="deg", frame="icrs")
+            image_centered = Cutout2D(
+                hdu.data,
+                center,
+                (cutout_height_arcsec * u.arcsec, cutout_width_arcsec * u.arcsec),
+                wcs=wcs,
+                mode="partial",
+                fill_value=np.nan,
+            )
+            wcs = image_centered.wcs
+
+            # Set the projection for this subplot
             ax = fig.add_subplot(num_rows, num_cols, j + 1, projection=wcs)
+
+            # Plot the image
             ax = plot_cutout(
                 ax,
-                path_i,
+                image_centered.data,
                 ra_i,
                 dec_i,
                 vra_i,
                 vdec_i,
                 dt_i,
-                height_arcsec=cutout_height_arcsec,
-                width_arcsec=cutout_width_arcsec,
                 crosshair=crosshair,
                 crosshair_kwargs=crosshair_kwargs_i,
                 velocity_vector=velocity_vector,
