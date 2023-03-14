@@ -315,6 +315,7 @@ def plot_cutouts(
     mag = candidates["mag"]
     mag_sigma = candidates["mag_sigma"]
     exposure_time = candidates["exposure_duration"]
+    obscode = candidates["obscode"]
 
     if include_missing:
         num_obs = len(paths)
@@ -351,13 +352,13 @@ def plot_cutouts(
 
     axs = []
     j = 0
-    for i, (path_i, ra_i, dec_i, vra_i, vdec_i, dt_i) in enumerate(
-        zip(paths, ra, dec, vra, vdec, exposure_time)
+    for i, (path_i, ra_i, dec_i, vra_i, vdec_i, dt_i, obscode_i) in enumerate(
+        zip(paths, ra, dec, vra, vdec, exposure_time, obscode)
     ):
         ax = None
         y = 1.0
         title = ""
-        title += f"{times[i].iso}"
+        title += f"{times[i].iso} [{obscode_i}]"
         title += f"\nRA: {ra_i:.4f}, Dec: {dec_i:.4f}"
         if include_filters:
             title += f", {filters[i]}"
