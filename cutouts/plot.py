@@ -20,6 +20,15 @@ CMAP_BONE.set_bad("black")
 logger = logging.getLogger(__file__)
 
 
+VELOCITY_VECTOR_KWARGS: dict = {
+    "gap": 2,  # arcsec
+    "scale_factor": 10,  # increase velocity by a factor of 10
+    "color": "#34ebcd",
+    "width": 0.1,  # arcsec
+    "zorder": 10,
+}
+
+
 def add_crosshair(
     ax: matplotlib.axes.Axes,
     wcs: WCS,
@@ -84,27 +93,24 @@ def add_crosshair(
 
 def add_velocity_vector(
     ax: matplotlib.axes.Axes,
-    wcs: WCS,
     ra: float,
     dec: float,
     vra: float,
     vdec: float,
-    gap: float = 8,
-    length: float = 8,
-    width: float = 1,
-    x_offset: int = 0,
-    y_offset: int = 0,
+    dt: float,
+    scale_factor: float = 10,
+    gap: float = 1,
+    width: float = 0.1,
     **kwargs,
 ):
     """
     Add a velocity vector showing the predicted velocity of an object
     to an image.
+
     Parameters
     ----------
     ax : `~matplotlib.axes.Axes`
         Matplotlib axes (usually a subplot) on which to add the velocity vector.
-    wcs : `~astropy.wcs.wcs.WCS`
-        World Coordinate System (WCS) that maps pixels in an image to RA, Dec.
     ra : float
         Predicted RA in degrees.
     dec : float
@@ -113,52 +119,38 @@ def add_velocity_vector(
         Predicted RA-velocity in degrees per day.
     vdec : float
         Predicted Dec in degrees in degrees per day.
+    dt : float
+        Exposure duration in units of seconds. Used to scale the velocity vector.
+    scale_factor : float
+        Scale factor to multiply the velocity by. Used to scale the velocity vector.
     gap : float
-        Distance from center in percentage of img width to start drawing velocity vector.
-    length : float
-        Length in percentage of img width of velocity vector.
+        Distance from (RA, Dec) in arcseconds to start drawing the velocity vector.
     width : float
-        width in percentage of img width of velocity vector.
-    x_offset : int, optional
-        Offset in x-axis pixels from the sky-plane origin of the image (offsets might be non-zero
-        due to image centering and padding, and/or trimming).
-    y_offset : int, optional
-        Offset in y-axis pixels from the sky-plane origin of the image (offsets might be non-zero
-        due to image centering, padding, and/or trimming)
+        Arrow tail width in arcseconds. The head will be 3x the width.
     **kwargs
         Keyword arguments to pass to ax.arrow.
     """
-    # x_center, y_center = wcs.world_to_array_index_values(ra, dec)
-    x_center, y_center = wcs.world_to_pixel_values(ra, dec)
-    x_center = x_center + x_offset
-    y_center = y_center + y_offset
+    # Calculate the unit vector in the direction of the velocity
+    vra_hat = vra / np.sqrt(vra**2 + vdec**2)
+    vdec_hat = vdec / np.sqrt(vra**2 + vdec**2)
 
-    image_width_pixels, image_height_pixels = wcs.array_shape
+    # Convert to the correct units
+    gap_degree = gap / 3600
+    dra = vra * (dt / 86400) * scale_factor
+    ddec = vdec * (dt / 86400) * scale_factor
+    width_degree = width / 3600
 
-    length_scaled = length * image_width_pixels
-    gap_scaled = gap * image_width_pixels
-    width_scaled = width * image_width_pixels
-
-    dt = 1 / 24 / 2
-    y_propagated, x_propagated = wcs.world_to_pixel_values(
-        ra + vra * dt, dec + vdec * dt
-    )
-    x_propagated = x_propagated + x_offset
-    y_propagated = y_propagated + y_offset
-    vx = (x_propagated - x_center) / dt
-    vy = (y_propagated - y_center) / dt
-
-    vx_hat = vx / np.sqrt(vx**2 + vy**2)
-    vy_hat = vy / np.sqrt(vx**2 + vy**2)
-    # print(3 * width_scaled)
+    # Add the velocity vector
     ax.arrow(
-        x_center + gap_scaled * vx_hat,
-        y_center + gap_scaled * vy_hat,
-        length_scaled * vx_hat,
-        length_scaled * vy_hat,
-        width=width_scaled,
-        head_width=7 * width_scaled,
-        # length_includes_head=True,
+        ra + vra_hat * gap_degree,
+        dec + vdec_hat * gap_degree,
+        dra,
+        ddec,
+        width=width_degree,
+        head_width=3 * width_degree,
+        head_length=3 * width_degree,
+        transform=ax.get_transform("world"),
+        length_includes_head=True,
         **kwargs,
     )
     return
@@ -316,6 +308,7 @@ def plot_cutout(
     dec: float,
     vra: float,
     vdec: float,
+    dt: float,
     height_arcsec: float = 20,
     width_arcsec: float = 20,
     crosshair: bool = True,
@@ -327,13 +320,7 @@ def plot_cutout(
         "zorder": 9,
     },
     velocity_vector: bool = True,
-    velocity_vector_kwargs: dict = {
-        "gap": 2,
-        "length": 2,
-        "color": "#34ebcd",
-        "width": 0.2,
-        "zorder": 10,
-    },
+    velocity_vector_kwargs: dict = VELOCITY_VECTOR_KWARGS,
     cmap: matplotlib.cm = CMAP_BONE,
 ) -> matplotlib.axes.Axes:
     """
@@ -355,6 +342,8 @@ def plot_cutout(
         Predicted RA-velocity in degrees per day.
     vdec : float
         Predicted Dec in degrees in degrees per day.
+    dt : float
+        Exposure duration in units of seconds. Used to scale the velocity vector.
     height_arcsec : float
         Image height in arcseconds
     width_arcsec : float
@@ -401,13 +390,11 @@ def plot_cutout(
     if velocity_vector:
         add_velocity_vector(
             ax,
-            wcs,
             ra,
             dec,
             vra,
             vdec,
-            x_offset=x_offset,
-            y_offset=y_offset,
+            dt,
             **velocity_vector_kwargs,
         )
 
@@ -439,13 +426,7 @@ def plot_cutouts(
         "zorder": 9,
     },
     velocity_vector: bool = True,
-    velocity_vector_kwargs: dict = {
-        "gap": 0.05,
-        "length": 0.15,
-        "color": "#34ebcd",
-        "width": 0.005,
-        "zorder": 10,
-    },
+    velocity_vector_kwargs: dict = VELOCITY_VECTOR_KWARGS,
     subplots_adjust_kwargs: dict = {
         "hspace": 0.15,
         "wspace": 0.15,
@@ -554,8 +535,8 @@ def plot_cutouts(
 
     axs = []
     j = 0
-    for i, (path_i, ra_i, dec_i, vra_i, vdec_i) in enumerate(
-        zip(paths, ra, dec, vra, vdec)
+    for i, (path_i, ra_i, dec_i, vra_i, vdec_i, dt_i) in enumerate(
+        zip(paths, ra, dec, vra, vdec, exposure_time)
     ):
         ax = None
         y = 1.0
@@ -615,7 +596,14 @@ def plot_cutouts(
                 j += 1
 
         else:
-            ax = fig.add_subplot(num_rows, num_cols, j + 1)
+
+            # Read WCS and add plot projection here since a subplot's
+            # projection cannot be altered once created...
+            hdu = fits.open(path_i)[0]
+            hdr = hdu.header
+            wcs = WCS(hdr)
+
+            ax = fig.add_subplot(num_rows, num_cols, j + 1, projection=wcs)
             ax = plot_cutout(
                 ax,
                 path_i,
@@ -623,6 +611,7 @@ def plot_cutouts(
                 dec_i,
                 vra_i,
                 vdec_i,
+                dt_i,
                 height_arcsec=cutout_height_arcsec,
                 width_arcsec=cutout_width_arcsec,
                 crosshair=crosshair,
@@ -665,13 +654,7 @@ def plot_comparison_cutouts(
         "zorder": 9,
     },
     velocity_vector: bool = True,
-    velocity_vector_kwargs: dict = {
-        "gap": 0.05,
-        "length": 0.15,
-        "color": "#34ebcd",
-        "width": 0.005,
-        "zorder": 10,
-    },
+    velocity_vector_kwargs: dict = VELOCITY_VECTOR_KWARGS,
     subplots_adjust_kwargs: dict = {
         "hspace": 0.15,
         "wspace": 0.15,
