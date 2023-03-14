@@ -55,7 +55,7 @@ def generate_ztf_image_urls_for_result(
         f"{fracday}/"
         f"ztf_{filefracday_str}_"
         f"{paddedfield}_"
-        f"{filtercode}_"
+        f"z{filtercode}_"  # z's have been removed from the filtercode at query time so add them here
         f"c{paddedccdid}_"
         f"{imgtypecode}_"
         f"q{qid_str}_"
@@ -124,6 +124,9 @@ def find_cutouts_ztf(cutout_request: CutoutRequest) -> DataFrame[CutoutsResultSc
         },
         inplace=True,
     )
+
+    # Remove the prepended z from all filter names
+    results["filter"] = results["filter"].str[1:]
 
     # Cast the exposure_id to a string
     results["exposure_id"] = results["exposure_id"].astype(str)
