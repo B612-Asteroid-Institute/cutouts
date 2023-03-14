@@ -1,5 +1,6 @@
 import logging
 import pathlib
+from copy import copy
 from typing import List, Tuple
 
 import imageio.v3 as iio
@@ -27,27 +28,32 @@ VELOCITY_VECTOR_KWARGS: dict = {
     "width": 0.1,  # arcsec
     "zorder": 10,
 }
+CROSSHAIR_DETECTION_KWARGS: dict = {
+    "gap": 2,
+    "length": 2,
+    "color": "#03fc0f",
+    "alpha": 1.0,
+    "zorder": 9,
+}
+CROSSHAIR_NON_DETECTION_KWARGS: dict = copy(CROSSHAIR_DETECTION_KWARGS)
+CROSSHAIR_NON_DETECTION_KWARGS["color"] = "r"
 
 
 def add_crosshair(
     ax: matplotlib.axes.Axes,
-    wcs: WCS,
     ra: float,
     dec: float,
     gap: float = 2,
     length: float = 2,
-    x_offset: int = 0,
-    y_offset: int = 0,
     **kwargs,
 ):
     """
     Add a crosshair centered on RA and Dec to the given axes.
+
     Parameter
     ---------
     ax : `~matplotlib.axes.Axes`
         Matplotlib axes (usually a subplot) on which to add the crosshair.
-    wcs : `~astropy.wcs.wcs.WCS`
-        World Coordinate System (WCS) that maps pixels in an image to RA, Dec.
     ra : float
         Predicted RA in degrees.
     dec : float
@@ -56,38 +62,35 @@ def add_crosshair(
         Distance from center in arcseconds to start drawing crosshair reticle bar.
     length : float
         Length in arcseconds of an individual bar reticle.
-    x_offset : int, optional
-        Offset in x-axis pixels from the sky-plane origin of the image (offsets might be non-zero
-        due to image centering, padding, and/or trimming).
-    y_offset : int, optional
-        Offset in y-axis pixels from the sky-plane origin of the image (offsets might be non-zero
-        due to image centering, padding, and/or trimming).
     **kwargs
         Keyword arguments to pass to ax.hlines and ax.vlines.
     """
-    # Get pixel location of RA and Dec
-    x_center, y_center = wcs.world_to_pixel_values(ra, dec)
+    # Convert to degrees
+    gap_degree = gap / 3600
+    length_degree = length / 3600
 
-    x_center = x_center + x_offset
-    y_center = y_center + y_offset
+    # Set the number of points to draw each reticle
+    n = 100
 
-    width_pixel_scale, height_pixel_scale = proj_plane_pixel_scales(wcs)
+    # Plot the top graticule of the crosshair (N)
+    ras = np.ones(n) * ra
+    decs = np.linspace(dec + gap_degree, dec + gap_degree + length_degree, n)
+    ax.plot(ras, decs, transform=ax.get_transform("world"), **kwargs)
 
-    gap_scaled = (gap / 3600.0) / width_pixel_scale
-    length_scaled = (length / 3600.0) / width_pixel_scale
+    # Plot the bottom graticule of the crosshair (S)
+    ras = np.ones(n) * ra
+    decs = np.linspace(dec - gap_degree, dec - gap_degree - length_degree, n)
+    ax.plot(ras, decs, transform=ax.get_transform("world"), **kwargs)
 
-    ax.vlines(
-        x_center, y_center + gap_scaled, y_center + gap_scaled + length_scaled, **kwargs
-    )
-    ax.vlines(
-        x_center, y_center - gap_scaled, y_center - gap_scaled - length_scaled, **kwargs
-    )
-    ax.hlines(
-        y_center, x_center + gap_scaled, x_center + gap_scaled + length_scaled, **kwargs
-    )
-    ax.hlines(
-        y_center, x_center - gap_scaled, x_center - gap_scaled - length_scaled, **kwargs
-    )
+    # Plot the left graticule of the crosshair (E)
+    ras = np.linspace(ra + gap_degree, ra + gap_degree + length_degree, n)
+    decs = np.ones(n) * dec
+    ax.plot(ras, decs, transform=ax.get_transform("world"), **kwargs)
+
+    # Plot the left graticule of the crosshair (W)
+    ras = np.linspace(ra - gap_degree, ra - gap_degree - length_degree, n)
+    decs = np.ones(n) * dec
+    ax.plot(ras, decs, transform=ax.get_transform("world"), **kwargs)
     return
 
 
@@ -312,13 +315,7 @@ def plot_cutout(
     height_arcsec: float = 20,
     width_arcsec: float = 20,
     crosshair: bool = True,
-    crosshair_kwargs: dict = {
-        "gap": 2,
-        "length": 2,
-        "color": "r",
-        "alpha": 0.9,
-        "zorder": 9,
-    },
+    crosshair_kwargs: dict = CROSSHAIR_DETECTION_KWARGS,
     velocity_vector: bool = True,
     velocity_vector_kwargs: dict = VELOCITY_VECTOR_KWARGS,
     cmap: matplotlib.cm = CMAP_BONE,
@@ -384,9 +381,7 @@ def plot_cutout(
     ax.axis("off")
 
     if crosshair:
-        add_crosshair(
-            ax, wcs, ra, dec, x_offset=x_offset, y_offset=y_offset, **crosshair_kwargs
-        )
+        add_crosshair(ax, ra, dec, **crosshair_kwargs)
     if velocity_vector:
         add_velocity_vector(
             ax,
@@ -411,20 +406,8 @@ def plot_cutouts(
     cutout_width_arcsec: float = 20,
     include_missing: bool = True,
     crosshair: bool = True,
-    crosshair_detection_kwargs: dict = {
-        "gap": 2,
-        "length": 2,
-        "color": "#03fc0f",
-        "alpha": 1.0,
-        "zorder": 9,
-    },
-    crosshair_non_detection_kwargs: dict = {
-        "gap": 2,
-        "length": 2,
-        "color": "r",
-        "alpha": 1.0,
-        "zorder": 9,
-    },
+    crosshair_detection_kwargs: dict = CROSSHAIR_DETECTION_KWARGS,
+    crosshair_non_detection_kwargs: dict = CROSSHAIR_NON_DETECTION_KWARGS,
     velocity_vector: bool = True,
     velocity_vector_kwargs: dict = VELOCITY_VECTOR_KWARGS,
     subplots_adjust_kwargs: dict = {
@@ -639,20 +622,8 @@ def plot_comparison_cutouts(
     cutout_width_arcsec: float = 20,
     include_missing: bool = True,
     crosshair: bool = True,
-    crosshair_detection_kwargs: dict = {
-        "gap": 2,
-        "length": 2,
-        "color": "#03fc0f",
-        "alpha": 1.0,
-        "zorder": 9,
-    },
-    crosshair_non_detection_kwargs: dict = {
-        "gap": 2,
-        "length": 2,
-        "color": "r",
-        "alpha": 1.0,
-        "zorder": 9,
-    },
+    crosshair_detection_kwargs: dict = CROSSHAIR_DETECTION_KWARGS,
+    crosshair_non_detection_kwargs: dict = CROSSHAIR_NON_DETECTION_KWARGS,
     velocity_vector: bool = True,
     velocity_vector_kwargs: dict = VELOCITY_VECTOR_KWARGS,
     subplots_adjust_kwargs: dict = {
