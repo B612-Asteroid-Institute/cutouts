@@ -134,6 +134,9 @@ def add_velocity_vector(
     Add a velocity vector showing the predicted velocity of an object
     to an image.
 
+    If the velocity vector is larger than the image boundary, it will be clipped and the
+    color set to red.
+
     Parameters
     ----------
     ax : `~matplotlib.axes.Axes`
@@ -167,10 +170,18 @@ def add_velocity_vector(
     ddec = vdec * (dt / 86400) * scale_factor
     width_degree = width / 3600
 
+    # Calculate the starting point of the arrow
+    ra0 = ra + vra_hat * gap_degree
+    dec0 = dec + vdec_hat * gap_degree
+
+    # Store boundaries of the image
+    x_lim = ax.get_xlim()
+    y_lim = ax.get_ylim()
+
     # Add the velocity vector
-    ax.arrow(
-        ra + vra_hat * gap_degree,
-        dec + vdec_hat * gap_degree,
+    arrow = ax.arrow(
+        ra0,
+        dec0,
         dra,
         ddec,
         width=width_degree,
@@ -180,6 +191,16 @@ def add_velocity_vector(
         length_includes_head=True,
         **kwargs,
     )
+
+    if ax.get_xlim() != x_lim or ax.get_ylim() != y_lim:
+        # If the arrow is outside the image boundaries then
+        # change the color to red
+        arrow.set_color("red")
+
+        # and reset the image boundaries
+        ax.set_xlim(x_lim)
+        ax.set_ylim(y_lim)
+
     return
 
 
