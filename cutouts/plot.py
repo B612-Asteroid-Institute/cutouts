@@ -74,10 +74,32 @@ def add_crosshair(
     # Set the number of points to draw each reticle
     n = 100
 
+    # Set the width of the crosshair
+    width_degree = 0.1 / 3600
+
     # Plot the top graticule of the crosshair (N)
-    ras = np.ones(n) * ra
-    decs = np.linspace(dec + gap_degree, dec + gap_degree + length_degree, n)
-    ax.plot(ras, decs, transform=ax.get_transform("world"), **kwargs)
+    ax.arrow(
+        ra,
+        dec + gap_degree,
+        0,
+        length_degree,
+        transform=ax.get_transform("world"),
+        width=width_degree,
+        head_width=4 * width_degree,
+        head_length=4 * width_degree,
+        length_includes_head=True,
+        **kwargs,
+    )
+    ax.text(
+        ra,
+        dec + gap_degree + length_degree + 1 / 3600,
+        "N",
+        horizontalalignment="center",
+        verticalalignment="center",
+        transform=ax.get_transform("world"),
+        color=kwargs["color"],
+        fontsize=6,
+    )
 
     # Plot the bottom graticule of the crosshair (S)
     ras = np.ones(n) * ra
