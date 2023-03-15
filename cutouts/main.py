@@ -286,13 +286,13 @@ def run_cutouts_from_precovery(
                 "dec": observations["pred_dec_deg"].values[i],
                 "vra": observations["pred_vra_degpday"].values[i],
                 "vdec": observations["pred_vdec_degpday"].values[i],
-                "mag": observations["mag"].values[i],
-                "mag_sigma": observations["mag_sigma"].values[i],
-                "filter": observations["filter"].values[i],
+                "mag": np.NaN,
+                "mag_sigma": np.NaN,
+                "filter": None,
                 "obscode": observations["obscode"].values[i],
-                "exposure_start": observations["exposure_mjd_start"].values[i],
-                "exposure_duration": observations["exposure_duration"].values[i],
-                "exposure_id": observations["exposure_id"].values[i],
+                "exposure_start": np.NaN,
+                "exposure_duration": np.NaN,
+                "exposure_id": None,
             }
         else:
             candidate = {
@@ -332,11 +332,11 @@ def run_cutouts_from_precovery(
                     "vdec": np.NaN,
                     "mag": np.NaN,
                     "mag_sigma": np.NaN,
-                    "filter": result["filter"],
+                    "filter": None,
                     "obscode": observations["obscode"].values[i],
-                    "exposure_start": result["exposure_start_mjd"],
-                    "exposure_duration": result["exposure_duration"],
-                    "exposure_id": result["exposure_id"],
+                    "exposure_start": np.NaN,
+                    "exposure_duration": np.NaN,
+                    "exposure_id": None,
                 }
             else:
                 candidate = {

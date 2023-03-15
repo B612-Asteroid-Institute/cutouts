@@ -346,19 +346,17 @@ def plot_cutouts(
     ax : list of `~matplotlib.axes.Axes`
         Matplotlib axes.
     """
-    paths = candidates["path"]
-    times = candidates["exposure_start"].map(
-        lambda x: Time(x, scale="utc", format="mjd")
-    )
-    ra = candidates["ra"]
-    dec = candidates["dec"]
-    vra = candidates["vra"]
-    vdec = candidates["vdec"]
-    filters = candidates["filter"]
-    mag = candidates["mag"]
-    mag_sigma = candidates["mag_sigma"]
-    exposure_time = candidates["exposure_duration"]
-    obscode = candidates["obscode"]
+    paths = candidates["path"].values
+    times = candidates["exposure_start"].values
+    ra = candidates["ra"].values
+    dec = candidates["dec"].values
+    vra = candidates["vra"].values
+    vdec = candidates["vdec"].values
+    filters = candidates["filter"].values
+    mag = candidates["mag"].values
+    mag_sigma = candidates["mag_sigma"].values
+    exposure_time = candidates["exposure_duration"].values
+    obscode = candidates["obscode"].values
 
     if include_missing:
         num_obs = len(paths)
@@ -377,19 +375,6 @@ def plot_cutouts(
 
     num_rows = np.ceil(num_obs / num_cols).astype(int)
 
-    include_filters = False
-    include_mag = False
-    include_mag_sigma = False
-    include_exposure_time = False
-    if isinstance(filters, pd.Series):
-        include_filters = True
-    if isinstance(mag, pd.Series):
-        include_mag = True
-    if isinstance(mag_sigma, pd.Series):
-        include_mag_sigma = True
-    if isinstance(exposure_time, pd.Series):
-        include_exposure_time = True
-
     fig = plt.figure(figsize=(col_width * num_cols, row_height * num_rows), dpi=dpi)
     fig.subplots_adjust(**subplots_adjust_kwargs)
 
@@ -400,41 +385,36 @@ def plot_cutouts(
     ):
         ax = None
         y = 1.0
-        title = ""
-        title += f"{times[i].iso} [{obscode_i}]"
-        title += f"\nRA: {ra_i:.4f}, Dec: {dec_i:.4f}"
-        if include_filters:
-            title += f", {filters[i]}"
+        cutout_title = ""
 
-        if include_mag:
-            if np.isnan(mag[i]) or mag[i] is None:
-                crosshair_kwargs_i = crosshair_non_detection_kwargs
-                title += ": --.--"
-            else:
-                crosshair_kwargs_i = crosshair_detection_kwargs
-                title += f": {mag[i]:.2f}"
-            y -= 0.03
+        if np.isnan(times[i]):
+            cutout_title += f"[{obscode_i}]"
+        else:
+            time_i = Time(times[i], format="mjd", scale="utc")
+            cutout_title += f"{time_i.isot} [{obscode_i}]"
 
+        cutout_title += f"\nRA: {ra_i:.4f}, Dec: {dec_i:.4f}"
+
+        if filters[i] is not None:
+            cutout_title += f", {filters[i]}"
+
+        if np.isnan(mag[i]):
+            crosshair_kwargs_i = crosshair_non_detection_kwargs
+            cutout_title += ": --.--"
         else:
             crosshair_kwargs_i = crosshair_detection_kwargs
+            cutout_title += f": {mag[i]:.2f}"
+        y -= 0.03
 
-        if include_mag_sigma:
-            if np.isnan(mag_sigma[i]):
-                title += "$\pm$--.--"  # noqa: W605
-            else:
-                title += f"$\pm{mag_sigma[i]:.2f}$"  # noqa: W605
+        if np.isnan(mag_sigma[i]):
+            cutout_title += "$\pm$--.--"  # noqa: W605
+        else:
+            cutout_title += f"$\pm{mag_sigma[i]:.2f}$"  # noqa: W605
 
-        if include_exposure_time:
-            if np.isnan(exposure_time[i]):
-                title += ", $\Delta$t: ---s"  # noqa: W605
-            else:
-                title += f", $\Delta$t: {exposure_time[i]:.0f}s"  # noqa: W605
-
-        # if crosshair:
-        # crosshair_size = (
-        #    crosshair_kwargs_i["length"] * 2.0 + crosshair_kwargs_i["gap"]
-        # )
-        # title += f', Xhair width: {crosshair_size}"'
+        if np.isnan(exposure_time[i]):
+            cutout_title += ", $\Delta$t: ---s"  # noqa: W605
+        else:
+            cutout_title += f", $\Delta$t: {exposure_time[i]:.0f}s"  # noqa: W605
 
         if path_i is None:
             if include_missing:
@@ -497,7 +477,7 @@ def plot_cutouts(
             j += 1
 
         if ax is not None:
-            ax.set_title(title, fontsize=5, y=y)
+            ax.set_title(cutout_title, fontsize=5, y=y)
             axs.append(ax)
 
     return fig, axs
@@ -608,19 +588,25 @@ def plot_comparison_cutouts(
         )
 
         for j, a in enumerate(ax[:i]):
-            delta_time = (
-                candidates["exposure_start"].values[j]
-                - comparison_candidates["exposure_start"].values[j]
-            )
-            xlim = a.get_xlim()
-            xrange = xlim[1] - xlim[0]
-            xlim_min = xlim[0] + 0.05 * xrange
 
-            ylim = a.get_ylim()
-            yrange = ylim[1] - ylim[0]
-            ylim_max = ylim[1] - 0.1 * yrange
+            if not np.isnan(candidates["exposure_start"].values[j]) and not np.isnan(
+                comparison_candidates["exposure_start"].values[j]
+            ):
+                delta_time = (
+                    candidates["exposure_start"].values[j]
+                    - comparison_candidates["exposure_start"].values[j]
+                )
+                xlim = a.get_xlim()
+                xrange = xlim[1] - xlim[0]
+                xlim_min = xlim[0] + 0.05 * xrange
 
-            a.text(xlim_min, ylim_max, f"{delta_time:+.5f} d", c="#03fc0f", fontsize=10)
+                ylim = a.get_ylim()
+                yrange = ylim[1] - ylim[0]
+                ylim_max = ylim[1] - 0.1 * yrange
+
+                a.text(
+                    xlim_min, ylim_max, f"{delta_time:+.5f} d", c="#03fc0f", fontsize=10
+                )
 
         figs.append(fig)
         axs.append(ax)
