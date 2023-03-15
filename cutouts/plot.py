@@ -39,6 +39,14 @@ CROSSHAIR_DETECTION_KWARGS: dict = {
 }
 CROSSHAIR_NON_DETECTION_KWARGS: dict = copy(CROSSHAIR_DETECTION_KWARGS)
 CROSSHAIR_NON_DETECTION_KWARGS["color"] = "r"
+SUBPLOTS_ADJUST_KWARGS: dict = {
+    "hspace": 0.15,
+    "wspace": 0.15,
+    "left": 0.05,
+    "right": 0.95,
+    "top": 0.90,
+    "bottom": 0.05,
+}
 
 
 def add_crosshair(
@@ -286,14 +294,7 @@ def plot_cutouts(
     crosshair_non_detection_kwargs: dict = CROSSHAIR_NON_DETECTION_KWARGS,
     velocity_vector: bool = True,
     velocity_vector_kwargs: dict = VELOCITY_VECTOR_KWARGS,
-    subplots_adjust_kwargs: dict = {
-        "hspace": 0.15,
-        "wspace": 0.15,
-        "left": 0.05,
-        "right": 0.95,
-        "top": 0.95,
-        "bottom": 0.02,
-    },
+    subplots_adjust_kwargs: dict = SUBPLOTS_ADJUST_KWARGS,
     cmap=CMAP_BONE,
 ) -> Tuple[matplotlib.figure.Figure, List[matplotlib.axes.Axes]]:
     """
@@ -498,14 +499,7 @@ def plot_comparison_cutouts(
     crosshair_non_detection_kwargs: dict = CROSSHAIR_NON_DETECTION_KWARGS,
     velocity_vector: bool = True,
     velocity_vector_kwargs: dict = VELOCITY_VECTOR_KWARGS,
-    subplots_adjust_kwargs: dict = {
-        "hspace": 0.15,
-        "wspace": 0.15,
-        "left": 0.05,
-        "right": 0.95,
-        "top": 0.95,
-        "bottom": 0.02,
-    },
+    subplots_adjust_kwargs: dict = SUBPLOTS_ADJUST_KWARGS,
     cmap=CMAP_BONE,
 ) -> Tuple[List[matplotlib.figure.Figure], List[List[matplotlib.axes.Axes]]]:
     """
