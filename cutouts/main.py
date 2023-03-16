@@ -31,7 +31,9 @@ def get_cutouts(
     cutout_requests: DataFrame[CutoutRequestSchema],
     out_dir: str = "~/.cutouts",
     timeout: Optional[int] = 180,
+    full_image_timeout: Optional[int] = 600,
     use_cache: bool = True,
+    download_full_image: bool = False,
 ) -> Iterable[Dict[str, Any]]:
     """ """
 
@@ -63,7 +65,7 @@ def get_cutouts(
         result["full_image_path"] = pathlib.Path(out_dir) / full_image_path
         result["cutout_image_path"] = pathlib.Path(out_dir) / cutout_image_path
 
-        for path in [result["full_image_path"], result["cutout_image_path"]]:
+        for path in result["cutout_image_path"]:
             if path.exists():
                 if use_cache:
                     logger.info(
@@ -81,6 +83,26 @@ def get_cutouts(
                 )
             except FileNotFoundError as e:
                 result["error"] = str(e)
+    
+        if download_full_image == True:
+            for path in result["full_image_path"]:
+                if path.exists():
+                    if use_cache:
+                        logger.info(
+                            f"{path} already exists locally and using cache, skipping"
+                        )
+                        continue
+
+                try:
+                    download_cutout(
+                        result["image_url"],
+                        out_file=path.as_posix(),
+                        cache=True,
+                        pkgname="cutouts",
+                        timeout=full_image_timeout,
+                    )
+                except FileNotFoundError as e:
+                    result["error"] = str(e)
 
     return results
 
@@ -140,7 +162,9 @@ def run_cutouts_from_precovery(
     out_file: pathlib.Path = pathlib.Path("cutout.png"),
     cutout_height_arcsec: float = 20.0,
     cutout_width_arcsec: float = 20.0,
+    download_full_image: bool = False,
 ):
+    
     cutout_requests = observations[
         [
             "obscode",
@@ -179,7 +203,7 @@ def run_cutouts_from_precovery(
 
     cutout_results = get_cutouts(
         cast(DataFrame[CutoutRequestSchema], cutout_requests),
-        out_dir=str(out_dir),
+        out_dir=str(out_dir), download_full_image=download_full_image,
     )
 
     plot_candidates = []
@@ -220,6 +244,6 @@ def run_cutouts_from_precovery(
         cutout_height_arcsec=cutout_height_arcsec,
         cutout_width_arcsec=cutout_width_arcsec,
     )
-    fig.savefig(out_dir.joinpath(out_file), bbox_inches="tight")
+    fig.savefig(pathlib.Path(out_dir).joinpath(pathlib.Path(out_file)), bbox_inches="tight")
 
     return cutout_results
