@@ -32,8 +32,8 @@ def get_cutouts(
     out_dir: str = "~/.cutouts",
     timeout: Optional[int] = 180,
     full_image_timeout: Optional[int] = 600,
-    use_cache: bool = True,
-    download_full_image: bool = False,
+    use_cache: Optional[bool] = True,
+    download_full_image: Optional[bool] = False,
 ) -> Iterable[Dict[str, Any]]:
     """ """
 
@@ -65,38 +65,35 @@ def get_cutouts(
         result["full_image_path"] = pathlib.Path(out_dir) / full_image_path
         result["cutout_image_path"] = pathlib.Path(out_dir) / cutout_image_path
 
-        for path in result["cutout_image_path"]:
-            if path.exists():
-                if use_cache:
-                    logger.info(
-                        f"{path} already exists locally and using cache, skipping"
-                    )
-                    continue
+        cutout_path = result["cutout_image_path"]
+        image_path = result["full_image_path"]
 
+        if cutout_path.exists() and use_cache:
+            logger.info(
+                f"{cutout_path} already exists locally and using cache, skipping"
+            )
+        else:
             try:
                 download_cutout(
                     result["cutout_url"],
-                    out_file=path.as_posix(),
+                    out_file=cutout_path.as_posix(),
                     cache=True,
                     pkgname="cutouts",
                     timeout=timeout,
                 )
             except FileNotFoundError as e:
                 result["error"] = str(e)
-    
-        if download_full_image == True:
-            for path in result["full_image_path"]:
-                if path.exists():
-                    if use_cache:
-                        logger.info(
-                            f"{path} already exists locally and using cache, skipping"
-                        )
-                        continue
 
+        if download_full_image == True:
+            if image_path.exists() and use_cache:
+                logger.info(
+                    f"{image_path} already exists locally and using cache, skipping"
+                )
+            else:
                 try:
                     download_cutout(
                         result["image_url"],
-                        out_file=path.as_posix(),
+                        out_file=image_path.as_posix(),
                         cache=True,
                         pkgname="cutouts",
                         timeout=full_image_timeout,
@@ -158,11 +155,11 @@ def main():
 
 def run_cutouts_from_precovery(
     observations: pd.DataFrame,
-    out_dir: pathlib.Path = pathlib.Path("."),
-    out_file: pathlib.Path = pathlib.Path("cutout.png"),
-    cutout_height_arcsec: float = 20.0,
-    cutout_width_arcsec: float = 20.0,
-    download_full_image: bool = False,
+    out_dir: Optional[pathlib.Path] = pathlib.Path("."),
+    out_file: Optional[pathlib.Path] = pathlib.Path("cutout.png"),
+    cutout_height_arcsec: Optional[float] = 20.0,
+    cutout_width_arcsec: Optional[float] = 20.0,
+    download_full_image: Optional[bool] = False,
 ):
     
     cutout_requests = observations[
