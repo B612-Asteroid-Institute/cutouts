@@ -25,7 +25,7 @@ logger = logging.getLogger(__file__)
 
 VELOCITY_VECTOR_KWARGS: dict = {
     "gap": 2,  # arcsec
-    "scale_factor": 10,  # increase velocity by a factor of 10
+    "scale_factor": 1,  # set default scale factor to be 1
     "color": "#34ebcd",
     "width": 0.1,  # arcsec
     "zorder": 10,
