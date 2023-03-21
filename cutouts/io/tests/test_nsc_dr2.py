@@ -5,7 +5,7 @@ from unittest.mock import patch
 from astropy.io.votable import parse
 from pyvo.dal.sia import SIAResults
 
-from ..nsc import find_cutouts_nsc_dr2
+from ..nsc import NSC_DR2_SIA, find_cutouts_nsc_dr2
 from ..types import CutoutRequest
 
 # 2014 HE199 (2014-04-28T08:07:52.435)
@@ -30,7 +30,7 @@ TEST_REQUESTS = [cutout_request1]
 
 @contextmanager
 def mock_sia_nsc_dr2_query(table_file: str):
-    with patch("cutouts.io.nsc.NSC_DR2_SIA.search") as mock_query:
+    with patch.object(NSC_DR2_SIA, "search") as mock_query:
         table_file = os.path.join(
             os.path.dirname(__file__), "testdata", "nsc_dr2", table_file
         )
@@ -45,7 +45,12 @@ def test_sia_nsc_dr2_query():
         "nsc_dr2_227.5251615214173_-27.026013823449265_56775.33880132809.xml"
     ) as mock:
         results = find_cutouts_nsc_dr2(cutout_request1)
-        mock.assert_called_once()
+        mock.assert_called_once_with(
+            cutout_request1.ra_deg,
+            cutout_request1.dec_deg,
+            cutout_request1.height_arcsec,
+            cutout_request1.width_arcsec,
+        )
 
         for col in [
             "ra_deg",

@@ -5,7 +5,7 @@ from unittest.mock import patch
 from astropy.io.votable import parse
 from pyvo.dal.sia import SIAResults
 
-from ..skymapper import find_cutouts_skymapper_dr2
+from ..skymapper import SKYMAPPER_DR2_SIA, find_cutouts_skymapper_dr2
 from ..types import CutoutRequest
 
 # 2021 EZ3 (2015-09-11T08:50:29.000)
@@ -29,7 +29,7 @@ TEST_REQUESTS = [cutout_request1]
 
 @contextmanager
 def mock_sia_skymapper_dr2_query(table_file: str):
-    with patch("cutouts.io.skymapper.SKYMAPPER_DR2_SIA.search") as mock_query:
+    with patch.object(SKYMAPPER_DR2_SIA, "search") as mock_query:
         table_file = os.path.join(
             os.path.dirname(__file__), "testdata", "skymapper_dr2", table_file
         )
@@ -44,7 +44,12 @@ def test_sia_skymapper_dr2_query():
         "skymapper_dr2_282.4358586_-16.1105754_57276.3683912.xml"
     ) as mock:
         results = find_cutouts_skymapper_dr2(cutout_request1)
-        mock.assert_called_once()
+        mock.assert_called_once_with(
+            cutout_request1.ra_deg,
+            cutout_request1.dec_deg,
+            cutout_request1.height_arcsec,
+            cutout_request1.width_arcsec,
+        )
 
         for col in [
             "ra_deg",
