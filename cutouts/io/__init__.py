@@ -7,8 +7,8 @@ from urllib.error import HTTPError
 import pandas as pd
 from astropy.utils.data import download_file
 
-from .nsc_dr2 import find_cutouts_nsc_dr2
-from .skymapper import find_cutouts_skymapper
+from .nsc import find_cutouts_nsc_dr2
+from .skymapper import find_cutouts_skymapper_dr2
 from .types import CutoutRequest
 from .ztf import find_cutouts_ztf
 
@@ -17,7 +17,7 @@ logger = logging.getLogger(__file__)
 
 EXPOSURE_SEARCH_MAPPING = {
     "I41": find_cutouts_ztf,
-    "Q55": find_cutouts_skymapper,
+    "Q55": find_cutouts_skymapper_dr2,
     "W84": find_cutouts_nsc_dr2,
     "V00": find_cutouts_nsc_dr2,
     "695": find_cutouts_nsc_dr2,
