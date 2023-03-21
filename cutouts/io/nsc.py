@@ -77,6 +77,16 @@ def find_cutouts_nsc_dr2(
     results["height_arcsec"] = cutout_request.height_arcsec
     results["width_arcsec"] = cutout_request.width_arcsec
 
+    # If filter is "VR DECam c0007 6300.0 2600.0" change it to
+    # VR. This appears to be a bug in the NSC DR2 SIA service.
+    buggy_filter = "VR DECam c0007 6300.0 2600.0"
+    num_buggy_filter = len(results[results["filter"] == buggy_filter])
+    if num_buggy_filter > 0:
+        logger.warning(
+            f"Found {num_buggy_filter} instances of {buggy_filter} filter. Changing to VR."
+        )
+        results.loc[results["filter"] == buggy_filter, "filter"] = "VR"
+
     # Only include the columns we care about
     results = results[
         [
