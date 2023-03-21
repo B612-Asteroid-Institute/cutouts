@@ -1,5 +1,6 @@
 import logging
 
+import pandas as pd
 import pandera as pa
 from pandera.typing import DataFrame
 from pyvo.dal.sia import SIAResults
@@ -52,7 +53,7 @@ def find_cutouts_skymapper_dr2(
         cutout_request.height_arcsec,
         cutout_request.width_arcsec,
     )
-    results = results.to_table().to_pandas()
+    results = pd.DataFrame(results)
 
     # Limit results to just fits files
     results = results[results["format"] == "image/fits"]
