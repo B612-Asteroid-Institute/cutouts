@@ -1,4 +1,4 @@
-from ..io.util import exposure_id_from_url
+from ..util import exposure_id_from_url
 
 
 def test_exposure_id_from_url():

@@ -1,5 +1,5 @@
-from cutouts.io.types import CutoutRequest
-from cutouts.io.ztf import find_cutouts_ztf
+from ..types import CutoutRequest
+from ..ztf import find_cutouts_ztf
 
 
 def test_find_cutouts_ztf():
