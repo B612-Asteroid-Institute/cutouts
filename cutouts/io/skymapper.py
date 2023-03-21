@@ -1,8 +1,8 @@
 import logging
 
-import pandas as pd
 import pandera as pa
 from pandera.typing import DataFrame
+from pyvo.dal.sia import SIAResults
 
 from .sia import SIAHandler
 from .types import CutoutRequest, CutoutsResultSchema
@@ -52,7 +52,8 @@ def find_cutouts_skymapper(
         cutout_request.height_arcsec,
         cutout_request.width_arcsec,
     )
-    results = pd.DataFrame(results)
+    results = results.to_table().to_pandas()
+
     # Limit results to just fits files
     results = results[results["format"] == "image/fits"]
 
@@ -104,10 +105,11 @@ class Skymapper_SIA(SIAHandler):
         dec_deg: float,
         height_arcsec: float = 20,
         width_arcsec: float = 20,
-    ) -> pd.DataFrame:
+    ) -> SIAResults:
         result = self.sia_service.search(
-            (ra_deg, dec_deg), size=(height_arcsec / 3600.0, width_arcsec / 3600.0)
+            (ra_deg, dec_deg),
+            size=(height_arcsec / 3600.0, width_arcsec / 3600.0),
+            format="all",
+            center="overlaps",
         )
-        result = pd.DataFrame(result)
-
         return result

@@ -47,7 +47,6 @@ def find_cutouts_nsc_dr2(
         cutout_request.height_arcsec,
         cutout_request.width_arcsec,
     )
-
     results = results.to_table().to_pandas()
 
     # Only include image type results.
@@ -110,6 +109,7 @@ class NSC_DR2_SIA(SIAHandler):
         results = self.sia_service.search(
             (ra_deg, dec_deg),
             size=(height_arcsec / 3600.0, width_arcsec / 3600.0),  # type: ignore
+            format="all",
+            center="overlaps",
         )
-
         return results
