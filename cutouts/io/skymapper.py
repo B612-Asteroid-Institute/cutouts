@@ -9,10 +9,17 @@ from .types import CutoutRequest, CutoutsResultSchema
 
 logger = logging.getLogger(__name__)
 
+
 def _get_generic_image_url_from_cutout_url(cutout_url: str):
     """ """
-    url_string = cutout_url.split("&")[0] + "&size=0.17,0.17&" + cutout_url.split("&")[2] + "&format=fits"
+    url_string = (
+        cutout_url.split("&")[0]
+        + "&size=0.17,0.17&"
+        + cutout_url.split("&")[2]
+        + "&format=fits"
+    )
     return url_string
+
 
 @pa.check_types
 def find_cutouts_skymapper(
