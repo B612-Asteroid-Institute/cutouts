@@ -10,7 +10,6 @@ from cutouts.io.tests.test_nsc_dr2 import TEST_REQUESTS
 SIA_URL = "https://datalab.noirlab.edu/sia/nsc_dr2"
 service = SIAService(SIA_URL)
 
-
 for cutout_request in cutout_requests:
 
     out_xml = f"nsc_dr2_{cutout_request.ra_deg}_{cutout_request.dec_deg}_{cutout_request.exposure_start_mjd}.xml"
