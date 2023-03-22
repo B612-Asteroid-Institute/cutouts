@@ -1,5 +1,5 @@
 import logging
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -314,8 +314,8 @@ def plot_cutout(
     dec: float,
     vra: float,
     vdec: float,
-    height_arcsec: float = 20,
-    width_arcsec: float = 20,
+    height_arcsec: Optional[float] = 20,
+    width_arcsec: Optional[float] = 20,
     crosshair: bool = True,
     crosshair_kwargs: dict = {
         "gap": 2,
@@ -417,8 +417,8 @@ def plot_cutouts(
     max_cols: int = 4,
     row_height: float = 2.0,
     col_width: float = 2.0,
-    cutout_height_arcsec: float = 20,
-    cutout_width_arcsec: float = 20,
+    cutout_height_arcsec: Optional[float] = 20,
+    cutout_width_arcsec: Optional[float] = 20,
     include_missing: bool = True,
     crosshair: bool = True,
     crosshair_detection_kwargs: dict = {

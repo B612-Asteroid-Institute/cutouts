@@ -29,7 +29,7 @@ OBSCODE_TOLERANCE_MAPPING = {
 @pa.check_types
 def get_cutouts(
     cutout_requests: DataFrame[CutoutRequestSchema],
-    out_dir: str = "~/.cutouts",
+    out_dir: pathlib.Path,
     timeout: Optional[int] = 180,
     full_image_timeout: Optional[int] = 600,
     use_cache: Optional[bool] = True,
@@ -62,8 +62,8 @@ def get_cutouts(
 
         full_image_path, cutout_image_path = generate_local_image_paths(result)
 
-        result["full_image_path"] = pathlib.Path(out_dir) / full_image_path
-        result["cutout_image_path"] = pathlib.Path(out_dir) / cutout_image_path
+        result["full_image_path"] = out_dir / full_image_path
+        result["cutout_image_path"] = out_dir / cutout_image_path
 
         cutout_path = result["cutout_image_path"]
         image_path = result["full_image_path"]
@@ -84,7 +84,7 @@ def get_cutouts(
             except FileNotFoundError as e:
                 result["error"] = str(e)
 
-        if download_full_image == True:
+        if download_full_image:
             if image_path.exists() and use_cache:
                 logger.info(
                     f"{image_path} already exists locally and using cache, skipping"
@@ -147,21 +147,23 @@ def main():
 
     observations = pd.read_csv(args.observations, index_col=None)
 
-    output = run_cutouts_from_precovery(
-        observations, pathlib.Path(args.out_dir), pathlib.Path(args.out_file)
-    )
+    output = run_cutouts_from_precovery(observations, args.out_dir, args.out_file)
     print(pd.DataFrame(output).to_csv(index=False))
 
 
 def run_cutouts_from_precovery(
     observations: pd.DataFrame,
-    out_dir: Optional[pathlib.Path] = pathlib.Path("."),
-    out_file: Optional[pathlib.Path] = pathlib.Path("cutout.png"),
+    out_dir: Optional[str] = ".",
+    out_file: Optional[str] = "cutout.png",
     cutout_height_arcsec: Optional[float] = 20.0,
     cutout_width_arcsec: Optional[float] = 20.0,
     download_full_image: Optional[bool] = False,
 ):
-    
+
+    # This seems unecessary but linting fails without it
+    out_dir_path = pathlib.Path(str(out_dir))
+    out_file_path = pathlib.Path(str(out_file))
+
     cutout_requests = observations[
         [
             "obscode",
@@ -200,7 +202,8 @@ def run_cutouts_from_precovery(
 
     cutout_results = get_cutouts(
         cast(DataFrame[CutoutRequestSchema], cutout_requests),
-        out_dir=str(out_dir), download_full_image=download_full_image,
+        out_dir=out_dir_path,
+        download_full_image=download_full_image,
     )
 
     plot_candidates = []
@@ -241,6 +244,6 @@ def run_cutouts_from_precovery(
         cutout_height_arcsec=cutout_height_arcsec,
         cutout_width_arcsec=cutout_width_arcsec,
     )
-    fig.savefig(pathlib.Path(out_dir).joinpath(pathlib.Path(out_file)), bbox_inches="tight")
+    fig.savefig(out_dir_path.joinpath(out_file_path), bbox_inches="tight")
 
     return cutout_results
