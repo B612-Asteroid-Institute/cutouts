@@ -36,16 +36,19 @@ def get_cutouts(
     use_cache: bool = True,
     download_full_image: bool = False,
     compare: bool = False,
-    compare_kwargs: dict = {
-        "min_time_separation": 1 / 24,
-        "min_exposure_duration_ratio": 1.0,
-        "same_filter": True,
-    },
+    compare_kwargs: Optional[dict] = None,
 ) -> Tuple[Iterable[Dict[str, Any]], Iterable[Dict[str, Any]]]:
     """ """
 
     # Get urls and metadata for each cutout
     logger.info(f"Getting cutouts for {len(cutout_requests)} requests.")
+
+    if compare_kwargs is None:
+        compare_kwargs = {
+            "min_time_separation": 1 / 24,
+            "min_exposure_duration_ratio": 1.0,
+            "same_filter": True,
+        }
 
     results = []
     comparison_results = []
@@ -55,7 +58,7 @@ def get_cutouts(
             results_df = find_cutouts(cutout_request)
             result = select_cutout(results_df, cutout_request)
 
-        except FileNotFoundError as e:
+        except Exception as e:
             logger.warning(e)
             result = {"error": e}
 
@@ -65,7 +68,7 @@ def get_cutouts(
                     results_df, result, cutout_request, **compare_kwargs
                 )
 
-            except FileNotFoundError as e:
+            except Exception as e:
                 logger.warning(e)
                 comparison_result = {"error": e}
 
@@ -105,7 +108,8 @@ def get_cutouts(
                     pkgname="cutouts",
                     timeout=timeout,
                 )
-            except FileNotFoundError as e:
+            except Exception as e:
+                logger.warning(e)
                 result["error"] = str(e)
 
         if download_full_image:
@@ -155,7 +159,8 @@ def get_cutouts(
                         pkgname="cutouts",
                         timeout=timeout,
                     )
-                except FileNotFoundError as e:
+                except Exception as e:
+                    logger.warning(e)
                     result["error"] = str(e)
 
     return results, comparison_results
@@ -219,11 +224,7 @@ def run_cutouts_from_precovery(
     full_image_timeout: Optional[int] = 600,
     use_cache: bool = True,
     compare: bool = False,
-    compare_kwargs: dict = {
-        "min_time_separation": 1 / 24,
-        "min_exposure_duration_ratio": 1.0,
-        "same_filter": True,
-    },
+    compare_kwargs: Optional[dict] = None,
 ):
 
     # This seems unecessary but linting fails without it

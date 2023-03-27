@@ -2,7 +2,6 @@ import logging
 import os
 import shutil
 from typing import Optional
-from urllib.error import HTTPError
 
 import pandas as pd
 from astropy.utils.data import download_file
@@ -109,12 +108,8 @@ def download_cutout(url: str, out_file: Optional[str] = None, **kwargs) -> str:
     path : str
         Location of downloaded cutout.
     """
-
-    try:
-        logger.info(f"Fetching {url}...")
-        path = download_file(url, **kwargs)
-    except HTTPError as e:
-        raise FileNotFoundError(str(e))
+    logger.info(f"Fetching {url}...")
+    path = download_file(url, **kwargs)
 
     if out_file is not None:
         if os.path.dirname(out_file) != "":
