@@ -109,6 +109,7 @@ def download_cutout(url: str, out_file: Optional[str] = None, **kwargs) -> str:
     path : str
         Location of downloaded cutout.
     """
+
     try:
         logger.info(f"Fetching {url}...")
         path = download_file(url, **kwargs)
@@ -116,7 +117,8 @@ def download_cutout(url: str, out_file: Optional[str] = None, **kwargs) -> str:
         raise FileNotFoundError(str(e))
 
     if out_file is not None:
-        os.makedirs(os.path.dirname(out_file), exist_ok=True)
+        if os.path.dirname(out_file) != "":
+            os.makedirs(os.path.dirname(out_file), exist_ok=True)
         shutil.copy(path, out_file)
         path = out_file
 

@@ -10,6 +10,17 @@ from .types import CutoutRequest, CutoutsResultSchema
 logger = logging.getLogger(__name__)
 
 
+def _get_generic_image_url_from_cutout_url(cutout_url: str):
+    """ """
+    url_string = (
+        cutout_url.split("&")[0]
+        + "&size=0.17,0.17&"
+        + cutout_url.split("&")[2]
+        + "&format=fits"
+    )
+    return url_string
+
+
 @pa.check_types
 def find_cutouts_skymapper(
     cutout_request: CutoutRequest,
@@ -54,16 +65,16 @@ def find_cutouts_skymapper(
         inplace=True,
     )
 
-    # Normalize the image url column
+    # Normalize the cutout url column
     results["cutout_url"] = results["get_fits"]
 
     results["height_arcsec"] = results["size"].apply(lambda x: x[0])
     results["width_arcsec"] = results["size"].apply(lambda x: x[1])
     results["exposure_id"] = results["unique_image_id"].apply(lambda x: x.split("-")[0])
 
-    # TODO: calculate a larger cutout since we can't get the whole
-    # image from the SIA service.
-    results["image_url"] = ""
+    results["image_url"] = results["cutout_url"].apply(
+        _get_generic_image_url_from_cutout_url
+    )
 
     results = results[
         [

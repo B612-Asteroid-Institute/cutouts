@@ -29,9 +29,11 @@ OBSCODE_TOLERANCE_MAPPING = {
 @pa.check_types
 def get_cutouts(
     cutout_requests: DataFrame[CutoutRequestSchema],
-    out_dir: str = "~/.cutouts",
+    out_dir: pathlib.Path,
     timeout: Optional[int] = 180,
-    use_cache: bool = True,
+    full_image_timeout: Optional[int] = 600,
+    use_cache: Optional[bool] = True,
+    download_full_image: Optional[bool] = False,
 ) -> Iterable[Dict[str, Any]]:
     """ """
 
@@ -60,27 +62,44 @@ def get_cutouts(
 
         full_image_path, cutout_image_path = generate_local_image_paths(result)
 
-        result["full_image_path"] = pathlib.Path(out_dir) / full_image_path
-        result["cutout_image_path"] = pathlib.Path(out_dir) / cutout_image_path
+        result["full_image_path"] = out_dir / full_image_path
+        result["cutout_image_path"] = out_dir / cutout_image_path
 
-        for path in [result["full_image_path"], result["cutout_image_path"]]:
-            if path.exists():
-                if use_cache:
-                    logger.info(
-                        f"{path} already exists locally and using cache, skipping"
-                    )
-                    continue
+        cutout_path = result["cutout_image_path"]
+        image_path = result["full_image_path"]
 
+        if cutout_path.exists() and use_cache:
+            logger.info(
+                f"{cutout_path} already exists locally and using cache, skipping"
+            )
+        else:
             try:
                 download_cutout(
                     result["cutout_url"],
-                    out_file=path.as_posix(),
+                    out_file=cutout_path.as_posix(),
                     cache=True,
                     pkgname="cutouts",
                     timeout=timeout,
                 )
             except FileNotFoundError as e:
                 result["error"] = str(e)
+
+        if download_full_image:
+            if image_path.exists() and use_cache:
+                logger.info(
+                    f"{image_path} already exists locally and using cache, skipping"
+                )
+            else:
+                try:
+                    download_cutout(
+                        result["image_url"],
+                        out_file=image_path.as_posix(),
+                        cache=True,
+                        pkgname="cutouts",
+                        timeout=full_image_timeout,
+                    )
+                except FileNotFoundError as e:
+                    result["error"] = str(e)
 
     return results
 
@@ -128,19 +147,23 @@ def main():
 
     observations = pd.read_csv(args.observations, index_col=None)
 
-    output = run_cutouts_from_precovery(
-        observations, pathlib.Path(args.out_dir), pathlib.Path(args.out_file)
-    )
+    output = run_cutouts_from_precovery(observations, args.out_dir, args.out_file)
     print(pd.DataFrame(output).to_csv(index=False))
 
 
 def run_cutouts_from_precovery(
     observations: pd.DataFrame,
-    out_dir: pathlib.Path = pathlib.Path("."),
-    out_file: pathlib.Path = pathlib.Path("cutout.png"),
-    cutout_height_arcsec: float = 20.0,
-    cutout_width_arcsec: float = 20.0,
+    out_dir: Optional[str] = ".",
+    out_file: Optional[str] = "cutout.png",
+    cutout_height_arcsec: Optional[float] = 20.0,
+    cutout_width_arcsec: Optional[float] = 20.0,
+    download_full_image: Optional[bool] = False,
 ):
+
+    # This seems unecessary but linting fails without it
+    out_dir_path = pathlib.Path(str(out_dir))
+    out_file_path = pathlib.Path(str(out_file))
+
     cutout_requests = observations[
         [
             "obscode",
@@ -179,7 +202,8 @@ def run_cutouts_from_precovery(
 
     cutout_results = get_cutouts(
         cast(DataFrame[CutoutRequestSchema], cutout_requests),
-        out_dir=str(out_dir),
+        out_dir=out_dir_path,
+        download_full_image=download_full_image,
     )
 
     plot_candidates = []
@@ -220,6 +244,6 @@ def run_cutouts_from_precovery(
         cutout_height_arcsec=cutout_height_arcsec,
         cutout_width_arcsec=cutout_width_arcsec,
     )
-    fig.savefig(out_dir.joinpath(out_file), bbox_inches="tight")
+    fig.savefig(out_dir_path.joinpath(out_file_path), bbox_inches="tight")
 
     return cutout_results
