@@ -3,6 +3,7 @@ import logging
 from typing import Tuple
 
 import backoff
+import numpy as np
 import pandas as pd
 import pandera as pa
 import requests
@@ -126,6 +127,7 @@ def find_cutouts_ztf(cutout_request: CutoutRequest) -> DataFrame[CutoutsResultSc
     )
 
     # Remove the prepended z from all filter names
+    assert np.all(results["filter"].str[0] == "z")
     results["filter"] = results["filter"].str[1:]
 
     # Cast the exposure_id to a string

@@ -46,7 +46,7 @@ def find_cutouts_skymapper_dr2(
         f"Fetching Skymapper cutouts with ra: {cutout_request.ra_deg} dec: {cutout_request.dec_deg}."
     )
 
-    sia = SKYMAPPER_DR2_SIA()
+    sia = SkyMapper_DR2_SIA()
     results = sia.search(
         cutout_request.ra_deg,
         cutout_request.dec_deg,
@@ -97,7 +97,7 @@ def find_cutouts_skymapper_dr2(
     return results
 
 
-class SKYMAPPER_DR2_SIA(SIAHandler):
+class SkyMapper_DR2_SIA(SIAHandler):
     SIA_URL = "https://api.skymapper.nci.org.au/public/siap/dr2/query?"
 
     def search(
