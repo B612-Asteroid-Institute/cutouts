@@ -47,6 +47,40 @@ SUBPLOTS_ADJUST_KWARGS: dict = {
     "top": 0.90,
     "bottom": 0.05,
 }
+CIRCLE_OBJECT_KWARGS: dict = {
+    "fill": False,
+    "color": "#03fc0f",
+    "alpha": 1.0,
+    "zorder": 0.9,
+}
+
+
+def add_circle(
+    ax: matplotlib.axes.Axes, obj_ra: float, obj_dec: float, rad: float = 2, **kwargs
+):
+    """
+    Add a circle on the location of the detected object.
+    ---------
+    ax : `~matplotlib.axes.Axes`
+        Matplotlib axes (usually a subplot) on which to add the crosshair.
+    obj_ra : float
+        RA of object detection in degrees.
+    obj_dec : float
+        Dec of object detection in degrees.
+    **kwargs
+        Keyword arguments to pass to ax.add_patch
+    """
+
+    radius = rad / 3600
+    center = (obj_ra, obj_dec)
+
+    ax.add_patch(
+        matplotlib.patches.Circle(
+            center, radius=radius, transform=ax.get_transform("world"), **kwargs
+        )
+    )
+
+    return
 
 
 def add_crosshair(
@@ -236,7 +270,11 @@ def plot_cutout(
     dec: float,
     vra: float,
     vdec: float,
+    obj_ra: float,
+    obj_dec: float,
     dt: float,
+    circle_object: bool = True,
+    circle_object_kwargs: dict = CIRCLE_OBJECT_KWARGS,
     crosshair: bool = True,
     crosshair_kwargs: dict = CROSSHAIR_DETECTION_KWARGS,
     velocity_vector: bool = True,
@@ -260,8 +298,17 @@ def plot_cutout(
         Predicted RA-velocity in degrees per day.
     vdec : float
         Predicted Dec-velocity in degrees per day.
+        Predicted Dec in degrees.
+    obj_ra : float
+        RA of object detection in degrees.
+    obj_dec : float
+        Dec of object detection in degrees.
     dt : float
         Exposure duration in units of seconds. Used to scale the velocity vector.
+    circe_object : bool, optional
+        Add circle around detected object.
+    circle_object_kwargs : dict
+        Keyword arguments to pass to `~cutouts.plot.add_circle`.
     crosshair : bool, optional
         Add crosshair centered on (RA, Dec).
     crosshair_kwargs : dict
@@ -292,6 +339,8 @@ def plot_cutout(
             dt,
             **velocity_vector_kwargs,
         )
+    if circle_object:
+        add_circle(ax, obj_ra, obj_dec, **circle_object_kwargs)
 
     ax.axis("off")
     return ax
@@ -306,6 +355,8 @@ def plot_cutouts(
     cutout_height_arcsec: float = 20,
     cutout_width_arcsec: float = 20,
     include_missing: bool = True,
+    circle_object: bool = True,
+    circle_object_kwargs: dict = CIRCLE_OBJECT_KWARGS,
     crosshair: bool = True,
     crosshair_detection_kwargs: dict = CROSSHAIR_DETECTION_KWARGS,
     crosshair_non_detection_kwargs: dict = CROSSHAIR_NON_DETECTION_KWARGS,
@@ -335,6 +386,10 @@ def plot_cutouts(
         Desired width of the cutout in arcseconds.
     include_missing : bool, optional
         Include an empty placeholder cutout if the cutout was not found (their paths are None).
+    circe_object : bool, optional
+        Add circle around detected object.
+    circle_object_kwargs : dict
+        Keyword arguments to pass to `~cutouts.plot.add_circle`.
     crosshair : bool, optional
         Add crosshairs centered on (RA, Dec). If the source is detected (see the magnitude
         keyword argument), then the crosshair_detection_kwargs will be applied to the crosshair.
@@ -370,6 +425,8 @@ def plot_cutouts(
     dec = candidates["dec"].values
     vra = candidates["vra"].values
     vdec = candidates["vdec"].values
+    obj_ra = candidates["obj_ra"].values
+    obj_dec = candidates["obj_dec"].values
     filters = candidates["filter"].values
     mag = candidates["mag"].values
     mag_sigma = candidates["mag_sigma"].values
@@ -398,8 +455,18 @@ def plot_cutouts(
 
     axs = []
     j = 0
-    for i, (path_i, ra_i, dec_i, vra_i, vdec_i, dt_i, obscode_i) in enumerate(
-        zip(paths, ra, dec, vra, vdec, exposure_time, obscode)
+    for i, (
+        path_i,
+        ra_i,
+        dec_i,
+        vra_i,
+        vdec_i,
+        obj_ra_i,
+        obj_dec_i,
+        dt_i,
+        obscode_i,
+    ) in enumerate(
+        zip(paths, ra, dec, vra, vdec, obj_ra, obj_dec, exposure_time, obscode)
     ):
         ax = None
         y = 1.0
@@ -492,7 +559,11 @@ def plot_cutouts(
                 dec_i,
                 vra_i,
                 vdec_i,
+                obj_ra_i,
+                obj_dec_i,
                 dt_i,
+                circle_object=circle_object,
+                circle_object_kwargs=circle_object_kwargs,
                 crosshair=crosshair,
                 crosshair_kwargs=crosshair_kwargs_i,
                 velocity_vector=velocity_vector_i,
@@ -517,6 +588,8 @@ def plot_comparison_cutouts(
     cutout_height_arcsec: float = 20,
     cutout_width_arcsec: float = 20,
     include_missing: bool = True,
+    circle_object: bool = True,
+    circle_object_kwargs: dict = CIRCLE_OBJECT_KWARGS,
     crosshair: bool = True,
     crosshair_detection_kwargs: dict = CROSSHAIR_DETECTION_KWARGS,
     crosshair_non_detection_kwargs: dict = CROSSHAIR_NON_DETECTION_KWARGS,
@@ -549,6 +622,10 @@ def plot_comparison_cutouts(
         Desired width of the cutout in arcseconds.
     include_missing : bool, optional
         Include an empty placeholder cutout if the cutout was not found (their paths are None).
+    circe_object : bool, optional
+        Add circle around detected object.
+    circle_object_kwargs : dict
+        Keyword arguments to pass to `~cutouts.plot.add_circle`.
     crosshair : bool, optional
         Add crosshairs centered on (RA, Dec). If the source is detected (see the magnitude
         keyword argument), then the crosshair_detection_kwargs will be applied to the crosshair.
@@ -595,6 +672,8 @@ def plot_comparison_cutouts(
             cutout_height_arcsec=cutout_height_arcsec,
             cutout_width_arcsec=cutout_width_arcsec,
             include_missing=include_missing,
+            circle_object=circle_object,
+            circle_object_kwargs=circle_object_kwargs,
             crosshair=crosshair,
             crosshair_detection_kwargs=crosshair_detection_kwargs,
             crosshair_non_detection_kwargs=crosshair_non_detection_kwargs,
