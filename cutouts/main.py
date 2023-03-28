@@ -4,15 +4,16 @@ import pathlib
 import sys
 from typing import Any, Dict, Iterable, Optional, Tuple, cast
 
+import numpy as np
 import pandas as pd
 import pandera as pa
 from astropy.time import Time
 from pandera.typing import DataFrame
 
-from .filter import select_cutout
+from .filter import select_comparison_cutout, select_cutout
 from .io import download_cutout, find_cutouts
 from .io.types import CutoutRequest, CutoutRequestSchema
-from .plot import plot_cutouts
+from .plot import generate_gif, plot_comparison_cutouts, plot_cutouts
 
 logger = logging.getLogger("cutouts")
 
@@ -32,24 +33,50 @@ def get_cutouts(
     out_dir: pathlib.Path,
     timeout: Optional[int] = 180,
     full_image_timeout: Optional[int] = 600,
-    use_cache: Optional[bool] = True,
-    download_full_image: Optional[bool] = False,
-) -> Iterable[Dict[str, Any]]:
+    use_cache: bool = True,
+    download_full_image: bool = False,
+    compare: bool = False,
+    compare_kwargs: Optional[dict] = None,
+) -> Tuple[Iterable[Dict[str, Any]], Iterable[Dict[str, Any]]]:
     """ """
 
     # Get urls and metadata for each cutout
     logger.info(f"Getting cutouts for {len(cutout_requests)} requests.")
 
+    if compare_kwargs is None:
+        compare_kwargs = {
+            "min_time_separation": 1 / 24,
+            "min_exposure_duration_ratio": 1.0,
+            "same_filter": True,
+        }
+
     results = []
+    comparison_results = []
     for record in cutout_requests.to_dict(orient="records"):
         try:
             cutout_request = CutoutRequest(**record)  # type: ignore
             results_df = find_cutouts(cutout_request)
             result = select_cutout(results_df, cutout_request)
 
-        except FileNotFoundError as e:
+        except Exception as e:
             logger.warning(e)
             result = {"error": e}
+
+        if compare:
+            try:
+                comparison_result = select_comparison_cutout(
+                    results_df, result, cutout_request, **compare_kwargs
+                )
+
+            except Exception as e:
+                logger.warning(e)
+                comparison_result = {"error": e}
+
+            comparison_result = dict(comparison_result)
+            comparison_results.append(comparison_result)
+
+        else:
+            comparison_results.append(None)
 
         result = dict(result)
         results.append(result)
@@ -81,7 +108,8 @@ def get_cutouts(
                     pkgname="cutouts",
                     timeout=timeout,
                 )
-            except FileNotFoundError as e:
+            except Exception as e:
+                logger.warning(e)
                 result["error"] = str(e)
 
         if download_full_image:
@@ -101,7 +129,41 @@ def get_cutouts(
                 except FileNotFoundError as e:
                     result["error"] = str(e)
 
-    return results
+    # Download comparison cutouts
+    if compare:
+        for result in comparison_results:
+            if result is not None:
+                if "error" in result:
+                    continue
+
+                (
+                    comparison_full_image_path,
+                    comparison_cutout_image_path,
+                ) = generate_local_image_paths(result)
+                result["cutout_image_path"] = (
+                    pathlib.Path(out_dir) / "comparison" / comparison_cutout_image_path
+                )
+                path = result["cutout_image_path"]
+                if path.exists():
+                    if use_cache:
+                        logger.info(
+                            f"{path} already exists locally and using cache, skipping"
+                        )
+                        continue
+
+                try:
+                    download_cutout(
+                        result["cutout_url"],
+                        out_file=path.as_posix(),
+                        cache=True,
+                        pkgname="cutouts",
+                        timeout=timeout,
+                    )
+                except Exception as e:
+                    logger.warning(e)
+                    result["error"] = str(e)
+
+    return results, comparison_results
 
 
 def generate_local_image_paths(result: dict) -> Tuple[str, str]:
@@ -153,11 +215,16 @@ def main():
 
 def run_cutouts_from_precovery(
     observations: pd.DataFrame,
-    out_dir: Optional[str] = ".",
-    out_file: Optional[str] = "cutout.png",
-    cutout_height_arcsec: Optional[float] = 20.0,
-    cutout_width_arcsec: Optional[float] = 20.0,
-    download_full_image: Optional[bool] = False,
+    out_dir: str = ".",
+    out_file: str = "cutout.png",
+    cutout_height_arcsec: float = 20.0,
+    cutout_width_arcsec: float = 20.0,
+    download_full_image: bool = False,
+    timeout: Optional[int] = 180,
+    full_image_timeout: Optional[int] = 600,
+    use_cache: bool = True,
+    compare: bool = False,
+    compare_kwargs: Optional[dict] = None,
 ):
 
     # This seems unecessary but linting fails without it
@@ -200,10 +267,15 @@ def run_cutouts_from_precovery(
         )
     cutout_requests["delta_time"].fillna(1e-8, inplace=True)
 
-    cutout_results = get_cutouts(
+    cutout_results, comparison_results = get_cutouts(
         cast(DataFrame[CutoutRequestSchema], cutout_requests),
         out_dir=out_dir_path,
         download_full_image=download_full_image,
+        timeout=timeout,
+        full_image_timeout=full_image_timeout,
+        use_cache=use_cache,
+        compare=compare,
+        compare_kwargs=compare_kwargs,
     )
 
     plot_candidates = []
@@ -215,12 +287,13 @@ def run_cutouts_from_precovery(
                 "dec": observations["pred_dec_deg"].values[i],
                 "vra": observations["pred_vra_degpday"].values[i],
                 "vdec": observations["pred_vdec_degpday"].values[i],
-                "mag": observations["mag"].values[i],
-                "mag_sigma": observations["mag_sigma"].values[i],
-                "filter": observations["filter"].values[i],
-                "exposure_start": observations["exposure_mjd_start"].values[i],
-                "exposure_duration": observations["exposure_duration"].values[i],
-                "exposure_id": observations["exposure_id"].values[i],
+                "mag": np.NaN,
+                "mag_sigma": np.NaN,
+                "filter": None,
+                "obscode": observations["obscode"].values[i],
+                "exposure_start": np.NaN,
+                "exposure_duration": np.NaN,
+                "exposure_id": None,
             }
         else:
             candidate = {
@@ -232,8 +305,10 @@ def run_cutouts_from_precovery(
                 "mag": observations["mag"].values[i],
                 "mag_sigma": observations["mag_sigma"].values[i],
                 "filter": observations["filter"].values[i],
+                "obscode": observations["obscode"].values[i],
                 "exposure_start": result["exposure_start_mjd"],
                 "exposure_duration": result["exposure_duration"],
+                "exposure_id": result["exposure_id"],
             }
         plot_candidates.append(candidate)
 
@@ -246,4 +321,54 @@ def run_cutouts_from_precovery(
     )
     fig.savefig(out_dir_path.joinpath(out_file_path), bbox_inches="tight")
 
-    return cutout_results
+    if compare:
+        plot_comparison_candidates = []
+        for i, result in enumerate(comparison_results):
+            if "error" in result:
+                candidate = {
+                    "path": None,
+                    "ra": observations["pred_ra_deg"].values[i],
+                    "dec": observations["pred_dec_deg"].values[i],
+                    "vra": np.NaN,
+                    "vdec": np.NaN,
+                    "mag": np.NaN,
+                    "mag_sigma": np.NaN,
+                    "filter": None,
+                    "obscode": observations["obscode"].values[i],
+                    "exposure_start": np.NaN,
+                    "exposure_duration": np.NaN,
+                    "exposure_id": None,
+                }
+            else:
+                candidate = {
+                    "path": result["cutout_image_path"],
+                    "ra": observations["pred_ra_deg"].values[i],
+                    "dec": observations["pred_dec_deg"].values[i],
+                    "vra": np.NaN,
+                    "vdec": np.NaN,
+                    "mag": np.NaN,
+                    "mag_sigma": np.NaN,
+                    "filter": result["filter"],
+                    "obscode": observations["obscode"].values[i],
+                    "exposure_start": result["exposure_start_mjd"],
+                    "exposure_duration": result["exposure_duration"],
+                    "exposure_id": result["exposure_id"],
+                }
+            plot_comparison_candidates.append(candidate)
+
+        plot_comparison_candidates = pd.DataFrame(plot_comparison_candidates)
+
+        figs, axs = plot_comparison_cutouts(
+            plot_candidates,
+            plot_comparison_candidates,
+            cutout_height_arcsec=cutout_height_arcsec,
+            cutout_width_arcsec=cutout_width_arcsec,
+        )
+        generate_gif(
+            figs,
+            out_dir=out_dir_path,
+            out_file=out_file_path.with_suffix(".gif"),
+            cleanup=True,
+        )
+
+    return cutout_results, comparison_results

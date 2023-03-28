@@ -5,6 +5,8 @@ pandas
 pandera
 pyvo
 matplotlib
+multimethod>=1.9.1
+imageio
 pytest
 pytest-cov
 pre-commit

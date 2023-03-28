@@ -1,0 +1,1641 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Produced with astropy.io.votable version 5.1
+     http://www.astropy.org/ -->
+<VOTABLE version="1.2" xmlns="http://www.ivoa.net/xml/VOTable/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.ivoa.net/xml/VOTable/v1.2">
+ <DESCRIPTION>
+  SkyMapper DR2 Image Access
+ </DESCRIPTION>
+ <RESOURCE type="results">
+  <DESCRIPTION>
+   By downloading SkyMapper data you agree to observe the policies
+   published at http://skymapper.anu.edu.au/policies/
+  </DESCRIPTION>
+  <PARAM ID="Service_Name" arraysize="*" datatype="char" name="Service Name" value="SkyMapper DR2 Simple Image Access Service (Public Access)"/>
+  <PARAM ID="Service_Identifier" arraysize="*" datatype="char" name="Service Identifier" value="ivo://nci.org.au/skymapper/siap"/>
+  <PARAM ID="Service_URL" arraysize="*" datatype="char" name="Service URL" value="https://api.skymapper.nci.org.au/public/siap/dr2/query?"/>
+  <PARAM ID="Service_Publisher" arraysize="*" datatype="char" name="Service Publisher" value="National Computational Infrastructure Australia (ivo://nci.org.au)"/>
+  <PARAM ID="Service_Contact" arraysize="*" datatype="char" name="Service Contact" value="SkyMapper Helpdesk (skymapper@anu.edu.au)"/>
+  <PARAM ID="INPUT_CENTER" arraysize="*" datatype="char" name="INPUT:CENTER" value="overlaps"/>
+  <PARAM ID="INPUT_FORMAT" arraysize="*" datatype="char" name="INPUT:FORMAT" value="all"/>
+  <PARAM ID="INPUT_POS" arraysize="*" datatype="char" name="INPUT:POS" value="282.4358586,-16.1105754"/>
+  <PARAM ID="INPUT_VERB" arraysize="*" datatype="char" name="INPUT:VERB" value="2"/>
+  <PARAM ID="INPUT_INTERSECT" arraysize="*" datatype="char" name="INPUT:INTERSECT" value="overlaps"/>
+  <PARAM ID="INPUT_SIZE" arraysize="*" datatype="char" name="INPUT:SIZE" value="0.005555555555555556,0.005555555555555556"/>
+  <INFO ID="QUERY_STATUS" name="QUERY_STATUS" value="OK"/>
+  <TABLE nrows="54">
+   <FIELD ID="image_name" arraysize="*" datatype="char" name="image_name" ucd="VOX:Image_Title">
+    <DESCRIPTION>
+     Image name
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="format" arraysize="*" datatype="char" name="format" ucd="VOX_Image_Format">
+    <DESCRIPTION>
+     MIME-type of the requested image
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="band" arraysize="1" datatype="char" name="band" ucd="VOX:BandPass_ID">
+    <DESCRIPTION>
+     SkyMapper filter (u,v,g,r,i,z)
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="get_image" arraysize="*" datatype="char" name="get_image" ucd="VOX:Image_AccessReference">
+    <DESCRIPTION>
+     Image download URL
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="preview" arraysize="*" datatype="char" name="preview" ucd="meta.ref.url">
+    <DESCRIPTION>
+     Download PNG preview
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="get_fits" arraysize="*" datatype="char" name="get_fits" ucd="meta.ref.url">
+    <DESCRIPTION>
+     Download FITS
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="get_mask" arraysize="*" datatype="char" name="get_mask" ucd="meta.ref.url">
+    <DESCRIPTION>
+     Download FITS bitmask
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="ra_cntr" datatype="double" name="ra_cntr" precision="F5" ucd="POS_EQ_RA_MAIN" unit="deg">
+    <DESCRIPTION>
+     ICRS Right Ascension of the image centre
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="dec_cntr" datatype="double" name="dec_cntr" precision="F5" ucd="POS_EQ_DEC_MAIN" unit="deg">
+    <DESCRIPTION>
+     ICRS Declination of the image centre
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="exptime" datatype="float" name="exptime" precision="F1" ucd="time.duration;obs.exposure" unit="s">
+    <DESCRIPTION>
+     On-sky exposure time
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="mjd_obs" datatype="double" name="mjd_obs" precision="F5" ucd="VOX:Image_MJDateObs" unit="mjd">
+    <DESCRIPTION>
+     Modified Julian Date of exposure start
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="size" arraysize="2" datatype="int" name="size" ucd="phys.angsize" unit="arcsec">
+    <DESCRIPTION>
+     Angular size of image
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="naxis" arraysize="2" datatype="short" name="naxis" ucd="VOX:Image_Naxis" unit="pix">
+    <DESCRIPTION>
+     Image size in pixels
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="scale" arraysize="2" datatype="float" name="scale" precision="F4" ucd="VOX:Image_Scale" unit="arcsec.pix-1">
+    <DESCRIPTION>
+     WCS pixel scale of each image axis
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="unique_image_id" arraysize="*" datatype="char" name="unique_image_id" ucd="meta.id;meta.main">
+    <DESCRIPTION>
+     Unique image identifier [image_id]-[ccd]
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="image_type" arraysize="*" datatype="char" name="image_type" ucd="meta.note">
+    <DESCRIPTION>
+     Type of image
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="filesize" datatype="int" name="filesize" ucd="VOX:Image_Filesize" unit="kB">
+    <DESCRIPTION>
+     Estimated FITS filesize in kB
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="pixflags" arraysize="*" datatype="char" name="pixflags" ucd="VOX:Image_PixFlags">
+    <DESCRIPTION>
+     Pixel flags of source image (C=raw cutout, V=suitable for
+     visualisation only)
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="airmass" datatype="float" name="airmass" precision="F2" ucd="obs.airmass">
+    <DESCRIPTION>
+     Airmass of exposure
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="mean_fwhm" datatype="float" name="mean_fwhm" precision="F2" ucd="instr.obsty.seeing;stat.mean" unit="arcsec">
+    <DESCRIPTION>
+     Mean image seeing FWHM as calculated by Science Data Pipeline
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="mean_elong" datatype="float" name="mean_elong" precision="F2" ucd="phys.size.axisratio;stat.mean">
+    <DESCRIPTION>
+     Mean image source elongation as calculated by Science Data
+     Pipeline
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="zpapprox" datatype="float" name="zpapprox" precision="F3" ucd="arith.zp;phot.mag" unit="mag">
+    <DESCRIPTION>
+     Approximate frame zeropoint. Refer to docs for more info.
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="crpix" arraysize="2" datatype="float" name="crpix" precision="F3" ucd="VOX:WCS_CoordRefPixel" unit="pix">
+    <DESCRIPTION>
+     Pixel coordinates of the WCS reference pixel
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="crval" arraysize="2" datatype="double" name="crval" precision="F5" ucd="VOX:WCS_CoordRefValue" unit="deg">
+    <DESCRIPTION>
+     World coordinates of the WCS reference pixel
+    </DESCRIPTION>
+   </FIELD>
+   <FIELD ID="cdmatrix" arraysize="4" datatype="double" name="cdmatrix" precision="E6" ucd="VOX:WCS_CDMatrix">
+    <DESCRIPTION>
+     WCS CD matrix. Elements are ordered as CD[i,j] = [1,1], [1,2],
+     [2,1], [2,2]
+    </DESCRIPTION>
+   </FIELD>
+   <PARAM ID="instrument" arraysize="*" datatype="char" name="instrument" ucd="INST_ID" value="SkyMapper.Imager">
+    <DESCRIPTION>
+     Instrument name
+    </DESCRIPTION>
+   </PARAM>
+   <PARAM ID="naxes" datatype="short" name="naxes" ucd="VOX:Image_Naxes" value="2">
+    <DESCRIPTION>
+     Number of image axes
+    </DESCRIPTION>
+   </PARAM>
+   <PARAM ID="crefframe" arraysize="*" datatype="char" name="crefframe" ucd="VOX:STC_CoordRefFrame" value="ICRS">
+    <DESCRIPTION>
+     Coordinate system reference frame
+    </DESCRIPTION>
+   </PARAM>
+   <PARAM ID="proj" arraysize="3" datatype="char" name="proj" ucd="VOX:WCS_CoordProjection" value="TPV">
+    <DESCRIPTION>
+     Tangent plane projection with a polynomial distortion function
+     described by coefficients provided in a set of PVi_j keywords.
+     The first image axis represents Right Ascension and the second
+     represents Declination
+    </DESCRIPTION>
+   </PARAM>
+   <DATA>
+    <TABLEDATA>
+     <TR>
+      <TD>SkyMapper_u_20140708113046-02_282.436-16.111_20x20</TD>
+      <TD>image/fits</TD>
+      <TD>u</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113046-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113046-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113046-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113046-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43587</TD>
+      <TD>-16.11063</TD>
+      <TD>40.0</TD>
+      <TD>56846.47971</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4960</TD>
+      <TD>20140708113046-02</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>C</TD>
+      <TD>1.24</TD>
+      <TD>3.80</TD>
+      <TD>1.33</TD>
+      <TD>25.356</TD>
+      <TD>-8345.317 5976.679</TD>
+      <TD>283.63445 -15.29648</TD>
+      <TD>-0.000137701 -6e-08 3.53e-07 0.000137771</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_u_20140708113046-02_282.436-16.111_20x20</TD>
+      <TD>image/png</TD>
+      <TD>u</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113046-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113046-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113046-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113046-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43587</TD>
+      <TD>-16.11063</TD>
+      <TD>40.0</TD>
+      <TD>56846.47971</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4960</TD>
+      <TD>20140708113046-02</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>V</TD>
+      <TD>1.24</TD>
+      <TD>3.80</TD>
+      <TD>1.33</TD>
+      <TD>25.356</TD>
+      <TD>-8345.317 5976.679</TD>
+      <TD>283.63445 -15.29648</TD>
+      <TD>-0.000137701 -6e-08 3.53e-07 0.000137771</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_g_20140708113226-02_282.436-16.111_20x20</TD>
+      <TD>image/fits</TD>
+      <TD>g</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113226-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113226-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113226-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113226-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43593</TD>
+      <TD>-16.11063</TD>
+      <TD>5.0</TD>
+      <TD>56846.48088</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4960</TD>
+      <TD>20140708113226-02</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>C</TD>
+      <TD>1.23</TD>
+      <TD>3.55</TD>
+      <TD>1.39</TD>
+      <TD>25.769</TD>
+      <TD>-8334.673 5977.994</TD>
+      <TD>283.63265 -15.29658</TD>
+      <TD>-0.000137682 -8.9e-08 3.89e-07 0.000137771</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_g_20140708113226-02_282.436-16.111_20x20</TD>
+      <TD>image/png</TD>
+      <TD>g</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113226-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113226-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113226-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113226-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43593</TD>
+      <TD>-16.11063</TD>
+      <TD>5.0</TD>
+      <TD>56846.48088</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4960</TD>
+      <TD>20140708113226-02</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>V</TD>
+      <TD>1.23</TD>
+      <TD>3.55</TD>
+      <TD>1.39</TD>
+      <TD>25.769</TD>
+      <TD>-8334.673 5977.994</TD>
+      <TD>283.63265 -15.29658</TD>
+      <TD>-0.000137682 -8.9e-08 3.89e-07 0.000137771</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_r_20140708113256-02_282.436-16.111_20x20</TD>
+      <TD>image/fits</TD>
+      <TD>r</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113256-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113256-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113256-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113256-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43594</TD>
+      <TD>-16.11054</TD>
+      <TD>5.0</TD>
+      <TD>56846.48123</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4959</TD>
+      <TD>20140708113256-02</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>C</TD>
+      <TD>1.23</TD>
+      <TD>2.82</TD>
+      <TD>1.27</TD>
+      <TD>25.569</TD>
+      <TD>-8334.955 5964.155</TD>
+      <TD>283.63286 -15.29847</TD>
+      <TD>-0.0001377 -9e-08 3.9e-07 0.00013776</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_r_20140708113256-02_282.436-16.111_20x20</TD>
+      <TD>image/png</TD>
+      <TD>r</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113256-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113256-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113256-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113256-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43594</TD>
+      <TD>-16.11054</TD>
+      <TD>5.0</TD>
+      <TD>56846.48123</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4959</TD>
+      <TD>20140708113256-02</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>V</TD>
+      <TD>1.23</TD>
+      <TD>2.82</TD>
+      <TD>1.27</TD>
+      <TD>25.569</TD>
+      <TD>-8334.955 5964.155</TD>
+      <TD>283.63286 -15.29847</TD>
+      <TD>-0.0001377 -9e-08 3.9e-07 0.00013776</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_i_20140708113322-02_282.436-16.111_20x20</TD>
+      <TD>image/fits</TD>
+      <TD>i</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113322-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113322-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113322-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113322-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43586</TD>
+      <TD>-16.11057</TD>
+      <TD>10.0</TD>
+      <TD>56846.48152</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4958 0.4960</TD>
+      <TD>20140708113322-02</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>C</TD>
+      <TD>1.23</TD>
+      <TD>2.87</TD>
+      <TD>1.34</TD>
+      <TD>25.601</TD>
+      <TD>-8335.251 5964.629</TD>
+      <TD>283.63288 -15.29833</TD>
+      <TD>-0.000137711 -9.5e-08 3.91e-07 0.000137778</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_i_20140708113322-02_282.436-16.111_20x20</TD>
+      <TD>image/png</TD>
+      <TD>i</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113322-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113322-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113322-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113322-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43586</TD>
+      <TD>-16.11057</TD>
+      <TD>10.0</TD>
+      <TD>56846.48152</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4958 0.4960</TD>
+      <TD>20140708113322-02</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>V</TD>
+      <TD>1.23</TD>
+      <TD>2.87</TD>
+      <TD>1.34</TD>
+      <TD>25.601</TD>
+      <TD>-8335.251 5964.629</TD>
+      <TD>283.63288 -15.29833</TD>
+      <TD>-0.000137711 -9.5e-08 3.91e-07 0.000137778</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_z_20140708113352-02_282.436-16.111_20x20</TD>
+      <TD>image/fits</TD>
+      <TD>z</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113352-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113352-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113352-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113352-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43581</TD>
+      <TD>-16.11067</TD>
+      <TD>20.0</TD>
+      <TD>56846.48186</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4959</TD>
+      <TD>20140708113352-02</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>C</TD>
+      <TD>1.23</TD>
+      <TD>2.77</TD>
+      <TD>1.36</TD>
+      <TD>25.685</TD>
+      <TD>-8335.346 5966.030</TD>
+      <TD>283.63263 -15.29840</TD>
+      <TD>-0.000137686 -9.6e-08 3.95e-07 0.000137756</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_z_20140708113352-02_282.436-16.111_20x20</TD>
+      <TD>image/png</TD>
+      <TD>z</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113352-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113352-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113352-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140708113352-02&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43581</TD>
+      <TD>-16.11067</TD>
+      <TD>20.0</TD>
+      <TD>56846.48186</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4959</TD>
+      <TD>20140708113352-02</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>V</TD>
+      <TD>1.23</TD>
+      <TD>2.77</TD>
+      <TD>1.36</TD>
+      <TD>25.685</TD>
+      <TD>-8335.346 5966.030</TD>
+      <TD>283.63263 -15.29840</TD>
+      <TD>-0.000137686 -9.6e-08 3.95e-07 0.000137756</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_u_20140719131223-16_282.436-16.111_20x20</TD>
+      <TD>image/fits</TD>
+      <TD>u</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131223-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131223-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131223-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131223-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43583</TD>
+      <TD>-16.11053</TD>
+      <TD>40.0</TD>
+      <TD>56857.55029</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4959</TD>
+      <TD>20140719131223-16</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>C</TD>
+      <TD>1.04</TD>
+      <TD>3.35</TD>
+      <TD>1.14</TD>
+      <TD>25.459</TD>
+      <TD>8418.948 6099.997</TD>
+      <TD>281.23477 -15.27754</TD>
+      <TD>-0.000137695 3.49e-07 -1.2e-07 0.000137756</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_u_20140719131223-16_282.436-16.111_20x20</TD>
+      <TD>image/png</TD>
+      <TD>u</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131223-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131223-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131223-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131223-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43583</TD>
+      <TD>-16.11053</TD>
+      <TD>40.0</TD>
+      <TD>56857.55029</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4959</TD>
+      <TD>20140719131223-16</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>V</TD>
+      <TD>1.04</TD>
+      <TD>3.35</TD>
+      <TD>1.14</TD>
+      <TD>25.459</TD>
+      <TD>8418.948 6099.997</TD>
+      <TD>281.23477 -15.27754</TD>
+      <TD>-0.000137695 3.49e-07 -1.2e-07 0.000137756</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_v_20140719131323-16_282.436-16.111_20x20</TD>
+      <TD>image/fits</TD>
+      <TD>v</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131323-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131323-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131323-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131323-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43589</TD>
+      <TD>-16.11056</TD>
+      <TD>20.0</TD>
+      <TD>56857.55098</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4959</TD>
+      <TD>20140719131323-16</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>C</TD>
+      <TD>1.04</TD>
+      <TD>2.91</TD>
+      <TD>1.15</TD>
+      <TD>24.912</TD>
+      <TD>8421.846 6103.771</TD>
+      <TD>281.23453 -15.27715</TD>
+      <TD>-0.000137686 3.56e-07 -1.24e-07 0.000137746</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_v_20140719131323-16_282.436-16.111_20x20</TD>
+      <TD>image/png</TD>
+      <TD>v</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131323-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131323-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131323-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131323-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43589</TD>
+      <TD>-16.11056</TD>
+      <TD>20.0</TD>
+      <TD>56857.55098</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4959</TD>
+      <TD>20140719131323-16</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>V</TD>
+      <TD>1.04</TD>
+      <TD>2.91</TD>
+      <TD>1.15</TD>
+      <TD>24.912</TD>
+      <TD>8421.846 6103.771</TD>
+      <TD>281.23453 -15.27715</TD>
+      <TD>-0.000137686 3.56e-07 -1.24e-07 0.000137746</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_g_20140719131403-16_282.436-16.111_20x20</TD>
+      <TD>image/fits</TD>
+      <TD>g</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131403-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131403-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131403-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131403-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43593</TD>
+      <TD>-16.11058</TD>
+      <TD>5.0</TD>
+      <TD>56857.55144</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4960</TD>
+      <TD>20140719131403-16</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>C</TD>
+      <TD>1.04</TD>
+      <TD>2.88</TD>
+      <TD>1.14</TD>
+      <TD>25.791</TD>
+      <TD>8416.972 6099.121</TD>
+      <TD>281.23518 -15.27779</TD>
+      <TD>-0.0001377 3.62e-07 -1.36e-07 0.000137764</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_g_20140719131403-16_282.436-16.111_20x20</TD>
+      <TD>image/png</TD>
+      <TD>g</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131403-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131403-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131403-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131403-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43593</TD>
+      <TD>-16.11058</TD>
+      <TD>5.0</TD>
+      <TD>56857.55144</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4960</TD>
+      <TD>20140719131403-16</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>V</TD>
+      <TD>1.04</TD>
+      <TD>2.88</TD>
+      <TD>1.14</TD>
+      <TD>25.791</TD>
+      <TD>8416.972 6099.121</TD>
+      <TD>281.23518 -15.27779</TD>
+      <TD>-0.0001377 3.62e-07 -1.36e-07 0.000137764</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_r_20140719131430-16_282.436-16.111_20x20</TD>
+      <TD>image/fits</TD>
+      <TD>r</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131430-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131430-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131430-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131430-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43593</TD>
+      <TD>-16.11056</TD>
+      <TD>5.0</TD>
+      <TD>56857.55176</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4959</TD>
+      <TD>20140719131430-16</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>C</TD>
+      <TD>1.04</TD>
+      <TD>2.48</TD>
+      <TD>1.16</TD>
+      <TD>25.587</TD>
+      <TD>8431.459 6124.101</TD>
+      <TD>281.23329 -15.27444</TD>
+      <TD>-0.000137689 3.74e-07 -1.41e-07 0.000137755</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_r_20140719131430-16_282.436-16.111_20x20</TD>
+      <TD>image/png</TD>
+      <TD>r</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131430-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131430-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131430-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131430-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43593</TD>
+      <TD>-16.11056</TD>
+      <TD>5.0</TD>
+      <TD>56857.55176</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4959</TD>
+      <TD>20140719131430-16</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>V</TD>
+      <TD>1.04</TD>
+      <TD>2.48</TD>
+      <TD>1.16</TD>
+      <TD>25.587</TD>
+      <TD>8431.459 6124.101</TD>
+      <TD>281.23329 -15.27444</TD>
+      <TD>-0.000137689 3.74e-07 -1.41e-07 0.000137755</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_i_20140719131500-16_282.436-16.111_20x20</TD>
+      <TD>image/fits</TD>
+      <TD>i</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131500-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131500-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131500-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131500-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43591</TD>
+      <TD>-16.11059</TD>
+      <TD>10.0</TD>
+      <TD>56857.55209</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4960</TD>
+      <TD>20140719131500-16</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>C</TD>
+      <TD>1.04</TD>
+      <TD>2.49</TD>
+      <TD>1.13</TD>
+      <TD>25.621</TD>
+      <TD>8428.212 6118.888</TD>
+      <TD>281.23364 -15.27510</TD>
+      <TD>-0.000137703 3.77e-07 -1.45e-07 0.000137774</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_i_20140719131500-16_282.436-16.111_20x20</TD>
+      <TD>image/png</TD>
+      <TD>i</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131500-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131500-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131500-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131500-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43591</TD>
+      <TD>-16.11059</TD>
+      <TD>10.0</TD>
+      <TD>56857.55209</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4960</TD>
+      <TD>20140719131500-16</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>V</TD>
+      <TD>1.04</TD>
+      <TD>2.49</TD>
+      <TD>1.13</TD>
+      <TD>25.621</TD>
+      <TD>8428.212 6118.888</TD>
+      <TD>281.23364 -15.27510</TD>
+      <TD>-0.000137703 3.77e-07 -1.45e-07 0.000137774</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_z_20140719131530-16_282.436-16.111_20x20</TD>
+      <TD>image/fits</TD>
+      <TD>z</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131530-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131530-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131530-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131530-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43590</TD>
+      <TD>-16.11061</TD>
+      <TD>20.0</TD>
+      <TD>56857.55245</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4959</TD>
+      <TD>20140719131530-16</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>C</TD>
+      <TD>1.04</TD>
+      <TD>2.93</TD>
+      <TD>1.15</TD>
+      <TD>25.663</TD>
+      <TD>8449.169 6116.659</TD>
+      <TD>281.23081 -15.27556</TD>
+      <TD>-0.000137684 3.8e-07 -1.4e-07 0.000137749</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_z_20140719131530-16_282.436-16.111_20x20</TD>
+      <TD>image/png</TD>
+      <TD>z</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131530-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131530-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131530-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140719131530-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43590</TD>
+      <TD>-16.11061</TD>
+      <TD>20.0</TD>
+      <TD>56857.55245</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4959</TD>
+      <TD>20140719131530-16</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>V</TD>
+      <TD>1.04</TD>
+      <TD>2.93</TD>
+      <TD>1.15</TD>
+      <TD>25.663</TD>
+      <TD>8449.169 6116.659</TD>
+      <TD>281.23081 -15.27556</TD>
+      <TD>-0.000137684 3.8e-07 -1.4e-07 0.000137749</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_r_20140720130413-16_282.436-16.111_20x20</TD>
+      <TD>image/fits</TD>
+      <TD>r</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140720130413-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140720130413-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140720130413-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140720130413-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43593</TD>
+      <TD>-16.11062</TD>
+      <TD>5.0</TD>
+      <TD>56858.54461</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4959</TD>
+      <TD>20140720130413-16</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>C</TD>
+      <TD>1.04</TD>
+      <TD>2.92</TD>
+      <TD>1.12</TD>
+      <TD>25.362</TD>
+      <TD>7975.044 6950.520</TD>
+      <TD>281.29920 -15.16010</TD>
+      <TD>-0.000137689 4e-07 -1.18e-07 0.000137754</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_r_20140720130413-16_282.436-16.111_20x20</TD>
+      <TD>image/png</TD>
+      <TD>r</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140720130413-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140720130413-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140720130413-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140720130413-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43593</TD>
+      <TD>-16.11062</TD>
+      <TD>5.0</TD>
+      <TD>56858.54461</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4959</TD>
+      <TD>20140720130413-16</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>V</TD>
+      <TD>1.04</TD>
+      <TD>2.92</TD>
+      <TD>1.12</TD>
+      <TD>25.362</TD>
+      <TD>7975.044 6950.520</TD>
+      <TD>281.29920 -15.16010</TD>
+      <TD>-0.000137689 4e-07 -1.18e-07 0.000137754</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_i_20140720130438-16_282.436-16.111_20x20</TD>
+      <TD>image/fits</TD>
+      <TD>i</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140720130438-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140720130438-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140720130438-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140720130438-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43583</TD>
+      <TD>-16.11064</TD>
+      <TD>10.0</TD>
+      <TD>56858.54491</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4960</TD>
+      <TD>20140720130438-16</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>C</TD>
+      <TD>1.04</TD>
+      <TD>2.89</TD>
+      <TD>1.12</TD>
+      <TD>25.373</TD>
+      <TD>7996.269 6932.587</TD>
+      <TD>281.29587 -15.16239</TD>
+      <TD>-0.000137705 3.93e-07 -1.1e-07 0.000137776</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_i_20140720130438-16_282.436-16.111_20x20</TD>
+      <TD>image/png</TD>
+      <TD>i</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140720130438-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140720130438-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140720130438-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140720130438-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43583</TD>
+      <TD>-16.11064</TD>
+      <TD>10.0</TD>
+      <TD>56858.54491</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4960</TD>
+      <TD>20140720130438-16</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>V</TD>
+      <TD>1.04</TD>
+      <TD>2.89</TD>
+      <TD>1.12</TD>
+      <TD>25.373</TD>
+      <TD>7996.269 6932.587</TD>
+      <TD>281.29587 -15.16239</TD>
+      <TD>-0.000137705 3.93e-07 -1.1e-07 0.000137776</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_u_20140722125719-16_282.436-16.111_20x20</TD>
+      <TD>image/fits</TD>
+      <TD>u</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125719-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125719-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125719-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125719-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43583</TD>
+      <TD>-16.11062</TD>
+      <TD>40.0</TD>
+      <TD>56860.53983</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4958 0.4959</TD>
+      <TD>20140722125719-16</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>C</TD>
+      <TD>1.04</TD>
+      <TD>3.46</TD>
+      <TD>1.17</TD>
+      <TD>25.438</TD>
+      <TD>7541.746 5684.308</TD>
+      <TD>281.36049 -15.33364</TD>
+      <TD>-0.000137712 4.1e-07 -5.2e-08 0.000137755</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_u_20140722125719-16_282.436-16.111_20x20</TD>
+      <TD>image/png</TD>
+      <TD>u</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125719-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125719-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125719-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125719-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43583</TD>
+      <TD>-16.11062</TD>
+      <TD>40.0</TD>
+      <TD>56860.53983</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4958 0.4959</TD>
+      <TD>20140722125719-16</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>V</TD>
+      <TD>1.04</TD>
+      <TD>3.46</TD>
+      <TD>1.17</TD>
+      <TD>25.438</TD>
+      <TD>7541.746 5684.308</TD>
+      <TD>281.36049 -15.33364</TD>
+      <TD>-0.000137712 4.1e-07 -5.2e-08 0.000137755</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_v_20140722125819-16_282.436-16.111_20x20</TD>
+      <TD>image/fits</TD>
+      <TD>v</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125819-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125819-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125819-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125819-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43588</TD>
+      <TD>-16.11060</TD>
+      <TD>20.0</TD>
+      <TD>56860.54052</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4959</TD>
+      <TD>20140722125819-16</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>C</TD>
+      <TD>1.04</TD>
+      <TD>3.70</TD>
+      <TD>1.14</TD>
+      <TD>24.865</TD>
+      <TD>7534.550 5678.573</TD>
+      <TD>281.36178 -15.33454</TD>
+      <TD>-0.000137694 4.22e-07 -6.3e-08 0.000137747</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_v_20140722125819-16_282.436-16.111_20x20</TD>
+      <TD>image/png</TD>
+      <TD>v</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125819-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125819-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125819-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125819-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43588</TD>
+      <TD>-16.11060</TD>
+      <TD>20.0</TD>
+      <TD>56860.54052</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4959</TD>
+      <TD>20140722125819-16</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>V</TD>
+      <TD>1.04</TD>
+      <TD>3.70</TD>
+      <TD>1.14</TD>
+      <TD>24.865</TD>
+      <TD>7534.550 5678.573</TD>
+      <TD>281.36178 -15.33454</TD>
+      <TD>-0.000137694 4.22e-07 -6.3e-08 0.000137747</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_g_20140722125859-16_282.436-16.111_20x20</TD>
+      <TD>image/fits</TD>
+      <TD>g</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125859-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125859-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125859-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125859-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43594</TD>
+      <TD>-16.11054</TD>
+      <TD>5.0</TD>
+      <TD>56860.54098</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4959</TD>
+      <TD>20140722125859-16</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>C</TD>
+      <TD>1.04</TD>
+      <TD>3.55</TD>
+      <TD>1.16</TD>
+      <TD>25.778</TD>
+      <TD>7534.085 5698.756</TD>
+      <TD>281.36195 -15.33170</TD>
+      <TD>-0.000137696 4.3e-07 -6.8e-08 0.000137752</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_g_20140722125859-16_282.436-16.111_20x20</TD>
+      <TD>image/png</TD>
+      <TD>g</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125859-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125859-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125859-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125859-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43594</TD>
+      <TD>-16.11054</TD>
+      <TD>5.0</TD>
+      <TD>56860.54098</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4959</TD>
+      <TD>20140722125859-16</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>V</TD>
+      <TD>1.04</TD>
+      <TD>3.55</TD>
+      <TD>1.16</TD>
+      <TD>25.778</TD>
+      <TD>7534.085 5698.756</TD>
+      <TD>281.36195 -15.33170</TD>
+      <TD>-0.000137696 4.3e-07 -6.8e-08 0.000137752</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_r_20140722125931-16_282.436-16.111_20x20</TD>
+      <TD>image/fits</TD>
+      <TD>r</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125931-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125931-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125931-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125931-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43589</TD>
+      <TD>-16.11061</TD>
+      <TD>5.0</TD>
+      <TD>56860.54134</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4959</TD>
+      <TD>20140722125931-16</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>C</TD>
+      <TD>1.04</TD>
+      <TD>3.37</TD>
+      <TD>1.22</TD>
+      <TD>25.574</TD>
+      <TD>7521.171 5683.611</TD>
+      <TD>281.36383 -15.33405</TD>
+      <TD>-0.000137693 4.41e-07 -8.3e-08 0.000137737</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_r_20140722125931-16_282.436-16.111_20x20</TD>
+      <TD>image/png</TD>
+      <TD>r</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125931-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125931-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125931-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125931-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43589</TD>
+      <TD>-16.11061</TD>
+      <TD>5.0</TD>
+      <TD>56860.54134</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4959</TD>
+      <TD>20140722125931-16</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>V</TD>
+      <TD>1.04</TD>
+      <TD>3.37</TD>
+      <TD>1.22</TD>
+      <TD>25.574</TD>
+      <TD>7521.171 5683.611</TD>
+      <TD>281.36383 -15.33405</TD>
+      <TD>-0.000137693 4.41e-07 -8.3e-08 0.000137737</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_i_20140722125956-16_282.436-16.111_20x20</TD>
+      <TD>image/fits</TD>
+      <TD>i</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125956-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125956-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125956-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125956-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43585</TD>
+      <TD>-16.11057</TD>
+      <TD>10.0</TD>
+      <TD>56860.54163</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4959</TD>
+      <TD>20140722125956-16</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>C</TD>
+      <TD>1.04</TD>
+      <TD>3.13</TD>
+      <TD>1.18</TD>
+      <TD>25.591</TD>
+      <TD>7517.910 5697.170</TD>
+      <TD>281.36414 -15.33204</TD>
+      <TD>-0.000137708 4.4e-07 -8.2e-08 0.000137752</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_i_20140722125956-16_282.436-16.111_20x20</TD>
+      <TD>image/png</TD>
+      <TD>i</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125956-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125956-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125956-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20140722125956-16&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43585</TD>
+      <TD>-16.11057</TD>
+      <TD>10.0</TD>
+      <TD>56860.54163</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4959</TD>
+      <TD>20140722125956-16</TD>
+      <TD>short</TD>
+      <TD>20</TD>
+      <TD>V</TD>
+      <TD>1.04</TD>
+      <TD>3.13</TD>
+      <TD>1.18</TD>
+      <TD>25.591</TD>
+      <TD>7517.910 5697.170</TD>
+      <TD>281.36414 -15.33204</TD>
+      <TD>-0.000137708 4.4e-07 -8.2e-08 0.000137752</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_z_20150910091802-20_282.436-16.110_20x20</TD>
+      <TD>image/fits</TD>
+      <TD>z</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20150910091802-20&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20150910091802-20&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20150910091802-20&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20150910091802-20&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43579</TD>
+      <TD>-16.11049</TD>
+      <TD>100.0</TD>
+      <TD>57275.38755</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4960</TD>
+      <TD>20150910091802-20</TD>
+      <TD>main</TD>
+      <TD>20</TD>
+      <TD>C</TD>
+      <TD>1.04</TD>
+      <TD>1.88</TD>
+      <TD>1.24</TD>
+      <TD>27.534</TD>
+      <TD>-7906.518 -6918.919</TD>
+      <TD>281.30272 -15.15801</TD>
+      <TD>0.000137698 -4.09e-07 8.2e-08 -0.000137765</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_z_20150910091802-20_282.436-16.110_20x20</TD>
+      <TD>image/png</TD>
+      <TD>z</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20150910091802-20&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20150910091802-20&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20150910091802-20&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20150910091802-20&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43579</TD>
+      <TD>-16.11049</TD>
+      <TD>100.0</TD>
+      <TD>57275.38755</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4960</TD>
+      <TD>20150910091802-20</TD>
+      <TD>main</TD>
+      <TD>20</TD>
+      <TD>V</TD>
+      <TD>1.04</TD>
+      <TD>1.88</TD>
+      <TD>1.24</TD>
+      <TD>27.534</TD>
+      <TD>-7906.518 -6918.919</TD>
+      <TD>281.30272 -15.15801</TD>
+      <TD>0.000137698 -4.09e-07 8.2e-08 -0.000137765</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_i_20150911084825-20_282.436-16.111_20x20</TD>
+      <TD>image/fits</TD>
+      <TD>i</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20150911084825-20&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20150911084825-20&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20150911084825-20&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20150911084825-20&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43577</TD>
+      <TD>-16.11060</TD>
+      <TD>100.0</TD>
+      <TD>57276.36698</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4958 0.4960</TD>
+      <TD>20150911084825-20</TD>
+      <TD>main</TD>
+      <TD>20</TD>
+      <TD>C</TD>
+      <TD>1.05</TD>
+      <TD>2.15</TD>
+      <TD>1.20</TD>
+      <TD>28.201</TD>
+      <TD>-7449.269 -5657.109</TD>
+      <TD>281.36749 -15.33139</TD>
+      <TD>0.000137726 -4.24e-07 7.3e-08 -0.000137786</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_i_20150911084825-20_282.436-16.111_20x20</TD>
+      <TD>image/png</TD>
+      <TD>i</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20150911084825-20&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20150911084825-20&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20150911084825-20&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20150911084825-20&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43577</TD>
+      <TD>-16.11060</TD>
+      <TD>100.0</TD>
+      <TD>57276.36698</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4958 0.4960</TD>
+      <TD>20150911084825-20</TD>
+      <TD>main</TD>
+      <TD>20</TD>
+      <TD>V</TD>
+      <TD>1.05</TD>
+      <TD>2.15</TD>
+      <TD>1.20</TD>
+      <TD>28.201</TD>
+      <TD>-7449.269 -5657.109</TD>
+      <TD>281.36749 -15.33139</TD>
+      <TD>0.000137726 -4.24e-07 7.3e-08 -0.000137786</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_z_20150911085027-20_282.436-16.111_20x20</TD>
+      <TD>image/fits</TD>
+      <TD>z</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20150911085027-20&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20150911085027-20&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20150911085027-20&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20150911085027-20&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43590</TD>
+      <TD>-16.11051</TD>
+      <TD>100.0</TD>
+      <TD>57276.36839</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4960</TD>
+      <TD>20150911085027-20</TD>
+      <TD>main</TD>
+      <TD>20</TD>
+      <TD>C</TD>
+      <TD>1.05</TD>
+      <TD>2.21</TD>
+      <TD>1.25</TD>
+      <TD>27.472</TD>
+      <TD>-7476.743 -5654.032</TD>
+      <TD>281.36385 -15.33181</TD>
+      <TD>0.000137703 -4.23e-07 6.9e-08 -0.000137767</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_z_20150911085027-20_282.436-16.111_20x20</TD>
+      <TD>image/png</TD>
+      <TD>z</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20150911085027-20&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20150911085027-20&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20150911085027-20&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20150911085027-20&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43590</TD>
+      <TD>-16.11051</TD>
+      <TD>100.0</TD>
+      <TD>57276.36839</TD>
+      <TD>20 20</TD>
+      <TD>42 42</TD>
+      <TD>0.4957 0.4960</TD>
+      <TD>20150911085027-20</TD>
+      <TD>main</TD>
+      <TD>20</TD>
+      <TD>V</TD>
+      <TD>1.05</TD>
+      <TD>2.21</TD>
+      <TD>1.25</TD>
+      <TD>27.472</TD>
+      <TD>-7476.743 -5654.032</TD>
+      <TD>281.36385 -15.33181</TD>
+      <TD>0.000137703 -4.23e-07 6.9e-08 -0.000137767</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_u_20160422182954-03_282.434-16.111_4x20</TD>
+      <TD>image/fits</TD>
+      <TD>u</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422182954-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422182954-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422182954-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422182954-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43353</TD>
+      <TD>-16.11060</TD>
+      <TD>40.0</TD>
+      <TD>57500.77079</TD>
+      <TD>4 20</TD>
+      <TD>10 42</TD>
+      <TD>0.4976 0.4976</TD>
+      <TD>20160422182954-03</TD>
+      <TD>short</TD>
+      <TD>15</TD>
+      <TD>C</TD>
+      <TD>1.04</TD>
+      <TD>3.17</TD>
+      <TD>1.09</TD>
+      <TD>25.452</TD>
+      <TD>63.900 2255.391</TD>
+      <TD>282.44144 -16.41937</TD>
+      <TD>0.000138214 -2.12e-07 -1.95e-07 -0.00013821</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_u_20160422182954-03_282.434-16.111_4x20</TD>
+      <TD>image/png</TD>
+      <TD>u</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422182954-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422182954-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422182954-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422182954-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43353</TD>
+      <TD>-16.11060</TD>
+      <TD>40.0</TD>
+      <TD>57500.77079</TD>
+      <TD>4 20</TD>
+      <TD>10 42</TD>
+      <TD>0.4976 0.4976</TD>
+      <TD>20160422182954-03</TD>
+      <TD>short</TD>
+      <TD>15</TD>
+      <TD>V</TD>
+      <TD>1.04</TD>
+      <TD>3.17</TD>
+      <TD>1.09</TD>
+      <TD>25.452</TD>
+      <TD>63.900 2255.391</TD>
+      <TD>282.44144 -16.41937</TD>
+      <TD>0.000138214 -2.12e-07 -1.95e-07 -0.00013821</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_v_20160422183055-03_282.434-16.111_4x20</TD>
+      <TD>image/fits</TD>
+      <TD>v</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183055-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183055-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183055-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183055-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43356</TD>
+      <TD>-16.11062</TD>
+      <TD>20.0</TD>
+      <TD>57500.77148</TD>
+      <TD>4 20</TD>
+      <TD>10 42</TD>
+      <TD>0.4976 0.4976</TD>
+      <TD>20160422183055-03</TD>
+      <TD>short</TD>
+      <TD>15</TD>
+      <TD>C</TD>
+      <TD>1.04</TD>
+      <TD>2.98</TD>
+      <TD>1.06</TD>
+      <TD>24.903</TD>
+      <TD>64.225 2255.526</TD>
+      <TD>282.44148 -16.41942</TD>
+      <TD>0.000138222 -2.2e-07 -1.85e-07 -0.000138217</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_v_20160422183055-03_282.434-16.111_4x20</TD>
+      <TD>image/png</TD>
+      <TD>v</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183055-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183055-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183055-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183055-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43356</TD>
+      <TD>-16.11062</TD>
+      <TD>20.0</TD>
+      <TD>57500.77148</TD>
+      <TD>4 20</TD>
+      <TD>10 42</TD>
+      <TD>0.4976 0.4976</TD>
+      <TD>20160422183055-03</TD>
+      <TD>short</TD>
+      <TD>15</TD>
+      <TD>V</TD>
+      <TD>1.04</TD>
+      <TD>2.98</TD>
+      <TD>1.06</TD>
+      <TD>24.903</TD>
+      <TD>64.225 2255.526</TD>
+      <TD>282.44148 -16.41942</TD>
+      <TD>0.000138222 -2.2e-07 -1.85e-07 -0.000138217</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_g_20160422183135-03_282.434-16.111_4x20</TD>
+      <TD>image/fits</TD>
+      <TD>g</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183135-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183135-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183135-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183135-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43355</TD>
+      <TD>-16.11057</TD>
+      <TD>5.0</TD>
+      <TD>57500.77196</TD>
+      <TD>4 20</TD>
+      <TD>10 42</TD>
+      <TD>0.4977 0.4976</TD>
+      <TD>20160422183135-03</TD>
+      <TD>short</TD>
+      <TD>15</TD>
+      <TD>C</TD>
+      <TD>1.04</TD>
+      <TD>2.44</TD>
+      <TD>1.10</TD>
+      <TD>25.780</TD>
+      <TD>64.089 2253.699</TD>
+      <TD>282.44145 -16.41914</TD>
+      <TD>0.000138242 -2.27e-07 -1.8e-07 -0.000138226</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_g_20160422183135-03_282.434-16.111_4x20</TD>
+      <TD>image/png</TD>
+      <TD>g</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183135-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183135-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183135-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183135-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43355</TD>
+      <TD>-16.11057</TD>
+      <TD>5.0</TD>
+      <TD>57500.77196</TD>
+      <TD>4 20</TD>
+      <TD>10 42</TD>
+      <TD>0.4977 0.4976</TD>
+      <TD>20160422183135-03</TD>
+      <TD>short</TD>
+      <TD>15</TD>
+      <TD>V</TD>
+      <TD>1.04</TD>
+      <TD>2.44</TD>
+      <TD>1.10</TD>
+      <TD>25.780</TD>
+      <TD>64.089 2253.699</TD>
+      <TD>282.44145 -16.41914</TD>
+      <TD>0.000138242 -2.27e-07 -1.8e-07 -0.000138226</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_r_20160422183200-03_282.434-16.111_5x20</TD>
+      <TD>image/fits</TD>
+      <TD>r</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183200-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183200-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183200-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183200-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43357</TD>
+      <TD>-16.11059</TD>
+      <TD>5.0</TD>
+      <TD>57500.77225</TD>
+      <TD>5 20</TD>
+      <TD>11 42</TD>
+      <TD>0.4978 0.4977</TD>
+      <TD>20160422183200-03</TD>
+      <TD>short</TD>
+      <TD>15</TD>
+      <TD>C</TD>
+      <TD>1.04</TD>
+      <TD>2.08</TD>
+      <TD>1.08</TD>
+      <TD>25.576</TD>
+      <TD>64.932 2253.563</TD>
+      <TD>282.44155 -16.41919</TD>
+      <TD>0.000138264 -2.16e-07 -1.9e-07 -0.000138248</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_r_20160422183200-03_282.434-16.111_5x20</TD>
+      <TD>image/png</TD>
+      <TD>r</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183200-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183200-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183200-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183200-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43357</TD>
+      <TD>-16.11059</TD>
+      <TD>5.0</TD>
+      <TD>57500.77225</TD>
+      <TD>5 20</TD>
+      <TD>11 42</TD>
+      <TD>0.4978 0.4977</TD>
+      <TD>20160422183200-03</TD>
+      <TD>short</TD>
+      <TD>15</TD>
+      <TD>V</TD>
+      <TD>1.04</TD>
+      <TD>2.08</TD>
+      <TD>1.08</TD>
+      <TD>25.576</TD>
+      <TD>64.932 2253.563</TD>
+      <TD>282.44155 -16.41919</TD>
+      <TD>0.000138264 -2.16e-07 -1.9e-07 -0.000138248</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_i_20160422183226-03_282.434-16.111_4x20</TD>
+      <TD>image/fits</TD>
+      <TD>i</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183226-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183226-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183226-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183226-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43350</TD>
+      <TD>-16.11061</TD>
+      <TD>10.0</TD>
+      <TD>57500.77253</TD>
+      <TD>4 20</TD>
+      <TD>9 42</TD>
+      <TD>0.4978 0.4977</TD>
+      <TD>20160422183226-03</TD>
+      <TD>short</TD>
+      <TD>15</TD>
+      <TD>C</TD>
+      <TD>1.04</TD>
+      <TD>1.87</TD>
+      <TD>1.09</TD>
+      <TD>25.581</TD>
+      <TD>62.944 2253.850</TD>
+      <TD>282.44133 -16.41926</TD>
+      <TD>0.000138284 -2.2e-07 -1.89e-07 -0.000138255</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_i_20160422183226-03_282.434-16.111_4x20</TD>
+      <TD>image/png</TD>
+      <TD>i</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183226-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183226-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183226-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183226-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43350</TD>
+      <TD>-16.11061</TD>
+      <TD>10.0</TD>
+      <TD>57500.77253</TD>
+      <TD>4 20</TD>
+      <TD>9 42</TD>
+      <TD>0.4978 0.4977</TD>
+      <TD>20160422183226-03</TD>
+      <TD>short</TD>
+      <TD>15</TD>
+      <TD>V</TD>
+      <TD>1.04</TD>
+      <TD>1.87</TD>
+      <TD>1.09</TD>
+      <TD>25.581</TD>
+      <TD>62.944 2253.850</TD>
+      <TD>282.44133 -16.41926</TD>
+      <TD>0.000138284 -2.2e-07 -1.89e-07 -0.000138255</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_z_20160422183257-03_282.434-16.111_5x20</TD>
+      <TD>image/fits</TD>
+      <TD>z</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183257-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183257-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183257-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183257-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43360</TD>
+      <TD>-16.11050</TD>
+      <TD>20.0</TD>
+      <TD>57500.77289</TD>
+      <TD>5 20</TD>
+      <TD>11 42</TD>
+      <TD>0.4977 0.4977</TD>
+      <TD>20160422183257-03</TD>
+      <TD>short</TD>
+      <TD>15</TD>
+      <TD>C</TD>
+      <TD>1.04</TD>
+      <TD>2.06</TD>
+      <TD>1.08</TD>
+      <TD>25.583</TD>
+      <TD>64.899 2253.531</TD>
+      <TD>282.44157 -16.41909</TD>
+      <TD>0.000138255 -2.17e-07 -1.91e-07 -0.000138241</TD>
+     </TR>
+     <TR>
+      <TD>SkyMapper_z_20160422183257-03_282.434-16.111_5x20</TD>
+      <TD>image/png</TD>
+      <TD>z</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183257-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183257-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=png</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183257-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=fits</TD>
+      <TD>https://api.skymapper.nci.org.au/public/siap/dr2/get_image?image=20160422183257-03&amp;size=0.00555555555556,0.00555555555556&amp;pos=282.4358586,-16.1105754&amp;format=mask</TD>
+      <TD>282.43360</TD>
+      <TD>-16.11050</TD>
+      <TD>20.0</TD>
+      <TD>57500.77289</TD>
+      <TD>5 20</TD>
+      <TD>11 42</TD>
+      <TD>0.4977 0.4977</TD>
+      <TD>20160422183257-03</TD>
+      <TD>short</TD>
+      <TD>15</TD>
+      <TD>V</TD>
+      <TD>1.04</TD>
+      <TD>2.06</TD>
+      <TD>1.08</TD>
+      <TD>25.583</TD>
+      <TD>64.899 2253.531</TD>
+      <TD>282.44157 -16.41909</TD>
+      <TD>0.000138255 -2.17e-07 -1.91e-07 -0.000138241</TD>
+     </TR>
+    </TABLEDATA>
+   </DATA>
+  </TABLE>
+ </RESOURCE>
+</VOTABLE>

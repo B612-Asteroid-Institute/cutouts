@@ -3,6 +3,7 @@ import logging
 import pandas as pd
 import pandera as pa
 from pandera.typing import DataFrame
+from pyvo.dal.sia import SIAResults
 
 from .sia import SIAHandler
 from .types import CutoutRequest, CutoutsResultSchema
@@ -22,7 +23,7 @@ def _get_generic_image_url_from_cutout_url(cutout_url: str):
 
 
 @pa.check_types
-def find_cutouts_skymapper(
+def find_cutouts_skymapper_dr2(
     cutout_request: CutoutRequest,
 ) -> DataFrame[CutoutsResultSchema]:
     """
@@ -45,7 +46,7 @@ def find_cutouts_skymapper(
         f"Fetching Skymapper cutouts with ra: {cutout_request.ra_deg} dec: {cutout_request.dec_deg}."
     )
 
-    sia = Skymapper_SIA()
+    sia = SkyMapper_DR2_SIA()
     results = sia.search(
         cutout_request.ra_deg,
         cutout_request.dec_deg,
@@ -53,6 +54,9 @@ def find_cutouts_skymapper(
         cutout_request.width_arcsec,
     )
     results = pd.DataFrame(results)
+
+    # Limit results to just fits files
+    results = results[results["format"] == "image/fits"]
 
     results.rename(
         columns={
@@ -93,7 +97,7 @@ def find_cutouts_skymapper(
     return results
 
 
-class Skymapper_SIA(SIAHandler):
+class SkyMapper_DR2_SIA(SIAHandler):
     SIA_URL = "https://api.skymapper.nci.org.au/public/siap/dr2/query?"
 
     def search(
@@ -102,10 +106,11 @@ class Skymapper_SIA(SIAHandler):
         dec_deg: float,
         height_arcsec: float = 20,
         width_arcsec: float = 20,
-    ) -> pd.DataFrame:
+    ) -> SIAResults:
         result = self.sia_service.search(
-            (ra_deg, dec_deg), size=(height_arcsec / 3600.0, width_arcsec / 3600.0)
+            (ra_deg, dec_deg),
+            size=(height_arcsec / 3600.0, width_arcsec / 3600.0),
+            format="all",
+            center="overlaps",
         )
-        result = pd.DataFrame(result)
-
         return result
