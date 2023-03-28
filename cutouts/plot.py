@@ -156,7 +156,7 @@ def add_velocity_vector(
     vra : float
         Predicted RA-velocity in degrees per day.
     vdec : float
-        Predicted Dec in degrees in degrees per day.
+        Predicted Dec-velocity in degrees per day.
     dt : float
         Exposure duration in units of seconds. Used to scale the velocity vector.
     scale_factor : float
@@ -168,6 +168,23 @@ def add_velocity_vector(
     **kwargs
         Keyword arguments to pass to ax.arrow.
     """
+    if np.isnan(ra):
+        raise ValueError("The RA must be finite to plot the velocity vector.")
+    if np.isnan(dec):
+        raise ValueError("The Dec must be finite to plot the velocity vector.")
+    if np.isnan(vra):
+        raise ValueError(
+            "The velocity in RA must be finite to plot the velocity vector."
+        )
+    if np.isnan(vdec):
+        raise ValueError(
+            "The velocity in Dec must be finite to plot the velocity vector."
+        )
+    if np.isnan(dt):
+        raise ValueError(
+            "The exposure duration must be finite to plot the velocity vector."
+        )
+
     # Calculate the unit vector in the direction of the velocity
     vra_hat = vra / np.sqrt(vra**2 + vdec**2)
     vdec_hat = vdec / np.sqrt(vra**2 + vdec**2)
@@ -242,7 +259,7 @@ def plot_cutout(
     vra : float
         Predicted RA-velocity in degrees per day.
     vdec : float
-        Predicted Dec in degrees in degrees per day.
+        Predicted Dec-velocity in degrees per day.
     dt : float
         Exposure duration in units of seconds. Used to scale the velocity vector.
     crosshair : bool, optional
@@ -417,6 +434,12 @@ def plot_cutouts(
         else:
             cutout_title += f", $\Delta$t: {exposure_time[i]:.0f}s"  # noqa: W605
 
+        # We expect vra_i, vdec_i to be NaN if we are plotting a comparison candidate
+        if np.isnan(vra_i) or np.isnan(vdec_i):
+            velocity_vector_i = False
+        else:
+            velocity_vector_i = velocity_vector
+
         if path_i is None:
             if include_missing:
                 ax = fig.add_subplot(num_rows, num_cols, j + 1)
@@ -472,7 +495,7 @@ def plot_cutouts(
                 dt_i,
                 crosshair=crosshair,
                 crosshair_kwargs=crosshair_kwargs_i,
-                velocity_vector=velocity_vector,
+                velocity_vector=velocity_vector_i,
                 velocity_vector_kwargs=velocity_vector_kwargs,
             )
             j += 1
