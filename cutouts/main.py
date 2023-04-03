@@ -126,7 +126,7 @@ def get_cutouts(
                         pkgname="cutouts",
                         timeout=full_image_timeout,
                     )
-                except FileNotFoundError as e:
+                except Exception as e:
                     result["error"] = str(e)
 
     # Download comparison cutouts
