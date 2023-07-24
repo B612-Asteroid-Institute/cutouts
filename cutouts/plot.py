@@ -486,6 +486,7 @@ def plot_cutouts(
         if np.isnan(mag[i]):
             crosshair_kwargs_i = crosshair_non_detection_kwargs
             cutout_title += ": --.--"
+            circle_object = False
         else:
             crosshair_kwargs_i = crosshair_detection_kwargs
             cutout_title += f": {mag[i]:.2f}"
