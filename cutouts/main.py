@@ -10,7 +10,7 @@ import pandera as pa
 from astropy.time import Time
 from pandera.typing import DataFrame
 
-from .filter import select_comparison_cutout, select_cutout
+from .filter import select_comparison_cutout, select_cutout, select_comparison_cutout_byrank
 from .io import download_cutout, find_cutouts
 from .io.types import CutoutRequest, CutoutRequestSchema
 from .plot import generate_gif, plot_comparison_cutouts, plot_cutouts
@@ -64,8 +64,8 @@ def get_cutouts(
 
         if compare:
             try:
-                comparison_result = select_comparison_cutout(
-                    results_df, result, cutout_request, **compare_kwargs
+                comparison_result = select_comparison_cutout_byrank(
+                    results_df, result, cutout_request
                 )
 
             except Exception as e:

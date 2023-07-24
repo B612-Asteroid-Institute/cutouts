@@ -205,3 +205,88 @@ def select_comparison_cutout(
         width_arcsec=candidate["width_arcsec"],
     )
     return candidate
+
+
+def select_comparison_cutout_byrank(
+    results_df: DataFrame[CutoutsResultSchema],
+    cutout_result: CutoutResult,
+    cutout_request: CutoutRequest,
+) -> CutoutResult:
+    """
+    Uses a heuristic weighting of several factors to pick the 'best' comparison cutout.
+    The factors are:
+    - time separation (smaller is better, to a point)
+    - exposure duration (larger is better)
+    - filter (same is better)
+
+    score is calculated as:
+
+    -1 point per log10(day) of time separation
+    -1 point if less than 1 hour time separation
+    +1 point per log10(exposure duration)
+
+    -1 point per filter difference. (ubgvrizy)
+    """
+
+    # Remove the cutout that was used to make the request if it is still included
+    # in the results dataframe
+    candidates_filtered = results_df[
+        results_df["cutout_url"] != cutout_result.cutout_url
+    ].copy()
+
+    # Add delta time column
+    candidates_filtered["delta_time"] = (
+        cutout_request.exposure_start_mjd - candidates_filtered["exposure_start_mjd"]
+    )
+    candidates_filtered["abs_delta_time"] = np.abs(candidates_filtered["delta_time"])
+
+    # Add dilter distance column
+    candidates_filtered["photometric_filter_distance"] = candidates_filtered[
+        "filter"
+    ].apply(
+        lambda x: photometric_filter_difference(x, cutout_result.filter),
+    )
+
+    # Add score column
+    candidates_filtered["score"] = (
+        -1 * np.log10(candidates_filtered["abs_delta_time"])
+        - 1 * (candidates_filtered["abs_delta_time"] < (1.0 / 2))
+        - 2 * (candidates_filtered["abs_delta_time"] < (1.0 / 24))
+        - 3 * (candidates_filtered["abs_delta_time"] < (1.0 / 96))
+        + 1 * np.log10(candidates_filtered["exposure_duration"])
+        - 1 * candidates_filtered["photometric_filter_distance"]
+    )
+
+    # Sort by score
+    candidates_filtered = candidates_filtered.sort_values(by="score", ascending=False)
+
+    # Select the first cutout (highest score)
+    candidate = candidates_filtered.to_dict(orient="records")[0]
+    candidate = CutoutResult(
+        cutout_url=candidate["cutout_url"],
+        exposure_duration=candidate["exposure_duration"],
+        exposure_id=candidate["exposure_id"],
+        exposure_start_mjd=candidate["exposure_start_mjd"],
+        filter=candidate["filter"],
+        height_arcsec=candidate["height_arcsec"],
+        image_url=candidate["image_url"],
+        ra_deg=cutout_request.ra_deg,
+        dec_deg=cutout_request.dec_deg,
+        request_id=cutout_request.request_id,
+        width_arcsec=candidate["width_arcsec"],
+    )
+    return candidate
+
+
+def photometric_filter_difference(f1, f2) -> int:
+    """
+    steps of difference between two filters
+    (ubgvrizy)
+    """
+    if f1 == f2:
+        return 0
+    filter_order = "ubgvrizy"
+    try:
+        return abs(filter_order.index(f1) - filter_order.index(f2))
+    except ValueError:
+        return 10
