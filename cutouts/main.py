@@ -223,6 +223,8 @@ def run_cutouts_from_precovery(
     timeout: Optional[int] = 180,
     full_image_timeout: Optional[int] = 600,
     use_cache: bool = True,
+    max_cols: int = 10,
+    max_cutouts: Optional[int] = None,
     compare: bool = False,
     compare_kwargs: Optional[dict] = None,
     title: Optional[str] = None,
@@ -278,8 +280,11 @@ def run_cutouts_from_precovery(
         compare=compare,
         compare_kwargs=compare_kwargs,
     )
+    if max_cutouts is None:
+        max_cutouts = len(cutout_results)
 
     plot_candidates = []
+    plot_comparison_candidates = []
     for i, result in enumerate(cutout_results):
         if "error" in result:
             candidate = {
@@ -315,22 +320,11 @@ def run_cutouts_from_precovery(
                 "exposure_duration": result["exposure_duration"],
                 "exposure_id": result["exposure_id"],
             }
-        plot_candidates.append(candidate)
-
-    plot_candidates = pd.DataFrame(plot_candidates)
-    # Plot cutouts
-    fig, ax = plot_cutouts(
-        plot_candidates,
-        cutout_height_arcsec=cutout_height_arcsec,
-        cutout_width_arcsec=cutout_width_arcsec,
-    )
-    fig.savefig(out_dir_path.joinpath(out_file_path), bbox_inches="tight")
-
-    if compare:
-        plot_comparison_candidates = []
-        for i, result in enumerate(comparison_results):
-            if "error" in result:
-                candidate = {
+        
+        if compare: 
+            comparison_result = comparison_results[i]
+            if "error" in comparison_result:
+                comparison_candidate = {
                     "path": None,
                     "ra": observations["pred_ra_deg"].values[i],
                     "dec": observations["pred_dec_deg"].values[i],
@@ -345,27 +339,49 @@ def run_cutouts_from_precovery(
                     "exposure_id": None,
                 }
             else:
-                candidate = {
-                    "path": result["cutout_image_path"],
+                comparison_candidate = {
+                    "path": comparison_result["cutout_image_path"],
                     "ra": observations["pred_ra_deg"].values[i],
                     "dec": observations["pred_dec_deg"].values[i],
                     "vra": np.NaN,
                     "vdec": np.NaN,
                     "mag": np.NaN,
                     "mag_sigma": np.NaN,
-                    "filter": result["filter"],
+                    "filter": comparison_result["filter"],
                     "obscode": observations["obscode"].values[i],
-                    "exposure_start": result["exposure_start_mjd"],
-                    "exposure_duration": result["exposure_duration"],
-                    "exposure_id": result["exposure_id"],
+                    "exposure_start": comparison_result["exposure_start_mjd"],
+                    "exposure_duration": comparison_result["exposure_duration"],
+                    "exposure_id": comparison_result["exposure_id"],
                 }
-            plot_comparison_candidates.append(candidate)
 
+            if candidate["path"] is not None and comparison_candidate["path"] is not None:
+                plot_candidates.append(candidate)
+                plot_comparison_candidates.append(comparison_candidate)
+            else: 
+                continue
+
+        else:
+            if candidate["path"] is not None:
+                plot_candidates.append(candidate)
+
+        if len(plot_candidates) >= max_cutouts:
+            break
+
+    plot_candidates = pd.DataFrame(plot_candidates)
+    # Plot cutouts
+    fig, ax = plot_cutouts(
+        plot_candidates,
+        max_cols=max_cols,
+        cutout_height_arcsec=cutout_height_arcsec,
+        cutout_width_arcsec=cutout_width_arcsec,
+    )
+    
     if title is not None:
         fig.suptitle(title, fontsize=28, y=0.99)
     fig.text(0.5, 0.025, "Asteroid Institute, a program of B612 Foundation", ha="center", va="center", fontsize=8)
     fig.savefig(out_dir_path.joinpath(out_file_path))# bbox_inches="tight")
 
+    if compare:
         plot_comparison_candidates = pd.DataFrame(plot_comparison_candidates)
 
         figs, axs = plot_comparison_cutouts(
@@ -373,6 +389,7 @@ def run_cutouts_from_precovery(
             plot_comparison_candidates,
             cutout_height_arcsec=cutout_height_arcsec,
             cutout_width_arcsec=cutout_width_arcsec,
+            max_cols=max_cols,
         )
         for fig in figs:
             if title is not None:
