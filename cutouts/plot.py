@@ -44,7 +44,7 @@ SUBPLOTS_ADJUST_KWARGS: dict = {
     "wspace": 0.15,
     "left": 0.05,
     "right": 0.95,
-    "top": 0.90,
+    "top": 0.95,
     "bottom": 0.05,
 }
 CIRCLE_OBJECT_KWARGS: dict = {
@@ -273,7 +273,7 @@ def plot_cutout(
     obj_ra: float,
     obj_dec: float,
     dt: float,
-    circle_object: bool = True,
+    circle_object: bool = False,
     circle_object_kwargs: dict = CIRCLE_OBJECT_KWARGS,
     crosshair: bool = True,
     crosshair_kwargs: dict = CROSSHAIR_DETECTION_KWARGS,
@@ -350,12 +350,12 @@ def plot_cutouts(
     candidates: pd.DataFrame,
     dpi: int = 200,
     max_cols: int = 4,
-    row_height: float = 2.0,
-    col_width: float = 2.0,
+    row_height: float = 1.8,
+    col_width: float = 1.8,
     cutout_height_arcsec: float = 20,
     cutout_width_arcsec: float = 20,
     include_missing: bool = True,
-    circle_object: bool = True,
+    circle_object: bool = False,
     circle_object_kwargs: dict = CIRCLE_OBJECT_KWARGS,
     crosshair: bool = True,
     crosshair_detection_kwargs: dict = CROSSHAIR_DETECTION_KWARGS,
@@ -572,7 +572,7 @@ def plot_cutouts(
             j += 1
 
         if ax is not None:
-            ax.set_title(cutout_title, fontsize=5, y=y)
+            ax.set_title(cutout_title, fontsize=4, y=y)
             axs.append(ax)
 
     return fig, axs
@@ -588,7 +588,7 @@ def plot_comparison_cutouts(
     cutout_height_arcsec: float = 20,
     cutout_width_arcsec: float = 20,
     include_missing: bool = True,
-    circle_object: bool = True,
+    circle_object: bool = False,
     circle_object_kwargs: dict = CIRCLE_OBJECT_KWARGS,
     crosshair: bool = True,
     crosshair_detection_kwargs: dict = CROSSHAIR_DETECTION_KWARGS,
