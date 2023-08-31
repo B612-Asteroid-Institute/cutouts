@@ -372,7 +372,7 @@ def run_cutouts_from_precovery(
             figs,
             out_dir=out_dir_path,
             out_file=out_file_path.with_suffix(".gif"),
-            cleanup=True,
+            cleanup=False,
         )
 
     return cutout_results, comparison_results
