@@ -225,6 +225,7 @@ def run_cutouts_from_precovery(
     use_cache: bool = True,
     compare: bool = False,
     compare_kwargs: Optional[dict] = None,
+    title: Optional[str] = None,
 ):
 
     # This seems unecessary but linting fails without it
@@ -360,6 +361,11 @@ def run_cutouts_from_precovery(
                 }
             plot_comparison_candidates.append(candidate)
 
+    if title is not None:
+        fig.suptitle(title, fontsize=28, y=0.99)
+    fig.text(0.5, 0.025, "Asteroid Institute, a program of B612 Foundation", ha="center", va="center", fontsize=8)
+    fig.savefig(out_dir_path.joinpath(out_file_path))# bbox_inches="tight")
+
         plot_comparison_candidates = pd.DataFrame(plot_comparison_candidates)
 
         figs, axs = plot_comparison_cutouts(
@@ -368,6 +374,11 @@ def run_cutouts_from_precovery(
             cutout_height_arcsec=cutout_height_arcsec,
             cutout_width_arcsec=cutout_width_arcsec,
         )
+        for fig in figs:
+            if title is not None:
+                fig.suptitle(title, fontsize=28, y=0.99)
+            fig.text(0.5, 0.025, "Asteroid Institute, a program of B612 Foundation", ha="center", va="center", fontsize=8)
+
         generate_gif(
             figs,
             out_dir=out_dir_path,
