@@ -1,11 +1,9 @@
 import logging
 
-import pandera as pa
-from pandera.typing import DataFrame
+import pandas as pd
 from pyvo.dal.sia import SIAResults
 
 from .sia import SIAHandler
-from .types import CutoutRequest, CutoutsResultSchema
 from .util import exposure_id_from_url
 
 logger = logging.getLogger(__name__)
@@ -16,10 +14,9 @@ def _get_generic_image_url_from_cutout_url(cutout_url: str):
     return cutout_url.split("&POS=")[0]
 
 
-@pa.check_types
 def find_cutouts_nsc_dr2(
-    cutout_request: CutoutRequest,
-) -> DataFrame[CutoutsResultSchema]:
+    cutout_request: pd.DataFrame,
+) -> pd.DataFrame:
     """
     Search the NOIRLab Archive for cutouts and images at a given RA, Dec.
 

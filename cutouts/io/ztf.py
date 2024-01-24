@@ -5,11 +5,9 @@ from typing import Tuple
 import backoff
 import numpy as np
 import pandas as pd
-import pandera as pa
 import requests
-from pandera.typing import DataFrame
 
-from .types import CutoutRequest, CutoutsResultSchema
+from .types import CutoutRequest
 
 logger = logging.getLogger(__file__)
 
@@ -83,8 +81,7 @@ def perform_request(search_url):
     return response.text
 
 
-@pa.check_types()
-def find_cutouts_ztf(cutout_request: CutoutRequest) -> DataFrame[CutoutsResultSchema]:
+def find_cutouts_ztf(cutout_request: CutoutRequest) -> pd.DataFrame:
     """
     Search the ZTF service for cutouts and images at a given RA, Dec.
 

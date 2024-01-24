@@ -1,17 +1,15 @@
 import logging
 
 import numpy as np
-import pandera as pa
-from pandera.typing import DataFrame
+import pandas as pd
 
-from .io.types import CutoutRequest, CutoutResult, CutoutsResultSchema
+from .io.types import CutoutRequest, CutoutResult
 
 logger = logging.getLogger(__file__)
 
 
-@pa.check_types
 def select_cutout(
-    results_df: DataFrame[CutoutsResultSchema], cutout_request: CutoutRequest
+    results_df: pd.DataFrame, cutout_request: CutoutRequest
 ) -> CutoutResult:
     """
     Select the cutout closest to the requested exposure start time +- delta_time.
@@ -91,9 +89,8 @@ def select_cutout(
     return result
 
 
-@pa.check_types
 def select_comparison_cutout(
-    results_df: DataFrame[CutoutsResultSchema],
+    results_df: pd.DataFrame,
     cutout_result: CutoutResult,
     cutout_request: CutoutRequest,
     min_time_separation: float = 1 / 24,
