@@ -2,17 +2,15 @@ import argparse
 import logging
 import pathlib
 import sys
-from typing import Any, Dict, Iterable, Optional, Tuple, cast
+from typing import Any, Dict, Iterable, Optional, Tuple
 
 import numpy as np
 import pandas as pd
-import pandera as pa
 from astropy.time import Time
-from pandera.typing import DataFrame
 
 from .filter import select_comparison_cutout, select_cutout
 from .io import download_cutout, find_cutouts
-from .io.types import CutoutRequest, CutoutRequestSchema
+from .io.types import CutoutRequest
 from .plot import generate_gif, plot_comparison_cutouts, plot_cutouts
 
 logger = logging.getLogger("cutouts")
@@ -27,9 +25,8 @@ OBSCODE_TOLERANCE_MAPPING = {
 }
 
 
-@pa.check_types
 def get_cutouts(
-    cutout_requests: DataFrame[CutoutRequestSchema],
+    cutout_requests: pd.DataFrame,
     out_dir: pathlib.Path,
     timeout: Optional[int] = 180,
     full_image_timeout: Optional[int] = 600,
@@ -267,7 +264,7 @@ def run_cutouts_from_precovery(
     cutout_requests["delta_time"].fillna(1e-8, inplace=True)
 
     cutout_results, comparison_results = get_cutouts(
-        cast(DataFrame[CutoutRequestSchema], cutout_requests),
+        cutout_requests,
         out_dir=out_dir_path,
         download_full_image=download_full_image,
         timeout=timeout,

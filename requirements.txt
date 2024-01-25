@@ -46,10 +46,6 @@ kiwisolver==1.4.5
     # via matplotlib
 matplotlib==3.8.2
     # via cutouts (pyproject.toml)
-multimethod==1.10
-    # via pandera
-mypy-extensions==1.0.0
-    # via typing-inspect
 nodeenv==1.8.0
     # via pre-commit
 numpy==1.26.3
@@ -60,19 +56,13 @@ numpy==1.26.3
     #   imageio
     #   matplotlib
     #   pandas
-    #   pandera
     #   pyerfa
 packaging==23.2
     # via
     #   astropy
     #   matplotlib
-    #   pandera
     #   pytest
 pandas==2.2.0
-    # via
-    #   cutouts (pyproject.toml)
-    #   pandera
-pandera==0.18.0
     # via cutouts (pyproject.toml)
 pillow==10.2.0
     # via
@@ -85,9 +75,7 @@ pluggy==1.4.0
 pre-commit==3.6.0
     # via cutouts (pyproject.toml)
 pydantic==2.5.3
-    # via
-    #   cutouts (pyproject.toml)
-    #   pandera
+    # via cutouts (pyproject.toml)
 pydantic-core==2.14.6
     # via pydantic
 pyerfa==2.0.1.1
@@ -116,24 +104,16 @@ requests==2.31.0
     # via pyvo
 six==1.16.0
     # via python-dateutil
-typeguard==4.1.5
-    # via pandera
 typing-extensions==4.9.0
     # via
     #   pydantic
     #   pydantic-core
-    #   typeguard
-    #   typing-inspect
-typing-inspect==0.9.0
-    # via pandera
 tzdata==2023.4
     # via pandas
 urllib3==2.1.0
     # via requests
 virtualenv==20.25.0
     # via pre-commit
-wrapt==1.16.0
-    # via pandera
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

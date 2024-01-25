@@ -1,14 +1,10 @@
 import os
-import pathlib
-import pickle
 from contextlib import contextmanager
 from unittest.mock import patch
 
-import pandas as pd
 from astropy.io.votable import parse
 from pyvo.dal.sia import SIAResults
 
-from ...main import get_cutouts
 from ..nsc import NSC_DR2_SIA, find_cutouts_nsc_dr2
 from ..types import CutoutRequest
 
