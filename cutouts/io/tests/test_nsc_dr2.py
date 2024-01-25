@@ -1,15 +1,15 @@
 import os
-from contextlib import contextmanager
-from unittest.mock import patch
 import pathlib
 import pickle
-import pandas as pd
+from contextlib import contextmanager
+from unittest.mock import patch
 
+import pandas as pd
 from astropy.io.votable import parse
 from pyvo.dal.sia import SIAResults
 
-from ..nsc import NSC_DR2_SIA, find_cutouts_nsc_dr2
 from ...main import get_cutouts
+from ..nsc import NSC_DR2_SIA, find_cutouts_nsc_dr2
 from ..types import CutoutRequest
 
 # 2014 HE199 (2014-04-28T08:07:52.435)
@@ -44,7 +44,6 @@ def mock_sia_nsc_dr2_query(table_file: str):
 
 
 def test_sia_nsc_dr2_query():
-
     with mock_sia_nsc_dr2_query(
         "nsc_dr2_227.5251615214173_-27.026013823449265_56775.33880132809.xml"
     ) as mock:
@@ -71,23 +70,3 @@ def test_sia_nsc_dr2_query():
             assert col in results.columns
 
         assert "VR" in results["filter"].values
-
-
-def test_sia_nsc_dr2_query_():
-
-    with mock_sia_nsc_dr2_query(
-        "nsc_dr2_227.5251615214173_-27.026013823449265_56775.33880132809.xml"
-    ) as mock:
-        results, comparison_results = get_cutouts(
-            pd.DataFrame(cutout_request1),
-            out_dir=pathlib.Path(os.path.dirname(os.path.abspath(__file__)))
-        )
-        print(results)
-        print(comparison_results)
-
-        with open('cutout_results.pickle', 'wb') as f:
-            pickle.dump(results, f)
-        with open('cutout_comparison_results.pickle', 'wb') as f:
-            pickle.dump(comparison_results, f)
-
-        assert False
