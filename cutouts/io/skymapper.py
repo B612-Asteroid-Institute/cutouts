@@ -1,10 +1,12 @@
 import logging
 
 import pandas as pd
+import pandera as pa
+from pandera.typing import DataFrame
 from pyvo.dal.sia import SIAResults
 
 from .sia import SIAHandler
-from .types import CutoutRequest
+from .types import CutoutRequest, CutoutsResultSchema
 
 logger = logging.getLogger(__name__)
 
@@ -20,9 +22,10 @@ def _get_generic_image_url_from_cutout_url(cutout_url: str):
     return url_string
 
 
+@pa.check_types
 def find_cutouts_skymapper_dr2(
     cutout_request: CutoutRequest,
-) -> pd.DataFrame:
+) -> DataFrame[CutoutsResultSchema]:
     """
     Search the Skymapper SIA service for cutouts and images at a given RA, Dec.
 
