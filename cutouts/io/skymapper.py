@@ -22,7 +22,6 @@ def _get_generic_image_url_from_cutout_url(cutout_url: str):
     return url_string
 
 
-@pa.check_types
 def find_cutouts_skymapper_dr2(
     cutout_request: CutoutRequest,
 ) -> DataFrame[CutoutsResultSchema]:

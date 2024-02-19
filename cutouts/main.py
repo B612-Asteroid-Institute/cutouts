@@ -27,7 +27,6 @@ OBSCODE_TOLERANCE_MAPPING = {
 }
 
 
-@pa.check_types
 def get_cutouts(
     cutout_requests: DataFrame[CutoutRequestSchema],
     out_dir: pathlib.Path,

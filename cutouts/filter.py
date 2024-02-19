@@ -9,7 +9,6 @@ from .io.types import CutoutRequest, CutoutResult, CutoutsResultSchema
 logger = logging.getLogger(__file__)
 
 
-@pa.check_types
 def select_cutout(
     results_df: DataFrame[CutoutsResultSchema], cutout_request: CutoutRequest
 ) -> CutoutResult:
@@ -91,7 +90,6 @@ def select_cutout(
     return result
 
 
-@pa.check_types
 def select_comparison_cutout(
     results_df: DataFrame[CutoutsResultSchema],
     cutout_result: CutoutResult,

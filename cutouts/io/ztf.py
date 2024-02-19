@@ -83,7 +83,6 @@ def perform_request(search_url):
     return response.text
 
 
-@pa.check_types()
 def find_cutouts_ztf(cutout_request: CutoutRequest) -> DataFrame[CutoutsResultSchema]:
     """
     Search the ZTF service for cutouts and images at a given RA, Dec.

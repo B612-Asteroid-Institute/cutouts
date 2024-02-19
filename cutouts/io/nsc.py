@@ -16,7 +16,6 @@ def _get_generic_image_url_from_cutout_url(cutout_url: str):
     return cutout_url.split("&POS=")[0]
 
 
-@pa.check_types
 def find_cutouts_nsc_dr2(
     cutout_request: CutoutRequest,
 ) -> DataFrame[CutoutsResultSchema]:
